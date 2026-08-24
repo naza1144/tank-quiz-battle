@@ -683,7 +683,13 @@ export class GameEngine {
           'GREEN': 'ทีมเขียวมรกต (GREEN SQUAD)',
           'YELLOW': 'ทีมทองสายฟ้า (YELLOW SQUAD)',
           'PURPLE': 'ทีมม่วงคอสมิก (PURPLE SQUAD)',
-          'CYAN': 'ทีมไซแอนออโรร่า (CYAN SQUAD)'
+          'CYAN': 'ทีมไซแอนออโรร่า (CYAN SQUAD)',
+          'team-1': 'ทีมแดงเพลิง (RED SQUAD)',
+          'team-2': 'ทีมน้ำเงินฟอสฟอรัส (BLUE SQUAD)',
+          'team-3': 'ทีมเขียวมรกต (GREEN SQUAD)',
+          'team-4': 'ทีมทองสายฟ้า (YELLOW SQUAD)',
+          'team-5': 'ทีมม่วงคอสมิก (PURPLE SQUAD)',
+          'team-6': 'ทีมไซแอนออโรร่า (CYAN SQUAD)'
         };
         winnerDisplayName = teamNameMap[winner.teamId] || `ทีม ${winner.teamId}`;
       }

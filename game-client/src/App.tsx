@@ -230,6 +230,9 @@ export const App: React.FC = () => {
 
     socket.on('game_over', (data: { winnerName?: string; leaderboard: LeaderboardEntry[] }) => {
       setGameOverData(data);
+      setActiveQuiz(null);
+      setSquadQuiz(null);
+      setSquadQuizSession(null);
     });
 
     return () => {

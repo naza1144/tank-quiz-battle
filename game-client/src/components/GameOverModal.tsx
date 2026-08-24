@@ -37,8 +37,8 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in font-thai crt-overlay">
-      <div className="relative w-full max-w-lg pixel-box bg-[#121624] p-6 text-slate-100 text-center">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md font-thai">
+      <div className="relative w-full max-w-lg pixel-box bg-[#121624] p-6 text-slate-100 text-center shadow-2xl">
         
         {/* Retro Rivet Corners */}
         <div className="absolute top-2 left-2 w-2 h-2 bg-amber-400 border border-black" />
