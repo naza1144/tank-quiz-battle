@@ -645,15 +645,46 @@ export class GameEngine {
   }
 
   public checkWinCondition(timeUp: boolean = false) {
+    if (!this.isRunning) return;
+
     const aliveTanks = Array.from(this.tanks.values()).filter(t => !t.isDead);
 
-    if (aliveTanks.length <= 1 || timeUp) {
+    let isGameOver = false;
+    if (timeUp) {
+      isGameOver = true;
+    } else if (this.mode === 'SQUAD') {
+      const aliveTeams = new Set(aliveTanks.map(t => t.teamId).filter(Boolean));
+      if (aliveTeams.size <= 1 && this.tanks.size >= 2) {
+        isGameOver = true;
+      }
+    } else {
+      if (aliveTanks.length <= 1 && this.tanks.size >= 2) {
+        isGameOver = true;
+      }
+    }
+
+    if (isGameOver) {
       this.isRunning = false;
-      const winner = aliveTanks[0] || Array.from(this.tanks.values()).sort((a, b) => b.score - a.score)[0];
+      const sortedTanks = Array.from(this.tanks.values()).sort((a, b) => b.score - a.score);
+      const winner = aliveTanks[0] || sortedTanks[0];
+      
+      let winnerDisplayName = winner ? winner.playerName : 'ทุกคนเก่งมาก!';
+      if (this.mode === 'SQUAD' && winner?.teamId) {
+        const teamNameMap: Record<string, string> = {
+          'RED': 'ทีมแดงเพลิง (RED SQUAD)',
+          'BLUE': 'ทีมน้ำเงินฟอสฟอรัส (BLUE SQUAD)',
+          'GREEN': 'ทีมเขียวมรกต (GREEN SQUAD)',
+          'YELLOW': 'ทีมทองสายฟ้า (YELLOW SQUAD)',
+          'PURPLE': 'ทีมม่วงคอสมิก (PURPLE SQUAD)',
+          'CYAN': 'ทีมไซแอนออโรร่า (CYAN SQUAD)'
+        };
+        winnerDisplayName = teamNameMap[winner.teamId] || `ทีม ${winner.teamId}`;
+      }
+
       this.listeners.onGameOver(
         winner?.id,
         winner?.teamId,
-        winner ? winner.playerName : 'ไม่มีผู้ชนะ'
+        winnerDisplayName
       );
     }
   }

@@ -406,18 +406,32 @@ export class RoomManager {
         },
         onGameOver: (winnerTankId, winnerTeamId, winnerName) => {
           room.state = 'GAME_OVER';
+
+          // Build full leaderboard including Drivers and Support crew
+          const leaderboard = Array.from(room.players.values()).map(p => {
+            const tank = engine.tanks.get(p.socketId) || Array.from(engine.tanks.values()).find(t => t.playerId === p.id || (p.teamId && t.teamId === p.teamId));
+            return {
+              name: p.name + (p.role === 'SUPPORT' ? ' [ผู้ช่วย]' : ''),
+              kills: tank ? tank.kills : 0,
+              score: tank ? tank.score : 0,
+              correctAnswers: tank ? tank.correctAnswers : 0,
+              isDead: tank ? tank.hp <= 0 : false
+            };
+          }).sort((a, b) => b.score - a.score);
+
           this.io.to(roomId).emit('game_over', {
             winnerTankId,
             winnerTeamId,
             winnerName,
-            leaderboard: Array.from(engine.tanks.values()).map(t => ({
+            leaderboard: leaderboard.length > 0 ? leaderboard : Array.from(engine.tanks.values()).map(t => ({
               name: t.playerName,
               kills: t.kills,
               score: t.score,
               correctAnswers: t.correctAnswers,
-              isDead: t.isDead
+              isDead: t.hp <= 0
             })).sort((a, b) => b.score - a.score)
           });
+
           if (room.intervalId) {
             clearInterval(room.intervalId);
             room.intervalId = undefined;

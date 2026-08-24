@@ -157,8 +157,8 @@ export const App: React.FC = () => {
       setCurrentRoomConfig(data.config);
       setPlayers(data.players);
       if (data.state === 'LOBBY') {
-        setView('LOBBY');
-        setGameOverData(null);
+        // Only set lobby if not actively playing or viewing game over
+        setView((prev) => (prev === 'GAME' ? prev : 'LOBBY'));
       }
     });
 
@@ -593,20 +593,20 @@ export const App: React.FC = () => {
             />
           )}
 
-          {/* Game Over Podium Modal */}
-          {gameOverData && (
-            <GameOverModal
-              winnerName={gameOverData.winnerName}
-              leaderboard={gameOverData.leaderboard}
-              onPlayAgain={() => {
-                soundFx.playStart();
-                setView('LOBBY');
-                setGameOverData(null);
-              }}
-            />
-          )}
-
         </div>
+      )}
+
+      {/* Global Game Over Podium Modal */}
+      {gameOverData && (
+        <GameOverModal
+          winnerName={gameOverData.winnerName}
+          leaderboard={gameOverData.leaderboard}
+          onPlayAgain={() => {
+            soundFx.playStart();
+            setView('LOBBY');
+            setGameOverData(null);
+          }}
+        />
       )}
 
       {/* Retro Arcade Footer */}
