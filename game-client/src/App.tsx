@@ -203,13 +203,13 @@ export const App: React.FC = () => {
       setSquadFinalResult(data);
       if (data.isCorrect) soundFx.playQuizCorrect();
       else soundFx.playQuizWrong();
+    });
 
-      setTimeout(() => {
-        setSquadQuiz(null);
-        setSquadQuizSession(null);
-        setSquadVoteUpdate(null);
-        setSquadFinalResult(null);
-      }, 3000);
+    socket.on('team_quiz_closed', () => {
+      setSquadQuiz(null);
+      setSquadQuizSession(null);
+      setSquadVoteUpdate(null);
+      setSquadFinalResult(null);
     });
 
     socket.on('quiz_result', () => {

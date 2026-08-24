@@ -54,27 +54,42 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
   onVoteQuestion,
   onSendCheer
 }) => {
-  const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
-  const [timeLeft, setTimeLeft] = useState<number>(5);
+  const durationSeconds = 
+    quizSession?.timeLimitSeconds || 
+    quizSession?.durationSeconds || 
+    quizSessionData?.timeLimitSeconds || 
+    currentQuestion?.timeLimitSeconds || 
+    12;
 
-  const activeSession = quizSession || (quizSessionData ? {
-    durationSeconds: quizSessionData.timeLimitSeconds,
-    expireAt: quizSessionData.endTime
-  } : null);
+  const expireAt = 
+    quizSession?.endTime || 
+    quizSession?.expireAt || 
+    quizSessionData?.endTime || 
+    (currentQuestion ? Date.now() + durationSeconds * 1000 : 0);
+
+  const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
+  const [timeLeft, setTimeLeft] = useState<number>(() => {
+    if (expireAt > Date.now()) {
+      return Math.max(0, (expireAt - Date.now()) / 1000);
+    }
+    return durationSeconds;
+  });
 
   // Reset local state when a new question pops up
   useEffect(() => {
     if (currentQuestion) {
       setSelectedChoice(null);
+      const remainingMs = expireAt > Date.now() ? expireAt - Date.now() : durationSeconds * 1000;
+      setTimeLeft(Math.max(0, remainingMs / 1000));
     }
-  }, [currentQuestion?.id]);
+  }, [currentQuestion?.id, expireAt, durationSeconds]);
 
   // Smooth Countdown Loop
   useEffect(() => {
-    if (!activeSession?.expireAt || !currentQuestion) return;
+    if (!expireAt || !currentQuestion) return;
 
-    const interval = setInterval(() => {
-      const remainingMs = activeSession.expireAt! - Date.now();
+    const updateTimer = () => {
+      const remainingMs = expireAt - Date.now();
       const remainingSec = Math.max(0, remainingMs / 1000);
       setTimeLeft(remainingSec);
 
@@ -82,14 +97,13 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
       if (remainingSec > 0 && remainingSec <= 3 && Math.floor(remainingSec * 10) % 10 === 0) {
         soundFx.playCountdownTick();
       }
+    };
 
-      if (remainingSec <= 0) {
-        clearInterval(interval);
-      }
-    }, 100);
+    updateTimer();
+    const interval = setInterval(updateTimer, 100);
 
     return () => clearInterval(interval);
-  }, [activeSession?.expireAt, currentQuestion]);
+  }, [expireAt, currentQuestion?.id]);
 
   const handleVote = (index: number) => {
     if (selectedChoice !== null || finalResult || timeLeft <= 0) return;
@@ -101,8 +115,7 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
 
   const voteCounts = voteUpdate?.voteCounts || [0, 0, 0, 0];
   const totalVotes = voteUpdate?.totalVotes || 0;
-  const duration = activeSession?.durationSeconds || 5;
-  const progressPercent = Math.max(0, Math.min(100, (timeLeft / duration) * 100));
+  const progressPercent = Math.max(0, Math.min(100, (timeLeft / durationSeconds) * 100));
 
   return (
     <div className="w-full max-w-4xl mx-auto p-3 sm:p-4 font-thai text-slate-100 animate-fade-in">

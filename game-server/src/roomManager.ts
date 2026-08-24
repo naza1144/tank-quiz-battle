@@ -31,6 +31,7 @@ export class RoomManager {
     config: RoomConfig;
     players: Map<string, Player>;
     activeSquadQuizzes: Map<string, SquadQuizSession>;
+    squadQuizQueues: Map<string, { question: QuizQuestion; crateId: string; tankId: string; timeLimitSeconds: number }[]>;
     engine?: GameEngine;
     intervalId?: NodeJS.Timeout;
     state: 'LOBBY' | 'STARTING' | 'IN_GAME' | 'GAME_OVER';
@@ -68,6 +69,7 @@ export class RoomManager {
       config: { ...config, id: roomId },
       players: new Map(),
       activeSquadQuizzes: new Map(),
+      squadQuizQueues: new Map(),
       state: 'LOBBY'
     });
     return roomId;
@@ -362,52 +364,34 @@ export class RoomManager {
         onTeamQuizTrigger: (teamId: string, question: QuizQuestion, crateId: string, tankId: string) => {
           const teamSupporters = Array.from(room.players.values()).filter(p => p.teamId === teamId && p.role === 'SUPPORT');
           if (teamSupporters.length > 0) {
-            const timeLimitSeconds = question.timeLimitSeconds || (question.difficulty === 'HARD' ? 5 : (question.difficulty === 'MEDIUM' ? 4 : 3));
-            const now = Date.now();
-            const session: SquadQuizSession = {
-              teamId,
-              tankId,
-              crateId,
-              question,
-              timeLimitSeconds,
-              startTime: now,
-              endTime: now + timeLimitSeconds * 1000,
-              votes: new Map(),
-              voterNames: new Map()
-            };
-
-            // Set auto-finalize timer when countdown completes
-            session.timer = setTimeout(() => {
-              this.finalizeTeamQuiz(roomId, teamId);
-            }, (timeLimitSeconds + 0.2) * 1000);
-
-            room.activeSquadQuizzes.set(teamId, session);
-
-            // Send popup with timer ONLY to support teammates! Driver does NOT get popup!
-            teamSupporters.forEach(p => {
-              this.io.to(p.socketId).emit('team_quiz_popup', {
-                teamId,
-                question,
-                crateId,
-                tankId,
-                timeLimitSeconds,
-                startTime: now,
-                endTime: now + timeLimitSeconds * 1000
-              });
-            });
-
-            // Notify the driver
-            const driver = Array.from(room.players.values()).find(p => p.teamId === teamId && p.role === 'DRIVER');
-            if (driver) {
-              this.io.to(driver.socketId).emit('game_event', {
-                type: 'QUIZ_TRIGGERED',
-                message: `📦 เก็บกล่องคำถาม! ทีมกำลังโหวตคำตอบ (${timeLimitSeconds} วิ)...`,
-                sound: 'CRATE_PICKUP',
-                tankId,
-                teamId,
-                timestamp: now
-              });
+            const timeLimitSeconds = question.timeLimitSeconds || (question.difficulty === 'HARD' ? 15 : (question.difficulty === 'MEDIUM' ? 12 : 10));
+            const item = { question, crateId, tankId, timeLimitSeconds };
+            
+            if (!room.squadQuizQueues.has(teamId)) {
+              room.squadQuizQueues.set(teamId, []);
             }
+
+            // If a quiz session is currently running for this team: Queue it! Do NOT overwrite or jump!
+            if (room.activeSquadQuizzes.has(teamId)) {
+              room.squadQuizQueues.get(teamId)!.push(item);
+              const qLen = room.squadQuizQueues.get(teamId)!.length;
+
+              const teamMembers = Array.from(room.players.values()).filter(p => p.teamId === teamId);
+              teamMembers.forEach(p => {
+                this.io.to(p.socketId).emit('game_event', {
+                  type: 'QUIZ_QUEUED',
+                  message: `📦 ชนกล่องคำถามเพิ่ม! (+${qLen} คำถามรออยู่ในคิว)`,
+                  sound: 'CRATE_PICKUP',
+                  tankId,
+                  teamId,
+                  timestamp: Date.now()
+                });
+              });
+              return;
+            }
+
+            // Start quiz session immediately
+            this.startTeamQuizSession(roomId, teamId, item);
           } else {
             // If no support player on this team, driver answers as fallback
             const driver = Array.from(room.players.values()).find(p => p.teamId === teamId && p.role === 'DRIVER');
@@ -554,12 +538,70 @@ export class RoomManager {
     });
   }
 
+  private startTeamQuizSession(
+    roomId: string, 
+    teamId: string, 
+    item: { question: QuizQuestion; crateId: string; tankId: string; timeLimitSeconds: number }
+  ) {
+    const room = this.rooms.get(roomId);
+    if (!room || room.state !== 'IN_GAME') return;
+
+    const teamSupporters = Array.from(room.players.values()).filter(p => p.teamId === teamId && p.role === 'SUPPORT');
+    const now = Date.now();
+    const session: SquadQuizSession = {
+      teamId,
+      tankId: item.tankId,
+      crateId: item.crateId,
+      question: item.question,
+      timeLimitSeconds: item.timeLimitSeconds,
+      startTime: now,
+      endTime: now + item.timeLimitSeconds * 1000,
+      votes: new Map(),
+      voterNames: new Map()
+    };
+
+    // Auto-finalize only when countdown completes!
+    session.timer = setTimeout(() => {
+      this.finalizeTeamQuiz(roomId, teamId);
+    }, (item.timeLimitSeconds + 0.2) * 1000);
+
+    room.activeSquadQuizzes.set(teamId, session);
+
+    const queueLength = room.squadQuizQueues.get(teamId)?.length || 0;
+
+    // Send popup with timer ONLY to support teammates! Driver does NOT get popup!
+    teamSupporters.forEach(p => {
+      this.io.to(p.socketId).emit('team_quiz_popup', {
+        teamId,
+        question: item.question,
+        crateId: item.crateId,
+        tankId: item.tankId,
+        timeLimitSeconds: item.timeLimitSeconds,
+        startTime: now,
+        endTime: now + item.timeLimitSeconds * 1000,
+        queueLength
+      });
+    });
+
+    // Notify the driver
+    const driver = Array.from(room.players.values()).find(p => p.teamId === teamId && p.role === 'DRIVER');
+    if (driver) {
+      this.io.to(driver.socketId).emit('game_event', {
+        type: 'QUIZ_TRIGGERED',
+        message: `📦 เก็บกล่องคำถาม! ทีมกำลังโหวตคำตอบ (${item.timeLimitSeconds} วิ)...`,
+        sound: 'CRATE_PICKUP',
+        tankId: item.tankId,
+        teamId,
+        timestamp: now
+      });
+    }
+  }
+
   private finalizeTeamQuiz(roomId: string, teamId: string) {
     const room = this.rooms.get(roomId);
     if (!room || !room.engine) return;
     const session = room.activeSquadQuizzes.get(teamId);
     if (!session) return;
-    room.activeSquadQuizzes.delete(teamId);
     if (session.timer) clearTimeout(session.timer);
 
     // Count votes
@@ -608,6 +650,26 @@ export class RoomManager {
         explanationTh: result.explanationTh
       });
     });
+
+    // Hold result banner on screen for 2.8s, then transition to next queued question or close
+    setTimeout(() => {
+      const currentRoom = this.rooms.get(roomId);
+      if (!currentRoom || currentRoom.state !== 'IN_GAME') return;
+
+      currentRoom.activeSquadQuizzes.delete(teamId);
+
+      const queue = currentRoom.squadQuizQueues.get(teamId);
+      if (queue && queue.length > 0) {
+        const nextItem = queue.shift()!;
+        this.startTeamQuizSession(roomId, teamId, nextItem);
+      } else {
+        // Broadcast quiz closed to team supporters
+        const supporters = Array.from(currentRoom.players.values()).filter(p => p.teamId === teamId && p.role === 'SUPPORT');
+        supporters.forEach(s => {
+          this.io.to(s.socketId).emit('team_quiz_closed', { teamId });
+        });
+      }
+    }, 2800);
   }
 
   public handleTeamSupportAnswer(socket: Socket, data: {
@@ -660,6 +722,7 @@ export class RoomManager {
       if (session.timer) clearTimeout(session.timer);
     }
     room.activeSquadQuizzes.clear();
+    room.squadQuizQueues.clear();
 
     // Broadcast room closed notice to all players in that room
     this.io.to(roomId).emit('room_closed', {
@@ -699,6 +762,7 @@ export class RoomManager {
       if (session.timer) clearTimeout(session.timer);
     }
     room.activeSquadQuizzes.clear();
+    room.squadQuizQueues.clear();
     room.engine = undefined;
     room.state = 'LOBBY';
 

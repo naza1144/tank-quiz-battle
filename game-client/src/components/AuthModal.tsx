@@ -87,7 +87,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin }) => {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="เช่น chanon.se.67 หรือ ฉายา"
+                  placeholder="เช่น naza1144 หรือ ฉายา"
                   value={gamerTag}
                   onChange={(e) => setGamerTag(e.target.value)}
                   maxLength={20}
