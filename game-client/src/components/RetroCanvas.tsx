@@ -340,8 +340,8 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
     // 6. Stunned Effect (Stars)
     if (now < tank.stunEndTime) {
       ctx.fillStyle = '#facc15';
-      ctx.font = '10px sans-serif';
-      ctx.fillText('💫', cx - 5, y - 10);
+      ctx.font = '10px monospace';
+      ctx.fillText('★ ★', cx - 8, y - 10);
     }
 
     // 7. Tank Overhead HUD (Name, HP Bar, Ammo Badge)
@@ -371,12 +371,12 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
   };
 
   return (
-    <div className="relative flex justify-center items-center p-2 bg-slate-900/90 rounded-2xl border-4 border-amber-500/80 shadow-[0_0_30px_rgba(234,179,8,0.25)]">
+    <div className="relative flex justify-center items-center p-1 sm:p-2.5 pixel-box bg-black shadow-2xl w-full max-w-[min(100vw-1rem,560px,50vh)] mx-auto aspect-square">
       <canvas
         ref={canvasRef}
         width={MAP_SIZE}
         height={MAP_SIZE}
-        className="max-w-full max-h-[75vh] aspect-square rounded-lg bg-black cursor-crosshair object-contain"
+        className="w-full h-full aspect-square bg-black object-contain crt-overlay cursor-crosshair rounded-sm"
       />
     </div>
   );

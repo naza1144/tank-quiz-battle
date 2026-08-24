@@ -348,9 +348,9 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                       ) : (
                         <button
                           onClick={() => handleUpdateTank(selectedArchetype, team.color, 'DRIVER', team.id)}
-                          className="w-full py-1 arcade-btn arcade-btn-amber font-arcade text-[8px] text-center"
+                          className="w-full py-2 sm:py-1.5 arcade-btn arcade-btn-amber font-arcade text-[9px] text-center min-h-[36px] flex items-center justify-center"
                         >
-                          + BE DRIVER
+                          + BE DRIVER (เป็นคนขับ)
                         </button>
                       )}
                     </div>
@@ -378,9 +378,9 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                       {(!isMyTeam || selectedRole !== 'SUPPORT') && (
                         <button
                           onClick={() => handleUpdateTank(selectedArchetype, team.color, 'SUPPORT', team.id)}
-                          className="w-full mt-1.5 py-1 arcade-btn arcade-btn-cyan font-arcade text-[8px] text-center"
+                          className="w-full mt-2 py-2 sm:py-1.5 arcade-btn arcade-btn-cyan font-arcade text-[9px] text-center min-h-[36px] flex items-center justify-center"
                         >
-                          + JOIN SQUAD
+                          + JOIN SQUAD (เข้าร่วมโหวต)
                         </button>
                       )}
                     </div>

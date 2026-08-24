@@ -211,7 +211,7 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
               const isSelected = selectedChoice === idx;
 
               let btnBorder = 'border-black';
-              let btnBg = 'bg-black/70 hover:bg-black/90';
+              let btnBg = 'bg-black/80 hover:bg-black/95';
 
               if (finalResult) {
                 if (idx === finalResult.correctIndex) {
@@ -230,36 +230,36 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
                   key={idx}
                   disabled={selectedChoice !== null || !!finalResult || timeLeft <= 0}
                   onClick={() => handleVote(idx)}
-                  className={`relative overflow-hidden p-3 border-2 font-bold text-left transition-all active:scale-98 ${btnBorder} ${btnBg} cursor-pointer`}
+                  className={`relative overflow-hidden p-3.5 sm:p-4 min-h-[58px] border-2 font-bold text-left transition-all active:scale-95 ${btnBorder} ${btnBg} cursor-pointer rounded-sm`}
                 >
                   {/* Live Voting Progress Fill Bar */}
                   <div
-                    className="absolute left-0 top-0 bottom-0 bg-cyan-500/25 pointer-events-none transition-all duration-300"
+                    className="absolute left-0 top-0 bottom-0 bg-cyan-500/30 pointer-events-none transition-all duration-300"
                     style={{ width: `${percent}%` }}
                   />
 
                   <div className="relative z-10 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className={`w-6 h-6 flex items-center justify-center font-arcade text-xs border ${
+                    <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                      <span className={`w-7 h-7 shrink-0 flex items-center justify-center font-arcade text-xs border ${
                         isSelected 
-                          ? 'bg-amber-400 text-black border-black'
+                          ? 'bg-amber-400 text-black border-black shadow'
                           : 'bg-black text-cyan-300 border-cyan-600'
                       }`}>
                         {letter}
                       </span>
-                      <span className="text-xs font-bold text-slate-100">{opt}</span>
+                      <span className="text-xs sm:text-sm font-bold text-slate-100 break-words">{opt}</span>
                     </div>
 
-                    <div className="text-right shrink-0 font-arcade text-[9px]">
-                      <span className="text-cyan-300">{percent}%</span>
-                      <span className="text-slate-500 block text-[7px]">({count})</span>
+                    <div className="text-right shrink-0 font-arcade text-[10px] sm:text-xs">
+                      <span className="text-cyan-300 font-bold">{percent}%</span>
+                      <span className="text-slate-400 block text-[8px]">({count} เสียง)</span>
                     </div>
                   </div>
 
                   {isSelected && (
-                    <div className="relative z-10 mt-1 font-arcade text-[7px] text-amber-300 flex items-center gap-1">
+                    <div className="relative z-10 mt-1.5 font-arcade text-[8px] text-amber-300 flex items-center gap-1">
                       <PixelStar size={8} color="#fbbf24" />
-                      <span>YOUR VOTE</span>
+                      <span>โหวตข้อนี้แล้ว (YOUR VOTE)</span>
                     </div>
                   )}
                 </button>
@@ -325,14 +325,14 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
         </div>
       )}
 
-      {/* Quick 8-bit Tactical Radio Cheering */}
-      <div className="flex flex-wrap gap-2 justify-center pt-2">
+      {/* Quick 8-bit Tactical Radio Cheering (2x2 grid on mobile) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2">
         <button
           onClick={() => {
             soundFx.playSelect();
             onSendCheer('เติมกระสุนแล้วนะ สู้ๆ!');
           }}
-          className="px-3 py-1.5 arcade-btn arcade-btn-slate font-arcade text-[8px] flex items-center gap-1.5 cursor-pointer"
+          className="px-2.5 py-2.5 arcade-btn arcade-btn-slate font-arcade text-[8px] flex items-center justify-center gap-1.5 cursor-pointer"
         >
           <PixelAmmo size={12} color="#fbbf24" />
           <span>AMMO SENT!</span>
@@ -342,7 +342,7 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
             soundFx.playSelect();
             onSendCheer('ระวังศัตรูทางซ้าย!');
           }}
-          className="px-3 py-1.5 arcade-btn arcade-btn-rose font-arcade text-[8px] flex items-center gap-1.5 cursor-pointer"
+          className="px-2.5 py-2.5 arcade-btn arcade-btn-rose font-arcade text-[8px] flex items-center justify-center gap-1.5 cursor-pointer"
         >
           <PixelExplosion size={12} color="#ffffff" />
           <span>ENEMY LEFT!</span>
@@ -352,7 +352,7 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
             soundFx.playSelect();
             onSendCheer('ลุยเลยเพื่อน รอดแน่นอน!');
           }}
-          className="px-3 py-1.5 arcade-btn arcade-btn-amber font-arcade text-[8px] flex items-center gap-1.5 cursor-pointer"
+          className="px-2.5 py-2.5 arcade-btn arcade-btn-amber font-arcade text-[8px] flex items-center justify-center gap-1.5 cursor-pointer"
         >
           <PixelTrophy size={12} color="#000000" />
           <span>WE GOT THIS!</span>
@@ -362,7 +362,7 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
             soundFx.playSelect();
             onSendCheer('รวมพลังโหวตข้อถูกเร็ว!');
           }}
-          className="px-3 py-1.5 arcade-btn arcade-btn-cyan font-arcade text-[8px] flex items-center gap-1.5 cursor-pointer"
+          className="px-2.5 py-2.5 arcade-btn arcade-btn-cyan font-arcade text-[8px] flex items-center justify-center gap-1.5 cursor-pointer"
         >
           <PixelBrain size={12} color="#000000" />
           <span>VOTE FAST!</span>
