@@ -238,7 +238,7 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
   const activeTeams = TEAM_PRESETS.slice(0, maxTanks);
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-2 sm:p-5 font-thai text-slate-100 animate-fade-in space-y-4 sm:space-y-6">
+    <div className="w-full max-w-6xl mx-auto p-2 sm:p-5 font-thai text-slate-100 space-y-4 sm:space-y-6">
       
       {/* Top Arcade Status Bar */}
       <div className="pixel-box bg-[#121624] p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3">

@@ -376,7 +376,7 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
         ref={canvasRef}
         width={MAP_SIZE}
         height={MAP_SIZE}
-        className="w-full h-full aspect-square bg-black object-contain crt-overlay cursor-crosshair rounded-sm"
+        className="w-full h-full aspect-square bg-black object-contain cursor-crosshair rounded-sm"
       />
     </div>
   );

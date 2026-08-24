@@ -377,9 +377,13 @@ export const App: React.FC = () => {
     setIsMuted(muted);
   };
 
-  const myPlayer = players.find(p => p.socketId === socketRef.current?.id || p.id === myPlayerIdRef.current);
+  const myPlayer = players.find(
+    p => (socketRef.current?.id && p.socketId === socketRef.current.id) || 
+         (myPlayerIdRef.current && p.id === myPlayerIdRef.current) ||
+         (userName && p.name === userName)
+  );
   const isHost = myPlayer?.isHost || false;
-  const myTank = tanks.find(t => t.id === socketRef.current?.id || t.playerId === myPlayer?.id);
+  const myTank = tanks.find(t => t.id === socketRef.current?.id || (myPlayer && t.playerId === myPlayer.id) || (myPlayer && t.playerName === myPlayer.name));
   const isSquadSupport = myPlayer?.role === 'SUPPORT' && currentRoomConfig?.mode === 'SQUAD';
   const [isBgmMuted, setIsBgmMuted] = useState<boolean>(!soundFx.isBgmActive());
 

@@ -127,7 +127,7 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
   const progressPercent = duration > 0 ? Math.max(0, Math.min(100, (timeLeft / duration) * 100)) : 0;
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-3 sm:p-4 font-thai text-slate-100 animate-fade-in">
+    <div className="w-full max-w-4xl mx-auto p-3 sm:p-4 font-thai text-slate-100">
       
       {/* Top Tactical Command Uplink Header */}
       <div className="pixel-box bg-[#121624] p-3 sm:p-4 mb-4 flex flex-wrap items-center justify-between gap-3">

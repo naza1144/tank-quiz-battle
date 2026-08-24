@@ -68,7 +68,7 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto p-3 sm:p-6 font-thai text-slate-100 animate-fade-in">
+    <div className="w-full max-w-5xl mx-auto p-3 sm:p-6 font-thai text-slate-100">
       
       {/* Top Arcade Mission Header */}
       <div className="pixel-box bg-[#121624] p-4 sm:p-5 mb-6 flex flex-wrap items-center justify-between gap-4">
