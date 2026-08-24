@@ -16,33 +16,52 @@ export const QuizModal: React.FC<QuizModalProps> = ({
   onAnswer,
   onClose
 }) => {
-  const [timeLeft, setTimeLeft] = useState<number>(question.timeLimitSeconds || 15);
+  const totalDuration = question.timeLimitSeconds || 15;
+  const [timeLeft, setTimeLeft] = useState<number>(totalDuration);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState<boolean>(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
 
+  const endTimeRef = React.useRef<number>(Date.now() + totalDuration * 1000);
+  const isAnsweredRef = React.useRef<boolean>(false);
+
   useEffect(() => {
-    if (isAnswered) return;
-
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          handleSelect(-1); // Timeout
-          return 0;
-        }
-        if (prev <= 3) {
-          soundFx.playCountdownTick(true);
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
+    isAnsweredRef.current = isAnswered;
   }, [isAnswered]);
 
+  useEffect(() => {
+    endTimeRef.current = Date.now() + totalDuration * 1000;
+    setTimeLeft(totalDuration);
+    let lastTickSecond = -1;
+
+    const interval = setInterval(() => {
+      if (isAnsweredRef.current) {
+        clearInterval(interval);
+        return;
+      }
+
+      const remainingMs = endTimeRef.current - Date.now();
+      const remainingSec = Math.max(0, remainingMs / 1000);
+      setTimeLeft(remainingSec);
+
+      const currentIntSec = Math.ceil(remainingSec);
+      if (currentIntSec > 0 && currentIntSec <= 3 && currentIntSec !== lastTickSecond) {
+        lastTickSecond = currentIntSec;
+        soundFx.playCountdownTick(true);
+      }
+
+      if (remainingSec <= 0) {
+        clearInterval(interval);
+        handleSelect(-1); // Timeout
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [question.id, totalDuration]);
+
   const handleSelect = (index: number) => {
-    if (isAnswered) return;
+    if (isAnsweredRef.current) return;
+    isAnsweredRef.current = true;
     setIsAnswered(true);
     setSelectedIndex(index);
 
@@ -63,7 +82,7 @@ export const QuizModal: React.FC<QuizModalProps> = ({
     }, 2500);
   };
 
-  const progressPercent = (timeLeft / (question.timeLimitSeconds || 15)) * 100;
+  const progressPercent = totalDuration > 0 ? (timeLeft / totalDuration) * 100 : 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fade-in crt-overlay">

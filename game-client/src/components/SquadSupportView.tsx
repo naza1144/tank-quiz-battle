@@ -54,56 +54,65 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
   onVoteQuestion,
   onSendCheer
 }) => {
-  const durationSeconds = 
-    quizSession?.timeLimitSeconds || 
-    quizSession?.durationSeconds || 
-    quizSessionData?.timeLimitSeconds || 
-    currentQuestion?.timeLimitSeconds || 
-    12;
-
-  const expireAt = 
-    quizSession?.endTime || 
-    quizSession?.expireAt || 
-    quizSessionData?.endTime || 
-    (currentQuestion ? Date.now() + durationSeconds * 1000 : 0);
-
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
-  const [timeLeft, setTimeLeft] = useState<number>(() => {
-    if (expireAt > Date.now()) {
-      return Math.max(0, (expireAt - Date.now()) / 1000);
-    }
-    return durationSeconds;
-  });
+  const [timeLeft, setTimeLeft] = useState<number>(12);
+  const [duration, setDuration] = useState<number>(12);
 
-  // Reset local state when a new question pops up
+  const endTimeRef = React.useRef<number>(0);
+  const durationRef = React.useRef<number>(12);
+
+  // When a new question arrives, lock in endTime and duration ONCE (immune to 30fps game_tick re-renders!)
   useEffect(() => {
     if (currentQuestion) {
       setSelectedChoice(null);
-      const remainingMs = expireAt > Date.now() ? expireAt - Date.now() : durationSeconds * 1000;
-      setTimeLeft(Math.max(0, remainingMs / 1000));
+      
+      const dur = 
+        quizSession?.timeLimitSeconds || 
+        quizSession?.durationSeconds || 
+        quizSessionData?.timeLimitSeconds || 
+        currentQuestion.timeLimitSeconds || 
+        12;
+
+      const end = 
+        quizSession?.endTime || 
+        quizSession?.expireAt || 
+        quizSessionData?.endTime || 
+        (Date.now() + dur * 1000);
+
+      endTimeRef.current = end;
+      durationRef.current = dur;
+      setDuration(dur);
+
+      const initialRemaining = Math.max(0, (end - Date.now()) / 1000);
+      setTimeLeft(initialRemaining);
     }
-  }, [currentQuestion?.id, expireAt, durationSeconds]);
+  }, [currentQuestion?.id, quizSession?.startTime, quizSession?.endTime]);
 
-  // Smooth Countdown Loop
+  // Smooth High-Precision Countdown Loop (100ms interval)
   useEffect(() => {
-    if (!expireAt || !currentQuestion) return;
+    if (!currentQuestion || endTimeRef.current <= 0) return;
 
-    const updateTimer = () => {
-      const remainingMs = expireAt - Date.now();
+    let lastTickSecond = -1;
+
+    const interval = setInterval(() => {
+      const remainingMs = endTimeRef.current - Date.now();
       const remainingSec = Math.max(0, remainingMs / 1000);
       setTimeLeft(remainingSec);
 
       // Play tick sound when 3 seconds remaining
-      if (remainingSec > 0 && remainingSec <= 3 && Math.floor(remainingSec * 10) % 10 === 0) {
+      const currentIntSec = Math.ceil(remainingSec);
+      if (currentIntSec > 0 && currentIntSec <= 3 && currentIntSec !== lastTickSecond) {
+        lastTickSecond = currentIntSec;
         soundFx.playCountdownTick();
       }
-    };
 
-    updateTimer();
-    const interval = setInterval(updateTimer, 100);
+      if (remainingSec <= 0) {
+        clearInterval(interval);
+      }
+    }, 100);
 
     return () => clearInterval(interval);
-  }, [expireAt, currentQuestion?.id]);
+  }, [currentQuestion?.id, quizSession?.startTime, quizSession?.endTime]);
 
   const handleVote = (index: number) => {
     if (selectedChoice !== null || finalResult || timeLeft <= 0) return;
@@ -115,7 +124,7 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
 
   const voteCounts = voteUpdate?.voteCounts || [0, 0, 0, 0];
   const totalVotes = voteUpdate?.totalVotes || 0;
-  const progressPercent = Math.max(0, Math.min(100, (timeLeft / durationSeconds) * 100));
+  const progressPercent = duration > 0 ? Math.max(0, Math.min(100, (timeLeft / duration) * 100)) : 0;
 
   return (
     <div className="w-full max-w-4xl mx-auto p-3 sm:p-4 font-thai text-slate-100 animate-fade-in">
