@@ -1,29 +1,6 @@
 import jwt from 'jsonwebtoken';
-import jwksClient from 'jwks-rsa';
 
-const TOKEN_SERVICE_JWKS_URL = process.env.TOKEN_SERVICE_JWKS_URL || 'http://token-service:8100/.well-known/jwks.json';
-const JWT_AUDIENCE = process.env.JWT_AUDIENCE || 'sudhood-services';
-const JWT_ISSUER = process.env.JWT_ISSUER || 'sudhood-token-service';
-
-const client = jwksClient({
-  jwksUri: TOKEN_SERVICE_JWKS_URL,
-  cache: true,
-  rateLimit: true,
-  jwksRequestsPerMinute: 30
-});
-
-function getKey(header: jwt.JwtHeader, callback: jwt.SigningKeyCallback) {
-  if (!header.kid) {
-    return callback(new Error('No kid in token header'));
-  }
-  client.getSigningKey(header.kid, (err, key) => {
-    if (err) {
-      return callback(err);
-    }
-    const signingKey = key?.getPublicKey();
-    callback(null, signingKey);
-  });
-}
+const JWT_SECRET = process.env.JWT_SECRET || 'tank-battle-quiz-secret-2026';
 
 export interface UserSession {
   id: string;
@@ -34,9 +11,26 @@ export interface UserSession {
   isGuest?: boolean;
 }
 
+export function signUserToken(user: UserSession): string {
+  return jwt.sign(
+    {
+      sub: user.id,
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar,
+      roles: user.roles || ['player'],
+      isGuest: !!user.isGuest
+    },
+    JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+}
+
 export function verifyToken(token: string): Promise<UserSession | null> {
   return new Promise((resolve) => {
-    // 1. Check if token is guest / demo token
+    if (!token) return resolve(null);
+
+    // 1. Guest or Demo format (e.g. guest-1234:Name)
     if (token.startsWith('guest-') || token.startsWith('demo-')) {
       const parts = token.split(':');
       const name = parts[1] || 'TankCommander';
@@ -48,43 +42,37 @@ export function verifyToken(token: string): Promise<UserSession | null> {
       });
     }
 
-    // 2. Try JWKS verification from Token-Service
-    jwt.verify(
-      token,
-      getKey,
-      {
-        audience: JWT_AUDIENCE,
-        issuer: JWT_ISSUER,
-        algorithms: ['RS256']
-      },
-      (err, decoded: any) => {
-        if (err || !decoded) {
-          // Fallback: try decoding unverified for dev mode if configured
-          try {
-            const rawDecoded: any = jwt.decode(token);
-            if (rawDecoded && (rawDecoded.sub || rawDecoded.email)) {
-              return resolve({
-                id: rawDecoded.sub || rawDecoded.email,
-                name: rawDecoded.name || rawDecoded.preferred_username || 'Google Player',
-                email: rawDecoded.email,
-                roles: rawDecoded.roles || [],
-                isGuest: false
-              });
-            }
-          } catch {
-            // failed
-          }
-          return resolve(null);
-        }
-
-        resolve({
-          id: decoded.sub,
-          name: decoded.name || decoded.preferred_username || decoded.email,
+    // 2. Try verifying with internal standalone secret
+    jwt.verify(token, JWT_SECRET, (err, decoded: any) => {
+      if (!err && decoded) {
+        return resolve({
+          id: decoded.sub || decoded.id,
+          name: decoded.name || decoded.email || 'Player',
           email: decoded.email,
-          roles: decoded.roles || [],
-          isGuest: false
+          avatar: decoded.avatar,
+          roles: decoded.roles || ['player'],
+          isGuest: !!decoded.isGuest
         });
       }
-    );
+
+      // 3. Fallback: decode JWT payload directly (e.g. Google tokens or client tokens)
+      try {
+        const rawDecoded: any = jwt.decode(token);
+        if (rawDecoded && (rawDecoded.sub || rawDecoded.email || rawDecoded.name)) {
+          return resolve({
+            id: rawDecoded.sub || rawDecoded.email || `user-${Date.now()}`,
+            name: rawDecoded.name || rawDecoded.preferred_username || rawDecoded.email || 'Player',
+            email: rawDecoded.email,
+            avatar: rawDecoded.picture || rawDecoded.avatar,
+            roles: rawDecoded.roles || ['player'],
+            isGuest: false
+          });
+        }
+      } catch {
+        // decode failed
+      }
+
+      resolve(null);
+    });
   });
 }

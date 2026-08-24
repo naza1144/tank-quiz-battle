@@ -5,7 +5,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { QuizManager } from './quizBank.js';
 import { RoomManager } from './roomManager.js';
-import { verifyToken } from './auth.js';
+import { verifyToken, signUserToken } from './auth.js';
 
 dotenv.config();
 
@@ -31,7 +31,32 @@ const roomManager = new RoomManager(io, quizManager);
 
 // REST API Endpoints
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', service: 'tank-quiz-game-server', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', service: 'tank-quiz-game-server', standalone: true, timestamp: new Date().toISOString() });
+});
+
+// Standalone Auth Endpoints
+app.post('/api/auth/login', (req, res) => {
+  const { name, email, studentId } = req.body;
+  const displayName = name || studentId || 'TankPlayer';
+  const token = signUserToken({
+    id: `std-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`,
+    name: displayName,
+    email: email || `${displayName.toLowerCase().replace(/\s+/g, '')}@ubu.ac.th`,
+    isGuest: false
+  });
+  res.json({ success: true, token, name: displayName });
+});
+
+app.post('/api/auth/guest', (req, res) => {
+  const { name } = req.body;
+  const displayName = name || `พลขับ_${Math.floor(1000 + Math.random() * 9000)}`;
+  const token = signUserToken({
+    id: `guest-${Date.now().toString(36)}`,
+    name: displayName,
+    email: `${displayName.toLowerCase().replace(/\s+/g, '')}@guest.local`,
+    isGuest: true
+  });
+  res.json({ success: true, token, name: displayName });
 });
 
 app.get('/api/rooms', (req, res) => {

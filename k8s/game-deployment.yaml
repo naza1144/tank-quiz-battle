@@ -1,8 +1,13 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: game
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: game-server
-  namespace: sudhood
+  namespace: game
   labels:
     app: game-server
 spec:
@@ -25,12 +30,8 @@ spec:
           env:
             - name: PORT
               value: "4000"
-            - name: TOKEN_SERVICE_JWKS_URL
-              value: "http://token-service:8100/.well-known/jwks.json"
-            - name: JWT_ISSUER
-              value: "sudhood-token-service"
-            - name: JWT_AUDIENCE
-              value: "sudhood-services"
+            - name: JWT_SECRET
+              value: "tank-battle-quiz-secret-2026"
           resources:
             requests:
               cpu: 100m
@@ -43,7 +44,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: game-server
-  namespace: sudhood
+  namespace: game
 spec:
   selector:
     app: game-server
@@ -56,7 +57,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: game-client
-  namespace: sudhood
+  namespace: game
   labels:
     app: game-client
 spec:
@@ -88,7 +89,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: game-client
-  namespace: sudhood
+  namespace: game
 spec:
   selector:
     app: game-client
@@ -101,13 +102,13 @@ apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: game-backend
-  namespace: sudhood
+  namespace: game
 spec:
   entryPoints:
     - web
     - websecure
   routes:
-    - match: (Host(`tank.192-168-50-96.sslip.io`) || Host(`game.192-168-50-96.sslip.io`) || Host(`192.168.50.96`)) && (PathPrefix(`/api`) || PathPrefix(`/socket.io`))
+    - match: (Host(`tank.192-168-50-96.sslip.io`) || Host(`game.192-168-50-96.sslip.io`)) && (PathPrefix(`/api`) || PathPrefix(`/socket.io`))
       kind: Rule
       services:
         - name: game-server
@@ -117,52 +118,23 @@ apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: game-frontend
-  namespace: sudhood
+  namespace: game
 spec:
   entryPoints:
     - web
     - websecure
   routes:
-    - match: Host(`tank.192-168-50-96.sslip.io`) || Host(`game.192-168-50-96.sslip.io`) || Host(`192.168.50.96`)
+    - match: Host(`tank.192-168-50-96.sslip.io`) || Host(`game.192-168-50-96.sslip.io`)
       kind: Rule
       services:
         - name: game-client
           port: 80
 ---
-apiVersion: traefik.io/v1alpha1
-kind: Middleware
-metadata:
-  name: redirect-to-hub
-  namespace: sudhood
-spec:
-  redirectRegex:
-    regex: "^https?://sudhood\\.192-168-50-96\\.sslip\\.io/?$"
-    replacement: "https://sudhood.192-168-50-96.sslip.io/hub/"
-    permanent: false
----
-apiVersion: traefik.io/v1alpha1
-kind: IngressRoute
-metadata:
-  name: sudhood-root-redirect
-  namespace: sudhood
-spec:
-  entryPoints:
-    - web
-    - websecure
-  routes:
-    - match: Host(`sudhood.192-168-50-96.sslip.io`) && Path(`/`)
-      kind: Rule
-      middlewares:
-        - name: redirect-to-hub
-      services:
-        - name: m10-platform
-          port: 8000
----
 apiVersion: v1
 kind: Service
 metadata:
   name: game-client-nodeport
-  namespace: sudhood
+  namespace: game
 spec:
   type: NodePort
   selector:
@@ -177,7 +149,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: game-server-nodeport
-  namespace: sudhood
+  namespace: game
 spec:
   type: NodePort
   selector:
