@@ -115,13 +115,17 @@ export class RoomManager {
     // In SQUAD mode, auto-assign to the team with lowest count for balance
     let assignedTeam = playerInfo.teamId;
     let assignedRole = playerInfo.role || 'SUPPORT';
+    const numTeams = Math.min(6, Math.max(2, room.config.maxTanks || 4));
     
     if (room.config.mode === 'SQUAD' && !assignedTeam) {
-      const teamCounts: Record<string, number> = { 'team-1': 0, 'team-2': 0, 'team-3': 0, 'team-4': 0 };
+      const allTeams = ['team-1', 'team-2', 'team-3', 'team-4', 'team-5', 'team-6'].slice(0, numTeams);
+      const teamCounts: Record<string, number> = {};
+      allTeams.forEach(t => { teamCounts[t] = 0; });
+
       for (const p of room.players.values()) {
         if (teamCounts[p.teamId] !== undefined) teamCounts[p.teamId]++;
       }
-      let minTeam = 'team-1';
+      let minTeam = allTeams[0];
       let minCount = Infinity;
       for (const [tid, cnt] of Object.entries(teamCounts)) {
         if (cnt < minCount) {
@@ -142,7 +146,9 @@ export class RoomManager {
       'team-1': '#ef4444',
       'team-2': '#3b82f6',
       'team-3': '#22c55e',
-      'team-4': '#eab308'
+      'team-4': '#eab308',
+      'team-5': '#a855f7',
+      'team-6': '#06b6d4'
     };
 
     const player: Player = {
@@ -152,7 +158,7 @@ export class RoomManager {
       email: playerInfo.email,
       avatar: playerInfo.avatar,
       role: assignedRole,
-      teamId: assignedTeam || `team-${room.players.size % 4 + 1}`,
+      teamId: assignedTeam || `team-${(room.players.size % numTeams) + 1}`,
       tankArchetype: playerInfo.tankArchetype || 'STANDARD',
       tankColor: playerInfo.tankColor || (assignedTeam ? teamColorMap[assignedTeam] : this.getRandomColor(room.players.size)),
       isHost: isFirst,
@@ -267,8 +273,11 @@ export class RoomManager {
       return;
     }
 
-    const teamIds = ['team-1', 'team-2', 'team-3', 'team-4'];
-    const teamColors = ['#ef4444', '#3b82f6', '#22c55e', '#eab308'];
+    const numTeams = Math.min(6, Math.max(2, room.config.maxTanks || 4));
+    const allTeamIds = ['team-1', 'team-2', 'team-3', 'team-4', 'team-5', 'team-6'];
+    const allTeamColors = ['#ef4444', '#3b82f6', '#22c55e', '#eab308', '#a855f7', '#06b6d4'];
+    const teamIds = allTeamIds.slice(0, numTeams);
+    const teamColors = allTeamColors.slice(0, numTeams);
     const playersList = Array.from(room.players.values());
 
     // 1. Separate existing drivers and non-drivers
@@ -283,7 +292,7 @@ export class RoomManager {
       }
     });
 
-    // 2. Assign exactly 1 driver per active team (up to 4 teams)
+    // 2. Assign exactly 1 driver per active team (up to numTeams)
     teamIds.forEach((tId, idx) => {
       let driver = drivers[idx];
       if (!driver && nonDrivers.length > 0) {
@@ -297,7 +306,7 @@ export class RoomManager {
     });
 
     // Convert any surplus drivers into support
-    for (let i = 4; i < drivers.length; i++) {
+    for (let i = numTeams; i < drivers.length; i++) {
       drivers[i].role = 'SUPPORT';
       nonDrivers.push(drivers[i]);
     }
@@ -306,8 +315,8 @@ export class RoomManager {
     let teamIdx = 0;
     nonDrivers.forEach(p => {
       p.role = 'SUPPORT';
-      p.teamId = teamIds[teamIdx % 4];
-      p.tankColor = teamColors[teamIdx % 4];
+      p.teamId = teamIds[teamIdx % numTeams];
+      p.tankColor = teamColors[teamIdx % numTeams];
       teamIdx++;
     });
 

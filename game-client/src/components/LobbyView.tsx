@@ -11,7 +11,8 @@ import {
   Crown,
   Volume2,
   VolumeX,
-  Music
+  Music,
+  Swords
 } from 'lucide-react';
 import { soundFx } from '../audio/soundFx.js';
 import { 
@@ -169,6 +170,28 @@ export const TEAM_PRESETS: {
     badgeBg: 'bg-amber-500 text-black',
     textColor: 'text-amber-400',
     icon: <PixelCrown size={20} color="#fbbf24" />
+  },
+  {
+    id: 'team-5',
+    name: 'PURPLE SQUAD',
+    nameTh: 'ทีมม่วงดารา',
+    color: '#a855f7',
+    bg: 'bg-purple-950/80',
+    border: 'border-purple-500',
+    badgeBg: 'bg-purple-600 text-white',
+    textColor: 'text-purple-400',
+    icon: <PixelShield size={20} color="#a855f7" />
+  },
+  {
+    id: 'team-6',
+    name: 'CYAN SQUAD',
+    nameTh: 'ทีมฟ้าไฮเปอร์',
+    color: '#06b6d4',
+    bg: 'bg-cyan-950/80',
+    border: 'border-cyan-500',
+    badgeBg: 'bg-cyan-500 text-black',
+    textColor: 'text-cyan-300',
+    icon: <PixelCrosshair size={20} color="#06b6d4" />
   }
 ];
 
@@ -211,6 +234,8 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
   };
 
   const isSquadMode = roomConfig?.mode === 'SQUAD';
+  const maxTanks = Math.min(6, Math.max(2, roomConfig?.maxTanks || 4));
+  const activeTeams = TEAM_PRESETS.slice(0, maxTanks);
 
   return (
     <div className="w-full max-w-6xl mx-auto p-2 sm:p-5 font-thai text-slate-100 animate-fade-in space-y-4 sm:space-y-6">
@@ -231,12 +256,12 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                   ? 'bg-cyan-950 text-cyan-300' 
                   : 'bg-amber-950 text-amber-300'
               }`}>
-                {isSquadMode ? 'SQUAD' : 'FFA'}
+                {isSquadMode ? `SQUAD (${maxTanks} TEAMS)` : `FFA (${maxTanks} TANKS)`}
               </span>
               <span className="px-1.5 py-0.5 border border-slate-700 bg-black text-amber-300">
-                📚 {roomConfig?.selectedSubject && roomConfig.selectedSubject !== 'ALL' ? roomConfig.selectedSubject : 'ALL'}
+                📚 {roomConfig?.selectedSubject && roomConfig.selectedSubject !== 'ALL' ? roomConfig.selectedSubject : 'ALL SUBJECTS'}
               </span>
-              <span>• 60+ PLAYERS</span>
+              <span>• CAP: 60+ PLAYERS</span>
             </div>
           </div>
         </div>
@@ -270,14 +295,16 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
         </div>
       </div>
 
-      {/* SQUAD / TEAM SELECTION BOARD (For Squad Mode) */}
+      {/* ════════════════════════════════════════════════════════════════════════ */}
+      {/* 1. SQUAD / TEAM SELECTION BOARD (For Squad Mode: 4 or 6 Teams)         */}
+      {/* ════════════════════════════════════════════════════════════════════════ */}
       {isSquadMode && (
         <div className="pixel-box bg-[#151a2d] p-3 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2.5 border-b-2 border-slate-800">
             <div>
               <h2 className="font-arcade text-xs text-cyan-400 flex items-center gap-1.5">
                 <PixelStar size={10} color="#22d3ee" />
-                <span>SQUAD FORMATION (จัดทีมและบทบาท)</span>
+                <span>SQUAD FORMATION ({maxTanks} TEAMS CO-OP)</span>
                 <PixelStar size={10} color="#22d3ee" />
               </h2>
               <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 flex items-center gap-1">
@@ -296,13 +323,18 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                 className="px-3 py-1.5 sm:px-4 sm:py-2 arcade-btn arcade-btn-cyan font-arcade text-[8px] sm:text-[9px] flex items-center gap-1.5 cursor-pointer"
               >
                 <PixelScale size={12} color="#000000" />
-                <span>AUTO-BALANCE (จัดทีมสมดุล)</span>
+                <span>AUTO-BALANCE ({maxTanks} TEAMS)</span>
               </button>
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-            {TEAM_PRESETS.map((team) => {
+          {/* SQUAD GRID: 4 Teams (2x2 / 1x4) or 6 Teams (2x3 / 3x2) */}
+          <div className={`grid gap-2.5 sm:gap-3 ${
+            maxTanks === 6 
+              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' 
+              : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'
+          }`}>
+            {activeTeams.map((team) => {
               const teamPlayers = players.filter(p => p.teamId === team.id);
               const driver = teamPlayers.find(p => p.role === 'DRIVER');
               const supporters = teamPlayers.filter(p => p.role === 'SUPPORT');
@@ -312,7 +344,7 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                 <div
                   key={team.id}
                   className={`border-2 sm:border-4 ${
-                    isMyTeam ? 'border-amber-400 shadow-[2px_2px_0_#f59e0b]' : 'border-black'
+                    isMyTeam ? 'border-amber-400 shadow-[3px_3px_0_#f59e0b]' : 'border-black'
                   } ${team.bg} p-2.5 sm:p-3 flex flex-col justify-between`}
                 >
                   {/* Team Header */}
@@ -347,7 +379,7 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                       ) : (
                         <button
                           onClick={() => handleUpdateTank(selectedArchetype, team.color, 'DRIVER', team.id)}
-                          className="w-full py-2 sm:py-1.5 arcade-btn arcade-btn-amber font-arcade text-[9px] text-center min-h-[36px] flex items-center justify-center"
+                          className="w-full py-2 sm:py-1.5 arcade-btn arcade-btn-amber font-arcade text-[9px] text-center min-h-[36px] flex items-center justify-center cursor-pointer"
                         >
                           + BE DRIVER (เป็นคนขับ)
                         </button>
@@ -371,36 +403,27 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                           ))}
                         </div>
                       ) : (
-                        <div className="text-[10px] text-slate-500 font-arcade">NO SUPPORTERS</div>
-                      )}
-                      
-                      {(!isMyTeam || selectedRole !== 'SUPPORT') && (
-                        <button
-                          onClick={() => handleUpdateTank(selectedArchetype, team.color, 'SUPPORT', team.id)}
-                          className="w-full mt-2 py-2 sm:py-1.5 arcade-btn arcade-btn-cyan font-arcade text-[9px] text-center min-h-[36px] flex items-center justify-center"
-                        >
-                          + JOIN SQUAD (เข้าร่วมโหวต)
-                        </button>
+                        <div className="text-[11px] text-slate-400 italic py-1">
+                          ยังไม่มีผู้ช่วย
+                        </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Team Switch Footer */}
-                  {isMyTeam && (
-                    <div className="mt-2 pt-1.5 border-t border-white/20 flex items-center justify-between text-xs">
-                      <button
-                        onClick={() => handleUpdateTank(
-                          selectedArchetype,
-                          team.color,
-                          selectedRole === 'DRIVER' ? 'SUPPORT' : 'DRIVER',
-                          team.id
-                        )}
-                        className="font-arcade text-[8px] text-amber-300 hover:underline"
-                      >
-                        ▸ SWITCH TO {selectedRole === 'DRIVER' ? 'SUPPORT' : 'DRIVER'}
-                      </button>
-                    </div>
-                  )}
+                  {/* Join Squad as Support Button */}
+                  <div className="mt-2.5 pt-2 border-t border-black/40">
+                    <button
+                      onClick={() => handleUpdateTank(selectedArchetype, team.color, 'SUPPORT', team.id)}
+                      className={`w-full py-2 text-[9px] font-arcade text-center border-2 transition-all cursor-pointer min-h-[36px] flex items-center justify-center ${
+                        isMyTeam && selectedRole === 'SUPPORT'
+                          ? 'bg-cyan-500 text-black border-white font-bold'
+                          : 'bg-black/80 text-slate-200 border-slate-700 hover:border-cyan-400'
+                      }`}
+                    >
+                      {isMyTeam && selectedRole === 'SUPPORT' ? '✓ YOUR SQUAD (ทีมของคุณ)' : '+ JOIN SQUAD (เข้าร่วมโหวต)'}
+                    </button>
+                  </div>
+
                 </div>
               );
             })}
@@ -408,17 +431,106 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {/* ════════════════════════════════════════════════════════════════════════ */}
+      {/* 2. FFA 6-COMBATANT ARENA GRID (For Free-For-All Mode: 6 Tanks)          */}
+      {/* ════════════════════════════════════════════════════════════════════════ */}
+      {!isSquadMode && (
+        <div className="pixel-box bg-[#151a2d] p-3 sm:p-5">
+          <div className="flex items-center justify-between mb-3 pb-2 border-b-2 border-slate-800">
+            <h2 className="font-arcade text-xs text-amber-400 flex items-center gap-2">
+              <Swords className="w-4 h-4 text-amber-400" />
+              <span>FFA COMBATANT ARENA ROSTER ({players.length}/{maxTanks} TANKS)</span>
+            </h2>
+            <span className="font-arcade text-[8px] px-2 py-0.5 bg-amber-950 text-amber-300 border border-amber-500">
+              SOLO BATTLE ROYALE
+            </span>
+          </div>
+
+          <div className={`grid gap-2.5 sm:gap-3 ${
+            maxTanks === 6 
+              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' 
+              : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'
+          }`}>
+            {Array.from({ length: maxTanks }).map((_, slotIdx) => {
+              const p = players[slotIdx];
+              const isMe = p?.id === myPlayerId || p?.socketId === myPlayerId;
+              const slotColor = COLORS[slotIdx % COLORS.length];
+
+              if (p) {
+                return (
+                  <div
+                    key={p.socketId}
+                    className={`p-3 border-2 sm:border-4 bg-black/80 flex items-center justify-between ${
+                      isMe ? 'border-amber-400 shadow-[3px_3px_0_#f59e0b]' : 'border-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 truncate">
+                      <span
+                        className="w-4 h-4 border border-black shrink-0 shadow"
+                        style={{ backgroundColor: p.tankColor || slotColor.value }}
+                      />
+                      <div className="truncate">
+                        <div className="font-bold text-xs text-white truncate flex items-center gap-1">
+                          <span>{slotIdx + 1}P: {p.name}</span>
+                          {p.isHost && <PixelCrown size={12} color="#fbbf24" />}
+                          {isMe && <span className="text-[8px] text-amber-400 font-arcade">(YOU)</span>}
+                        </div>
+                        <div className="font-arcade text-[8px] text-slate-400 mt-0.5">
+                          {p.tankArchetype} • {COLORS.find(c => c.value === p.tankColor)?.name || 'CUSTOM'}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      {p.isReady ? (
+                        <span className="px-2 py-0.5 bg-emerald-950 text-emerald-300 border border-emerald-500 font-arcade text-[8px]">
+                          READY
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 bg-slate-900 text-slate-500 border border-slate-700 font-arcade text-[8px]">
+                          CHOOSING
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+
+              // Empty Slot Placeholder
+              return (
+                <div
+                  key={`empty-${slotIdx}`}
+                  className="p-3 border-2 border-dashed border-slate-800 bg-black/30 flex items-center justify-between text-slate-600 font-arcade text-[9px]"
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="w-3.5 h-3.5 border border-slate-800 opacity-40"
+                      style={{ backgroundColor: slotColor.value }}
+                    />
+                    <span>{slotIdx + 1}P: [ WAITING FOR TANKER... ]</span>
+                  </div>
+                  <span className="animate-pulse">OPEN</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════════════════════════════════ */}
+      {/* 3. TANK CLASS & COLOR SELECTION SECTION                                */}
+      {/* ════════════════════════════════════════════════════════════════════════ */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
         
-        {/* Left: Tank Customization / Support Operator Panel */}
-        <div className="lg:col-span-7 space-y-6">
+        {/* Left: Tank Class Selector */}
+        <div className="lg:col-span-7 space-y-4 sm:space-y-6">
           
-          {/* If Squad Mode & Player is Support: Show Operator Status Card instead of tank selector */}
+          {/* If Squad Mode & Player is Support: Show Operator Status Card */}
           {isSquadMode && selectedRole === 'SUPPORT' ? (
-            <div className="pixel-box bg-[#151a2d] p-5">
-              <div className="flex items-center gap-3 mb-4 border-b-2 border-slate-800 pb-3">
-                <div className="w-12 h-12 bg-cyan-600 border-2 border-black flex items-center justify-center shadow-[2px_2px_0_#000]">
-                  <PixelBrain size={28} color="#000000" />
+            <div className="pixel-box bg-[#151a2d] p-4 sm:p-5">
+              <div className="flex items-center gap-3 mb-3 border-b-2 border-slate-800 pb-3">
+                <div className="w-10 h-10 bg-cyan-600 border-2 border-black flex items-center justify-center shadow-[2px_2px_0_#000]">
+                  <PixelBrain size={24} color="#000000" />
                 </div>
                 <div>
                   <h2 className="font-arcade text-xs sm:text-sm text-cyan-400">
@@ -430,9 +542,9 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                 </div>
               </div>
 
-              <div className="space-y-3 text-xs text-slate-300 leading-relaxed font-thai">
+              <div className="space-y-2.5 text-xs text-slate-300 leading-relaxed font-thai">
                 <div className="p-3 bg-black/60 border-2 border-slate-800">
-                  <div className="font-arcade text-[10px] text-amber-400 mb-1 flex items-center gap-1.5">
+                  <div className="font-arcade text-[9px] text-amber-400 mb-1 flex items-center gap-1.5">
                     <PixelStar size={10} color="#fbbf24" />
                     <span>TANK SELECTION RESTRICTION:</span>
                   </div>
@@ -442,61 +554,61 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                 </div>
 
                 <div className="p-3 bg-black/60 border-2 border-slate-800">
-                  <div className="font-arcade text-[10px] text-cyan-400 mb-1 flex items-center gap-1.5">
+                  <div className="font-arcade text-[9px] text-cyan-400 mb-1 flex items-center gap-1.5">
                     <PixelStar size={10} color="#22d3ee" />
                     <span>YOUR MISSION (ภารกิจของคุณ):</span>
                   </div>
                   <div className="space-y-1">
                     <div>• ประจำที่หน้าจอคอนโซลรอคำถามเมื่อคนขับวิ่งชนกล่องคำถาม <strong className="text-yellow-300">[?]</strong></div>
-                    <div>• ช่วยกันวิเคราะห์และโหวตเลือกคำตอบที่ถูกต้องที่สุดภายใน 3-5 วินาที</div>
+                    <div>• ช่วยกันวิเคราะห์และโหวตเลือกคำตอบที่ถูกต้องที่สุดภายใน 10-15 วินาที</div>
                     <div>• เมื่อหมดเวลา ระบบจะรวมเสียงโหวตส่วนใหญ่เพื่อเติมกระสุนให้คนขับทันที!</div>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t-2 border-slate-800 flex flex-wrap items-center justify-between gap-2">
-                <span className="font-arcade text-[9px] text-slate-400">WANT TO DRIVE INSTEAD?</span>
+              <div className="mt-3 pt-3 border-t-2 border-slate-800 flex flex-wrap items-center justify-between gap-2">
+                <span className="font-arcade text-[8px] sm:text-[9px] text-slate-400">WANT TO DRIVE INSTEAD?</span>
                 <button
                   onClick={() => handleUpdateTank(selectedArchetype, selectedColor, 'DRIVER', selectedTeam)}
-                  className="px-4 py-2 arcade-btn arcade-btn-amber font-arcade text-[9px] cursor-pointer flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 arcade-btn arcade-btn-amber font-arcade text-[8px] sm:text-[9px] cursor-pointer flex items-center gap-1.5"
                 >
-                  <PixelGamepad size={14} color="#000000" />
+                  <PixelGamepad size={12} color="#000000" />
                   <span>SWITCH TO DRIVER (สลับเป็นคนขับ)</span>
                 </button>
               </div>
             </div>
           ) : (
-            <div className="pixel-box bg-[#151a2d] p-4 sm:p-5">
-              <h2 className="font-arcade text-xs text-amber-400 mb-4 flex items-center gap-2">
+            <div className="pixel-box bg-[#151a2d] p-3 sm:p-5">
+              <h2 className="font-arcade text-xs text-amber-400 mb-3 flex items-center gap-2">
                 <Crosshair className="w-4 h-4" /> 1. SELECT TANK CLASS (สำหรับพลขับ)
               </h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {TANK_PRESETS.map((t) => {
                   const isSelected = selectedArchetype === t.type;
                   return (
                     <button
                       key={t.type}
                       onClick={() => handleUpdateTank(t.type, selectedColor, selectedRole, selectedTeam)}
-                      className={`p-3.5 border-4 text-left transition-all ${
+                      className={`p-3 border-2 sm:border-4 text-left transition-all cursor-pointer ${
                         isSelected
-                          ? 'border-amber-400 bg-amber-950/70 shadow-[4px_4px_0_#f59e0b]'
+                          ? 'border-amber-400 bg-amber-950/70 shadow-[3px_3px_0_#f59e0b]'
                           : 'border-black bg-black/60 hover:border-slate-600'
                       }`}
                     >
-                      <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center justify-between mb-1">
                         <div>{t.icon}</div>
                         {isSelected && (
-                          <span className="font-arcade text-[9px] bg-amber-400 text-black px-1.5 py-0.5">
+                          <span className="font-arcade text-[8px] bg-amber-400 text-black px-1.5 py-0.5">
                             ACTIVE
                           </span>
                         )}
                       </div>
                       <div className="font-arcade text-xs text-amber-300">{t.nameTh}</div>
-                      <p className="text-xs text-slate-400 mt-1 leading-relaxed">{t.desc}</p>
+                      <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{t.desc}</p>
                       
                       {/* Retro 8-bit Block Meters */}
-                      <div className="space-y-1 mt-3 pt-2 border-t-2 border-slate-800 font-arcade text-[8px]">
+                      <div className="space-y-0.5 mt-2 pt-2 border-t-2 border-slate-800 font-arcade text-[8px]">
                         <div className="flex justify-between text-rose-400">
                           <span>HP:</span> <span>{t.hpBlocks} ({t.hp})</span>
                         </div>
@@ -516,26 +628,26 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
 
           {/* Tank Color Selector (in FFA mode) */}
           {!isSquadMode && (
-            <div className="pixel-box bg-[#151a2d] p-4 sm:p-5">
-              <h2 className="font-arcade text-xs text-amber-400 mb-3 flex items-center gap-2">
-                <Sparkles className="w-4 h-4" /> 2. SELECT TANK COLOR
+            <div className="pixel-box bg-[#151a2d] p-3 sm:p-4">
+              <h2 className="font-arcade text-xs text-amber-400 mb-2.5 flex items-center gap-2">
+                <Sparkles className="w-4 h-4" /> 2. SELECT TANK COLOR ({COLORS.length} COLORS)
               </h2>
-              <div className="flex flex-wrap gap-2.5">
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                 {COLORS.map((c) => (
                   <button
                     key={c.value}
                     onClick={() => handleUpdateTank(selectedArchetype, c.value, selectedRole, selectedTeam)}
-                    className={`flex items-center gap-2 px-3 py-2 border-2 ${
+                    className={`flex items-center justify-center gap-1.5 p-2 border-2 cursor-pointer ${
                       selectedColor === c.value
                         ? 'border-white bg-slate-800 shadow-[2px_2px_0_#fff]'
                         : 'border-black bg-black/80 hover:border-slate-600'
                     }`}
                   >
                     <span
-                      className="w-3.5 h-3.5 border border-black shadow"
+                      className="w-3 h-3 border border-black shadow shrink-0"
                       style={{ backgroundColor: c.value }}
                     />
-                    <span className="font-arcade text-[9px] text-slate-200">{c.name}</span>
+                    <span className="font-arcade text-[8px] text-slate-200">{c.name}</span>
                   </button>
                 ))}
               </div>
@@ -544,18 +656,18 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
 
         </div>
 
-        {/* Right: Players in Room & Match Control */}
-        <div className="lg:col-span-5 space-y-6">
+        {/* Right: Roster & Match Control */}
+        <div className="lg:col-span-5 space-y-4 sm:space-y-6">
           
-          <div className="pixel-box bg-[#151a2d] p-4 sm:p-5">
-            <div className="flex items-center justify-between mb-4 border-b-2 border-slate-800 pb-2">
+          <div className="pixel-box bg-[#151a2d] p-3 sm:p-5">
+            <div className="flex items-center justify-between mb-3 border-b-2 border-slate-800 pb-2">
               <h2 className="font-arcade text-xs text-slate-300 flex items-center gap-2">
-                <Users className="w-4 h-4 text-cyan-400" /> ROSTER ({players.length}/{roomConfig?.maxTanks || 6})
+                <Users className="w-4 h-4 text-cyan-400" /> SQUAD ROSTER ({players.length} PLAYERS)
               </h2>
             </div>
 
             {/* Players List */}
-            <div className="space-y-2 mb-6 max-h-72 overflow-y-auto pr-1">
+            <div className="space-y-1.5 mb-4 max-h-64 overflow-y-auto pr-1">
               {players.map((p) => {
                 const isMe = p.id === myPlayerId || p.socketId === myPlayerId;
                 const teamPreset = TEAM_PRESETS.find(t => t.id === p.teamId);
@@ -563,26 +675,26 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                 return (
                   <div
                     key={p.socketId}
-                    className={`flex items-center justify-between p-2.5 border-2 ${
+                    className={`flex items-center justify-between p-2 border-2 ${
                       isMe
                         ? 'border-amber-400 bg-amber-950/40'
                         : 'border-black bg-black/60'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2 truncate">
                       <span
-                        className="w-3.5 h-3.5 border border-black shadow shrink-0"
+                        className="w-3 h-3 border border-black shadow shrink-0"
                         style={{ backgroundColor: p.tankColor }}
                       />
-                      <div>
-                        <div className="font-bold text-xs text-white flex items-center gap-1.5">
-                          {p.name}
-                          {p.isHost && <PixelCrown size={12} color="#fbbf24" />}
+                      <div className="truncate">
+                        <div className="font-bold text-xs text-white flex items-center gap-1 truncate">
+                          <span>{p.name}</span>
+                          {p.isHost && <PixelCrown size={10} color="#fbbf24" />}
                           {isMe && <span className="font-arcade text-[8px] text-amber-400">(YOU)</span>}
                         </div>
-                        <div className="text-[11px] text-slate-400">
+                        <div className="text-[10px] text-slate-400">
                           {isSquadMode && teamPreset && (
-                            <span className={`font-arcade text-[9px] mr-1 ${teamPreset.textColor}`}>
+                            <span className={`font-arcade text-[8px] mr-1 ${teamPreset.textColor}`}>
                               [{teamPreset.name.split(' ')[0]}]
                             </span>
                           )}
@@ -608,16 +720,16 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
             </div>
 
             {/* Ready / Start Buttons */}
-            <div className="space-y-3 pt-3 border-t-2 border-slate-800">
+            <div className="space-y-2.5 pt-3 border-t-2 border-slate-800">
               {isHost ? (
                 <button
                   onClick={() => {
                     soundFx.playStart();
                     onStartGame();
                   }}
-                  className="w-full py-4 arcade-btn arcade-btn-amber font-arcade text-xs tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3.5 arcade-btn arcade-btn-amber font-arcade text-xs tracking-wider flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Play className="w-4 h-4 fill-black" /> START BATTLE (เริ่มเกม)
+                  <Play className="w-4 h-4 fill-black" /> START BATTLE (เริ่มการแข่งขัน)
                 </button>
               ) : (
                 <button
@@ -625,7 +737,7 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                     soundFx.playSelect();
                     onSetReady(!myPlayer?.isReady);
                   }}
-                  className={`w-full py-4 arcade-btn font-arcade text-xs tracking-wider cursor-pointer ${
+                  className={`w-full py-3.5 arcade-btn font-arcade text-xs tracking-wider cursor-pointer ${
                     myPlayer?.isReady ? 'arcade-btn-slate' : 'arcade-btn-emerald'
                   }`}
                 >
@@ -633,10 +745,10 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                 </button>
               )}
 
-              <p className="text-center font-arcade text-[9px] text-slate-500 flex items-center justify-center gap-1.5">
-                <PixelStar size={10} color="#64748b" />
+              <p className="text-center font-arcade text-[8px] text-slate-500 flex items-center justify-center gap-1">
+                <PixelStar size={8} color="#64748b" />
                 <span>{isHost ? 'HOST: PRESS START WHEN READY' : 'WAITING FOR HOST TO START'}</span>
-                <PixelStar size={10} color="#64748b" />
+                <PixelStar size={8} color="#64748b" />
               </p>
             </div>
 
@@ -644,32 +756,12 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
 
           {/* Quick Rules */}
           <div className="pixel-box bg-[#151a2d] p-3 text-xs text-slate-400 space-y-1 font-thai leading-relaxed">
-            <div className="font-bold text-amber-400 font-arcade text-[10px] flex items-center gap-1.5">
+            <div className="font-bold text-amber-400 font-arcade text-[9px] flex items-center gap-1.5">
               <PixelStar size={10} color="#fbbf24" />
               <span>MISSION INTEL:</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span>•</span>
-              <strong className="text-amber-300 flex items-center gap-1">
-                คนขับ <PixelGamepad size={12} color="#fbbf24" />
-              </strong>
-              <span>วิ่งชนกล่อง</span>
-              <PixelCrate size={12} color="#f59e0b" />
-              <span>ในสนาม</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span>•</span>
-              <span>คำถามจะเด้งเฉพาะหน้าจอ</span>
-              <strong className="text-cyan-300 flex items-center gap-1">
-                ผู้ช่วยตอบ <PixelBrain size={12} color="#22d3ee" />
-              </strong>
-              <span>เพื่อโหวตเสียงส่วนมาก (3-5 วิ)</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span>•</span>
-              <span>เมื่อทีมโหวตถูก กระสุนจะส่งให้คนขับทันที!</span>
-              <PixelAmmo size={12} color="#fbbf24" />
-            </div>
+            <div>• โหมด 6 คน: รองรับผู้เล่น 6 รถถัง หรือ 6 ทีม พร้อมกันในสมรภูมิเดียว</div>
+            <div>• ชนกล่อง <strong className="text-yellow-300">[?]</strong> เพื่อรับโจทย์คำถามและเติมกระสุน</div>
           </div>
 
         </div>
