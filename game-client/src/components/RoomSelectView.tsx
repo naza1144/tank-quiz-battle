@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { GameMode, RoomConfig } from '../types.js';
-import { Users, Plus, Play, Shield, Zap, Sparkles, LogOut } from 'lucide-react';
+import { Users, Plus, Play, Shield, Zap, Sparkles, LogOut, Swords, Crown } from 'lucide-react';
+import { soundFx } from '../audio/soundFx.js';
 
 interface RoomSelectViewProps {
   rooms: {
@@ -26,13 +27,14 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
 }) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [roomName, setRoomName] = useState('');
-  const [mode, setMode] = useState<GameMode>('FFA');
-  const [maxTanks, setMaxTanks] = useState<number>(6);
+  const [mode, setMode] = useState<GameMode>('SQUAD');
+  const [maxTanks, setMaxTanks] = useState<number>(4);
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
+    soundFx.playStart();
     onCreateRoom({
-      name: roomName.trim() || 'ห้องประลองใหม่',
+      name: roomName.trim() || 'สนามรบรถถังใหม่',
       mode,
       maxTanks,
       roundTimeSeconds: 240,
@@ -42,142 +44,204 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto p-4 sm:p-6 font-thai text-slate-100 animate-fade-in">
+    <div className="w-full max-w-5xl mx-auto p-3 sm:p-6 font-thai text-slate-100 animate-fade-in">
       
-      {/* Header Banner */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-900/90 border-2 border-slate-800 p-5 rounded-3xl mb-8 shadow-xl">
+      {/* Top Arcade Mission Header */}
+      <div className="pixel-box bg-[#121624] p-4 sm:p-5 mb-6 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500 text-black flex items-center justify-center text-2xl font-bold shadow-lg">
-            🎮
+          <div className="w-12 h-12 bg-amber-500 border-2 border-black flex items-center justify-center text-2xl shadow-[2px_2px_0_#000]">
+            🕹️
           </div>
           <div>
-            <div className="text-xs text-amber-400 font-bold uppercase tracking-wider">
-              ศูนย์รวมสนามรบ (BATTLE LOBBY)
+            <div className="font-arcade text-[10px] text-amber-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+              <span>★</span> MISSION SELECT / BATTLE ROOMS <span>★</span>
             </div>
-            <div className="text-xl font-extrabold text-white">
-              ยินดีต้อนรับ, <span className="text-amber-400">{userName}</span>
+            <div className="font-arcade text-xs sm:text-sm text-white">
+              PLAYER: <span className="text-amber-300">{userName}</span>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-extrabold text-xs sm:text-sm rounded-2xl shadow-lg flex items-center gap-2 active:scale-95 transition-all"
+            onClick={() => {
+              soundFx.playSelect();
+              setShowCreateModal(true);
+            }}
+            className="px-4 py-2.5 arcade-btn arcade-btn-amber font-arcade text-[10px] flex items-center gap-1.5 cursor-pointer"
           >
-            <Plus className="w-4 h-4" /> สร้างห้องใหม่
+            <span>+</span> <span>CREATE ROOM (สร้างห้อง)</span>
           </button>
+          
           <button
-            onClick={onLogout}
-            className="p-2.5 bg-slate-800 hover:bg-rose-900/50 border border-slate-700 hover:border-rose-600 rounded-2xl text-slate-400 hover:text-rose-200 transition-all"
+            onClick={() => {
+              soundFx.playSelect();
+              onLogout();
+            }}
+            className="p-2.5 arcade-btn arcade-btn-rose text-xs cursor-pointer"
             title="ออกจากระบบ"
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="w-4 h-4" />
           </button>
         </div>
       </div>
 
       {/* Room Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {rooms.map((room) => {
-          const isPlaying = room.state === 'IN_GAME';
-
-          return (
-            <div
-              key={room.id}
-              className="bg-slate-900/80 border-2 border-slate-800 hover:border-amber-500/60 p-5 rounded-3xl shadow-lg transition-all flex flex-col justify-between"
+        {rooms.length === 0 ? (
+          <div className="col-span-full pixel-box bg-slate-900/90 p-8 text-center">
+            <p className="font-arcade text-xs text-amber-400 mb-4">
+              NO ACTIVE BATTLE ROOMS FOUND
+            </p>
+            <button
+              onClick={() => {
+                soundFx.playSelect();
+                setShowCreateModal(true);
+              }}
+              className="px-6 py-3 arcade-btn arcade-btn-amber font-arcade text-xs cursor-pointer inline-flex items-center gap-2"
             >
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="px-3 py-1 bg-slate-800 text-amber-300 rounded-xl text-xs font-bold border border-slate-700">
-                    {room.mode === 'SQUAD' ? 'โหมดทีม Squad Co-op 🤝' : 'โหมดประลองเดี่ยว FFA ⚔️'}
-                  </span>
-                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                    isPlaying ? 'bg-rose-950 text-rose-400 border border-rose-700/50' : 'bg-emerald-950 text-emerald-400 border border-emerald-700/50'
-                  }`}>
-                    {isPlaying ? 'กำลังแข่ง' : 'รอผู้เล่น'}
-                  </span>
+              <span>+</span> <span>CREATE FIRST ROOM (สร้างห้องแรก)</span>
+            </button>
+          </div>
+        ) : (
+          rooms.map((room) => {
+            const isPlaying = room.state === 'IN_GAME';
+
+            return (
+              <div
+                key={room.id}
+                className="pixel-box bg-[#151a2d] p-4 flex flex-col justify-between hover:bg-[#1a2138] transition-colors"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`px-2 py-0.5 border-2 border-black font-arcade text-[9px] ${
+                      room.mode === 'SQUAD' 
+                        ? 'bg-cyan-950 text-cyan-300' 
+                        : 'bg-amber-950 text-amber-300'
+                    }`}>
+                      {room.mode === 'SQUAD' ? '🤝 SQUAD CO-OP' : '⚔️ FFA BATTLE'}
+                    </span>
+                    
+                    <span className={`px-2 py-0.5 border-2 border-black font-arcade text-[8px] ${
+                      isPlaying 
+                        ? 'bg-rose-900 text-rose-300 animate-blink' 
+                        : 'bg-emerald-900 text-emerald-300'
+                    }`}>
+                      {isPlaying ? '● IN BATTLE' : '● WAITING'}
+                    </span>
+                  </div>
+
+                  <h3 className="font-bold text-base text-amber-300 mb-1 flex items-center gap-2">
+                    <span>🎯</span> {room.name}
+                  </h3>
+                  
+                  <p className="text-xs text-slate-400 mb-3">
+                    {room.mode === 'SQUAD'
+                      ? 'ทีมเวิร์ก 4 ทีม: คนขับรถถัง 1 คน + เพื่อนร่วมห้องช่วยกันโหวตตอบคำถาม'
+                      : 'ประลองอิสระ: แข่งขันขับรถถังเก็บกล่องคำถามเพื่อเอาตัวรอด'}
+                  </p>
                 </div>
 
-                <h3 className="text-lg font-extrabold text-white mb-1">
-                  {room.name}
-                </h3>
-                <p className="text-xs text-slate-400 mb-4">
-                  {room.mode === 'SQUAD'
-                    ? '1 คนขับ + เพื่อนร่วมทีมช่วยตอบโจทย์ Quiz เพื่อโหลดกระสุน'
-                    : 'ทุกคนขับรถถังชนกล่องคำถาม แลกกระสุนเพื่อยิงเอาตัวรอด'}
-                </p>
-              </div>
+                <div className="flex items-center justify-between pt-3 border-t-2 border-slate-800">
+                  <div className="font-arcade text-[10px] text-slate-400 flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>{room.playerCount} PLAYERS</span>
+                  </div>
 
-              <div className="flex items-center justify-between pt-3 border-t border-slate-800/80">
-                <div className="flex items-center gap-1.5 text-xs text-slate-400 font-bold">
-                  <Users className="w-4 h-4 text-cyan-400" />
-                  <span>{room.playerCount} / {room.maxTanks} ผู้เล่น</span>
+                  <button
+                    onClick={() => {
+                      soundFx.playStart();
+                      onJoinRoom(room.id);
+                    }}
+                    className="px-4 py-2 arcade-btn arcade-btn-amber font-arcade text-[10px] flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>▶</span> <span>JOIN (เข้าร่วม)</span>
+                  </button>
                 </div>
-
-                <button
-                  onClick={() => onJoinRoom(room.id)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-amber-500 hover:text-black border border-slate-700 hover:border-amber-400 rounded-xl text-xs font-extrabold text-amber-300 transition-all flex items-center gap-1.5 active:scale-95"
-                >
-                  <Play className="w-3.5 h-3.5 fill-current" /> เข้าร่วมรบ
-                </button>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
 
-      {/* Create Room Modal */}
+      {/* Retro Create Room Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-md bg-slate-900 border-4 border-amber-500 rounded-3xl p-6 shadow-2xl text-slate-100">
-            <h2 className="text-xl font-extrabold text-amber-400 mb-4">สร้างห้องประลองใหม่</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in crt-overlay">
+          <div className="w-full max-w-md pixel-box bg-[#121624] p-6 text-slate-100">
+            <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-slate-800">
+              <h2 className="font-arcade text-xs sm:text-sm text-amber-400">
+                ★ CREATE BATTLE ROOM ★
+              </h2>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="font-arcade text-xs text-rose-400 hover:text-white"
+              >
+                [X]
+              </button>
+            </div>
             
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-400 mb-1">ชื่อห้อง</label>
+                <label className="block font-arcade text-[10px] text-slate-400 mb-1">
+                  ▸ ROOM NAME (ชื่อห้อง):
+                </label>
                 <input
                   type="text"
                   value={roomName}
                   onChange={(e) => setRoomName(e.target.value)}
                   placeholder="เช่น สนามประลองห้อง ม.1/2"
-                  className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm font-bold text-white focus:outline-none focus:border-amber-400"
+                  maxLength={30}
+                  className="w-full px-3 py-2.5 bg-black border-2 border-slate-700 focus:border-amber-400 text-white font-bold text-sm focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-400 mb-1">โหมดการเล่น</label>
+                <label className="block font-arcade text-[10px] text-slate-400 mb-1">
+                  ▸ GAME MODE (โหมดการเล่น):
+                </label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
-                    onClick={() => setMode('FFA')}
-                    className={`p-3 rounded-xl border text-xs font-bold ${
-                      mode === 'FFA' ? 'bg-amber-500/20 border-amber-500 text-amber-300' : 'bg-slate-800 border-slate-700 text-slate-400'
-                    }`}
-                  >
-                    ⚔️ Free-for-All (เดี่ยว)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setMode('SQUAD')}
-                    className={`p-3 rounded-xl border text-xs font-bold ${
-                      mode === 'SQUAD' ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300' : 'bg-slate-800 border-slate-700 text-slate-400'
+                    onClick={() => {
+                      soundFx.playSelect();
+                      setMode('SQUAD');
+                    }}
+                    className={`p-3 border-2 border-black font-bold text-xs ${
+                      mode === 'SQUAD' 
+                        ? 'bg-cyan-600 text-black shadow-[2px_2px_0_#000]' 
+                        : 'bg-slate-800 text-slate-400'
                     }`}
                   >
                     🤝 Squad Co-op (ทีม)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundFx.playSelect();
+                      setMode('FFA');
+                    }}
+                    className={`p-3 border-2 border-black font-bold text-xs ${
+                      mode === 'FFA' 
+                        ? 'bg-amber-500 text-black shadow-[2px_2px_0_#000]' 
+                        : 'bg-slate-800 text-slate-400'
+                    }`}
+                  >
+                    ⚔️ Free-for-All (เดี่ยว)
                   </button>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-400 mb-1">จำนวนรถถังสูงสุด</label>
+                <label className="block font-arcade text-[10px] text-slate-400 mb-1">
+                  ▸ MAX TANKS (จำนวนรถถัง):
+                </label>
                 <select
                   value={maxTanks}
                   onChange={(e) => setMaxTanks(Number(e.target.value))}
-                  className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm font-bold text-white focus:outline-none focus:border-amber-400"
+                  className="w-full px-3 py-2.5 bg-black border-2 border-slate-700 focus:border-amber-400 text-white font-bold text-sm focus:outline-none"
                 >
-                  <option value={4}>4 คัน (กำลังดี)</option>
-                  <option value={6}>6 คัน (เต็มรูปแบบ)</option>
+                  <option value={4}>4 คัน (แนะนำสำหรับ 4 ทีม)</option>
+                  <option value={6}>6 คัน (สนามใหญ่)</option>
                 </select>
               </div>
 
@@ -185,15 +249,15 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-bold text-slate-400"
+                  className="flex-1 py-3 arcade-btn arcade-btn-slate font-arcade text-[10px]"
                 >
-                  ยกเลิก
+                  CANCEL
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs rounded-xl shadow-lg"
+                  className="flex-1 py-3 arcade-btn arcade-btn-amber font-arcade text-[10px]"
                 >
-                  สร้างห้อง
+                  CONFIRM
                 </button>
               </div>
             </form>

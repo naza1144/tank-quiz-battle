@@ -353,6 +353,12 @@ export const App: React.FC = () => {
   const isHost = myPlayer?.isHost || false;
   const myTank = tanks.find(t => t.id === socketRef.current?.id || t.playerId === myPlayer?.id);
   const isSquadSupport = myPlayer?.role === 'SUPPORT' && currentRoomConfig?.mode === 'SQUAD';
+  const [isBgmMuted, setIsBgmMuted] = useState<boolean>(!soundFx.isBgmActive());
+
+  const handleToggleBgm = () => {
+    const active = soundFx.toggleBgm();
+    setIsBgmMuted(!active);
+  };
 
   // Format round timer
   const formatTimer = (seconds: number) => {
@@ -362,7 +368,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between">
+    <div className="min-h-screen bg-[#080b14] text-slate-100 flex flex-col justify-between overflow-x-hidden">
       
       {/* 1. Auth View */}
       {view === 'AUTH' && (
@@ -371,7 +377,7 @@ export const App: React.FC = () => {
 
       {/* 2. Room Select View */}
       {view === 'ROOMS' && (
-        <div className="py-8 px-4 flex-1 flex flex-col justify-center">
+        <div className="py-6 px-3 sm:px-4 flex-1 flex flex-col justify-center">
           <RoomSelectView
             rooms={rooms}
             userName={userName}
@@ -384,7 +390,7 @@ export const App: React.FC = () => {
 
       {/* 3. Lobby View */}
       {view === 'LOBBY' && (
-        <div className="py-8 px-4 flex-1">
+        <div className="py-6 px-3 sm:px-4 flex-1">
           <LobbyView
             roomConfig={currentRoomConfig}
             players={players}
@@ -404,56 +410,68 @@ export const App: React.FC = () => {
       {view === 'GAME' && (
         <div className="flex-1 flex flex-col p-2 sm:p-4 max-w-6xl mx-auto w-full font-thai">
           
-          {/* Top HUD Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900/90 border-2 border-slate-800 p-3 sm:p-4 rounded-2xl mb-3 shadow-lg">
+          {/* Top 8-Bit Arcade HUD Bar */}
+          <div className="pixel-box bg-[#121624] p-3 mb-3 flex flex-wrap items-center justify-between gap-3">
             
             <div className="flex items-center gap-3">
               <button
-                onClick={handleLeaveRoom}
-                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition-all"
+                onClick={() => {
+                  soundFx.playSelect();
+                  handleLeaveRoom();
+                }}
+                className="p-2 arcade-btn arcade-btn-slate text-xs"
                 title="ออกจากการแข่งขัน"
               >
                 <ArrowLeft className="w-4 h-4" />
               </button>
               <div>
-                <div className="text-xs text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
-                  <Swords className="w-3.5 h-3.5" /> {currentRoomConfig?.name || 'สนามประลอง'}
+                <div className="font-arcade text-[9px] text-amber-400 uppercase tracking-widest flex items-center gap-1.5">
+                  <span>★</span> {currentRoomConfig?.name || 'TANK BATTLE 1990'}
                 </div>
-                <div className="text-sm sm:text-base font-extrabold text-white">
-                  ผู้เล่น: <span className="text-amber-300">{userName}</span>
+                <div className="font-arcade text-xs text-white">
+                  1P: <span className="text-amber-300">{userName}</span>
                 </div>
               </div>
             </div>
 
             {/* Middle Stats (HP & Ammo for Driver) */}
             {myTank && !isSquadSupport && (
-              <div className="flex items-center gap-3 bg-slate-800/90 px-4 py-2 rounded-2xl border border-slate-700">
-                <div className="flex items-center gap-1.5 text-rose-400 font-extrabold text-sm">
-                  <Heart className="w-4 h-4 fill-rose-500" />
-                  <span>{myTank.hp}/{myTank.maxHp} HP</span>
+              <div className="flex items-center gap-3 bg-black border-2 border-slate-700 px-3 py-1.5 font-arcade text-[10px]">
+                <div className="flex items-center gap-1 text-rose-400 font-extrabold">
+                  <span>HP:</span>
+                  <span>{'■'.repeat(Math.max(0, myTank.hp))}{'□'.repeat(Math.max(0, myTank.maxHp - myTank.hp))}</span>
                 </div>
-                <div className="h-4 w-px bg-slate-700" />
-                <div className={`flex items-center gap-1.5 font-extrabold text-sm ${
-                  myTank.ammo > 0 ? 'text-amber-400' : 'text-rose-400 animate-pulse'
+                <div className="h-3 w-0.5 bg-slate-700" />
+                <div className={`flex items-center gap-1 font-extrabold ${
+                  myTank.ammo > 0 ? 'text-amber-300' : 'text-rose-400 animate-blink'
                 }`}>
-                  <Zap className="w-4 h-4 fill-current" />
-                  <span>{myTank.ammo} กระสุน {myTank.ammo === 0 ? '(หมด! เก็บกล่อง [?])' : ''}</span>
+                  <Zap className="w-3.5 h-3.5 fill-current" />
+                  <span>AMMO: {myTank.ammo} {myTank.ammo === 0 ? '(EMPTY!)' : ''}</span>
                 </div>
               </div>
             )}
 
-            {/* Right: Round Timer & Audio */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800/80 rounded-xl border border-slate-700 text-amber-300 font-mono font-bold text-sm">
-                <Clock className="w-4 h-4 text-amber-400" />
+            {/* Right: Round Timer & Audio Controls */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-black border-2 border-amber-500 text-amber-300 font-arcade text-xs">
+                <span>⏱</span>
                 <span>{formatTimer(roundTimer)}</span>
               </div>
+              
+              <button
+                onClick={handleToggleBgm}
+                className={`p-2 arcade-btn ${isBgmMuted ? 'arcade-btn-slate' : 'arcade-btn-cyan'}`}
+                title="เปิด/ปิดเพลงประกอบ BGM"
+              >
+                🎵
+              </button>
+
               <button
                 onClick={handleToggleSound}
-                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition-all"
-                title="เปิด/ปิดเสียง"
+                className={`p-2 arcade-btn ${isMuted ? 'arcade-btn-rose' : 'arcade-btn-emerald'}`}
+                title="เปิด/ปิดเสียงเอฟเฟกต์ SFX"
               >
-                {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
+                {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
               </button>
             </div>
 
@@ -507,7 +525,7 @@ export const App: React.FC = () => {
               {gameEvents.map((evt, idx) => (
                 <div
                   key={evt.timestamp + idx}
-                  className="px-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-700 text-xs font-bold text-slate-200 backdrop-blur-md shadow-lg animate-fade-in"
+                  className="px-3 py-1.5 pixel-box bg-black/90 text-xs font-arcade text-amber-300 shadow-lg animate-fade-in"
                 >
                   {evt.message}
                 </div>
@@ -533,6 +551,7 @@ export const App: React.FC = () => {
               winnerName={gameOverData.winnerName}
               leaderboard={gameOverData.leaderboard}
               onPlayAgain={() => {
+                soundFx.playStart();
                 setView('LOBBY');
                 setGameOverData(null);
               }}
@@ -542,9 +561,9 @@ export const App: React.FC = () => {
         </div>
       )}
 
-      {/* Footer Branding */}
-      <footer className="py-2 text-center text-[11px] text-slate-600 font-thai border-t border-slate-900 bg-slate-950/80">
-        Tank Quiz Battle 1990 • การเรียนรู้ผ่านเกมรถถังสุดมันส์
+      {/* Retro Arcade Footer */}
+      <footer className="py-2 text-center font-arcade text-[8px] text-slate-600 border-t-2 border-slate-900 bg-black/80">
+        ★ TANK QUIZ BATTLE 1990 • STANDALONE RETRO ARCADE ★
       </footer>
 
     </div>

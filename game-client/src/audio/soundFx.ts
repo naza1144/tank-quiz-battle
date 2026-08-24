@@ -1,6 +1,10 @@
 class RetroSoundEngine {
   private ctx: AudioContext | null = null;
   private isMuted: boolean = false;
+  private isBgmMuted: boolean = false;
+  private bgmTimer: number | null = null;
+  private bgmStep: number = 0;
+  private bgmGain: GainNode | null = null;
 
   private initContext() {
     if (!this.ctx) {
@@ -16,6 +20,11 @@ class RetroSoundEngine {
 
   public toggleMute(): boolean {
     this.isMuted = !this.isMuted;
+    if (this.isMuted) {
+      this.stopBgm();
+    } else {
+      this.startBgm();
+    }
     return this.isMuted;
   }
 
@@ -23,7 +32,187 @@ class RetroSoundEngine {
     return this.isMuted;
   }
 
-  // 1. Tank Shooting (Square wave pitch drop)
+  public toggleBgm(): boolean {
+    this.isBgmMuted = !this.isBgmMuted;
+    if (this.isBgmMuted) {
+      this.stopBgm();
+    } else if (!this.isMuted) {
+      this.startBgm();
+    }
+    return !this.isBgmMuted;
+  }
+
+  public isBgmActive(): boolean {
+    return !this.isBgmMuted && !this.isMuted;
+  }
+
+  // --- 8-BIT RETRO BACKGROUND MUSIC (CHIPTUNE) ---
+  // Authentic 8-bit battle theme loop generated with Square + Triangle + Noise channels
+  public startBgm() {
+    if (this.isMuted || this.isBgmMuted || this.bgmTimer) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    // Create master BGM gain node
+    this.bgmGain = this.ctx.createGain();
+    this.bgmGain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+    this.bgmGain.connect(this.ctx.destination);
+
+    // Chiptune melody notes (C4, D4, E4, G4, A4, C5, Bb4, etc.)
+    const melody = [
+      261.63, 0, 329.63, 392.00, 523.25, 0, 392.00, 329.63,
+      293.66, 0, 349.23, 440.00, 587.33, 0, 440.00, 349.23,
+      329.63, 0, 392.00, 493.88, 659.25, 0, 493.88, 392.00,
+      466.16, 440.00, 392.00, 349.23, 293.66, 329.63, 349.23, 392.00
+    ];
+
+    const bass = [
+      130.81, 130.81, 130.81, 130.81, 146.83, 146.83, 146.83, 146.83,
+      164.81, 164.81, 164.81, 164.81, 174.61, 174.61, 196.00, 196.00
+    ];
+
+    this.bgmStep = 0;
+    const stepDuration = 140; // ~107 BPM 16th notes
+
+    const tick = () => {
+      if (!this.ctx || this.isMuted || this.isBgmMuted) {
+        this.stopBgm();
+        return;
+      }
+
+      const now = this.ctx.currentTime;
+      const mNote = melody[this.bgmStep % melody.length];
+      const bNote = bass[Math.floor(this.bgmStep / 2) % bass.length];
+
+      // 1. Lead Chiptune Square Wave
+      if (mNote > 0 && this.bgmGain) {
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(mNote, now);
+
+        g.gain.setValueAtTime(0.06, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+
+        osc.connect(g);
+        g.connect(this.bgmGain);
+        osc.start(now);
+        osc.stop(now + 0.11);
+      }
+
+      // 2. Triangle Wave Bassline
+      if (this.bgmStep % 2 === 0 && this.bgmGain) {
+        const bOsc = this.ctx.createOscillator();
+        const bG = this.ctx.createGain();
+        bOsc.type = 'triangle';
+        bOsc.frequency.setValueAtTime(bNote, now);
+
+        bG.gain.setValueAtTime(0.09, now);
+        bG.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+
+        bOsc.connect(bG);
+        bG.connect(this.bgmGain);
+        bOsc.start(now);
+        bOsc.stop(now + 0.22);
+      }
+
+      // 3. 8-bit Noise Hi-Hat & Snare Percussion
+      if (this.bgmGain && (this.bgmStep % 4 === 2 || this.bgmStep % 8 === 6)) {
+        this.playNoisePercussion(now, this.bgmStep % 8 === 6);
+      }
+
+      this.bgmStep++;
+    };
+
+    this.bgmTimer = window.setInterval(tick, stepDuration);
+  }
+
+  public stopBgm() {
+    if (this.bgmTimer) {
+      clearInterval(this.bgmTimer);
+      this.bgmTimer = null;
+    }
+  }
+
+  private playNoisePercussion(time: number, isSnare: boolean) {
+    if (!this.ctx || !this.bgmGain) return;
+    const bufferSize = this.ctx.sampleRate * (isSnare ? 0.05 : 0.02);
+    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = isSnare ? 'bandpass' : 'highpass';
+    filter.frequency.value = isSnare ? 1000 : 5000;
+
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(isSnare ? 0.04 : 0.02, time);
+    g.gain.exponentialRampToValueAtTime(0.001, time + (isSnare ? 0.05 : 0.02));
+
+    noise.connect(filter);
+    filter.connect(g);
+    g.connect(this.bgmGain);
+
+    noise.start(time);
+    noise.stop(time + (isSnare ? 0.05 : 0.02));
+  }
+
+  // --- 8-BIT RETRO SOUND EFFECTS ---
+
+  // 1. Arcade Button / Menu Select Blip
+  public playSelect() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(880, this.ctx.currentTime);
+    osc.frequency.setValueAtTime(1760, this.ctx.currentTime + 0.03);
+
+    gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.06);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.06);
+  }
+
+  // 2. Arcade Game Start / Coin Insert
+  public playStart() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const notes = [987.77, 1318.51]; // B5, E6 (Classic Nintendo Coin Sound)
+    notes.forEach((freq, i) => {
+      const osc = this.ctx!.createOscillator();
+      const gain = this.ctx!.createGain();
+
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, this.ctx!.currentTime + i * 0.07);
+
+      gain.gain.setValueAtTime(0.2, this.ctx!.currentTime + i * 0.07);
+      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx!.currentTime + i * 0.07 + (i === 1 ? 0.35 : 0.07));
+
+      osc.connect(gain);
+      gain.connect(this.ctx!.destination);
+
+      osc.start(this.ctx!.currentTime + i * 0.07);
+      osc.stop(this.ctx!.currentTime + i * 0.07 + (i === 1 ? 0.35 : 0.07));
+    });
+  }
+
+  // 3. Tank Shooting (Retro Square Wave Frequency Slide)
   public playShoot() {
     if (this.isMuted) return;
     this.initContext();
@@ -33,8 +222,8 @@ class RetroSoundEngine {
     const gain = this.ctx.createGain();
 
     osc.type = 'square';
-    osc.frequency.setValueAtTime(440, this.ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(110, this.ctx.currentTime + 0.12);
+    osc.frequency.setValueAtTime(600, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(120, this.ctx.currentTime + 0.12);
 
     gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
@@ -46,7 +235,7 @@ class RetroSoundEngine {
     osc.stop(this.ctx.currentTime + 0.12);
   }
 
-  // 2. Brick / Steel Hit (Short blip)
+  // 4. Brick / Steel Hit (Arcade Impact)
   public playHit(isSteel: boolean = false) {
     if (this.isMuted) return;
     this.initContext();
@@ -56,43 +245,54 @@ class RetroSoundEngine {
     const gain = this.ctx.createGain();
 
     osc.type = isSteel ? 'triangle' : 'sawtooth';
-    osc.frequency.setValueAtTime(isSteel ? 800 : 200, this.ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(isSteel ? 600 : 80, this.ctx.currentTime + 0.08);
+    osc.frequency.setValueAtTime(isSteel ? 900 : 250, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(isSteel ? 450 : 60, this.ctx.currentTime + 0.09);
 
-    gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+    gain.gain.setValueAtTime(0.18, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.09);
 
     osc.connect(gain);
     gain.connect(this.ctx.destination);
 
     osc.start();
-    osc.stop(this.ctx.currentTime + 0.08);
+    osc.stop(this.ctx.currentTime + 0.09);
   }
 
-  // 3. Tank Explosion (Noise & low rumble)
+  // 5. Tank Explosion (Classic 8-bit Noise Rumble)
   public playExplosion() {
     if (this.isMuted) return;
     this.initContext();
     if (!this.ctx) return;
 
-    const osc = this.ctx.createOscillator();
+    // White noise explosion
+    const bufferSize = this.ctx.sampleRate * 0.4;
+    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.12));
+    }
+
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(800, this.ctx.currentTime);
+    filter.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.4);
+
     const gain = this.ctx.createGain();
-
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(150, this.ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.45);
-
     gain.gain.setValueAtTime(0.35, this.ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.45);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.4);
 
-    osc.connect(gain);
+    noise.connect(filter);
+    filter.connect(gain);
     gain.connect(this.ctx.destination);
 
-    osc.start();
-    osc.stop(this.ctx.currentTime + 0.45);
+    noise.start();
+    noise.stop(this.ctx.currentTime + 0.4);
   }
 
-  // 4. Quiz Correct (Arpeggio fanfare)
+  // 6. Quiz Correct (8-bit Level-Up Fanfare)
   public playQuizCorrect() {
     if (this.isMuted) return;
     this.initContext();
@@ -104,20 +304,20 @@ class RetroSoundEngine {
       const gain = this.ctx!.createGain();
 
       osc.type = 'square';
-      osc.frequency.setValueAtTime(freq, this.ctx!.currentTime + i * 0.08);
+      osc.frequency.setValueAtTime(freq, this.ctx!.currentTime + i * 0.07);
 
-      gain.gain.setValueAtTime(0.2, this.ctx!.currentTime + i * 0.08);
-      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx!.currentTime + i * 0.08 + 0.12);
+      gain.gain.setValueAtTime(0.2, this.ctx!.currentTime + i * 0.07);
+      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx!.currentTime + i * 0.07 + 0.14);
 
       osc.connect(gain);
       gain.connect(this.ctx!.destination);
 
-      osc.start(this.ctx!.currentTime + i * 0.08);
-      osc.stop(this.ctx!.currentTime + i * 0.08 + 0.12);
+      osc.start(this.ctx!.currentTime + i * 0.07);
+      osc.stop(this.ctx!.currentTime + i * 0.07 + 0.14);
     });
   }
 
-  // 5. Quiz Wrong (Low buzzer)
+  // 7. Quiz Wrong (8-bit Descending Buzzer)
   public playQuizWrong() {
     if (this.isMuted) return;
     this.initContext();
@@ -127,20 +327,20 @@ class RetroSoundEngine {
     const gain = this.ctx.createGain();
 
     osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(120, this.ctx.currentTime);
-    osc.frequency.setValueAtTime(100, this.ctx.currentTime + 0.15);
+    osc.frequency.setValueAtTime(160, this.ctx.currentTime);
+    osc.frequency.setValueAtTime(110, this.ctx.currentTime + 0.12);
 
     gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.35);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
 
     osc.connect(gain);
     gain.connect(this.ctx.destination);
 
     osc.start();
-    osc.stop(this.ctx.currentTime + 0.35);
+    osc.stop(this.ctx.currentTime + 0.3);
   }
 
-  // 6. No Ammo Click
+  // 8. No Ammo Click
   public playNoAmmo() {
     if (this.isMuted) return;
     this.initContext();
@@ -150,9 +350,9 @@ class RetroSoundEngine {
     const gain = this.ctx.createGain();
 
     osc.type = 'triangle';
-    osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+    osc.frequency.setValueAtTime(320, this.ctx.currentTime);
 
-    gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+    gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
 
     osc.connect(gain);
@@ -162,14 +362,59 @@ class RetroSoundEngine {
     osc.stop(this.ctx.currentTime + 0.05);
   }
 
-  // 7. Victory / Level Start Fanfare
+  // 9. Countdown Tick (Chiptune Ping)
+  public playCountdownTick(isFinal: boolean = false) {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(isFinal ? 1200 : 700, this.ctx.currentTime);
+
+    gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.06);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.06);
+  }
+
+  // 10. Vote Blip
+  public playVote() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(500, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.05);
+
+    gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.05);
+  }
+
+  // 11. Victory / Game Over Fanfare
   public playVictory() {
     if (this.isMuted) return;
     this.initContext();
     if (!this.ctx) return;
 
     const notes = [261.63, 329.63, 392.00, 523.25, 440.00, 523.25];
-    const durations = [0.15, 0.15, 0.15, 0.25, 0.15, 0.4];
+    const durations = [0.12, 0.12, 0.12, 0.22, 0.12, 0.4];
     let time = this.ctx.currentTime;
 
     notes.forEach((freq, i) => {

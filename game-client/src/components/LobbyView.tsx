@@ -13,7 +13,8 @@ import {
   Sparkles, 
   Crown,
   Volume2,
-  VolumeX
+  VolumeX,
+  Music
 } from 'lucide-react';
 import { soundFx } from '../audio/soundFx.js';
 
@@ -35,95 +36,114 @@ const TANK_PRESETS: {
   nameTh: string;
   desc: string;
   hp: number;
+  hpBlocks: string;
   speed: string;
+  speedBlocks: string;
   damage: number;
+  damageBlocks: string;
   icon: string;
 }[] = [
   {
     type: 'STANDARD',
-    nameTh: 'รถถังมาตรฐาน (Standard)',
+    nameTh: 'STANDARD TANK',
     desc: 'สมดุลทั้งความเร็วและเกราะ ยิงได้แม่นยำ เหมาะกับทุกสถานการณ์',
     hp: 2,
-    speed: 'ปานกลาง',
+    hpBlocks: '■■□□',
+    speed: 'MEDIUM',
+    speedBlocks: '■■■□',
     damage: 1,
+    damageBlocks: '■□□□',
     icon: '🛡️'
   },
   {
     type: 'SCOUT',
-    nameTh: 'สายสปีดคล่องแคล่ว (Scout)',
+    nameTh: 'SCOUT TANK',
     desc: 'เคลื่อนที่ไว วิ่งเก็บกล่องคำถามได้เร็วสุด แต่เกราะบาง (1 HP)',
     hp: 1,
-    speed: 'เร็วมาก ⚡',
+    hpBlocks: '■□□□',
+    speed: 'TURBO',
+    speedBlocks: '■■■■',
     damage: 1,
+    damageBlocks: '■□□□',
     icon: '⚡'
   },
   {
     type: 'HEAVY',
-    nameTh: 'เกราะหนักจอมพลัง (Heavy)',
+    nameTh: 'HEAVY TANK',
     desc: 'เกราะหนา 4 HP ยิงหนัก 2 เท่า แต่เคลื่อนที่ช้า ชนกำแพงแกร่ง',
     hp: 4,
-    speed: 'ช้า',
+    hpBlocks: '■■■■',
+    speed: 'SLOW',
+    speedBlocks: '■■□□',
     damage: 2,
+    damageBlocks: '■■□□',
     icon: '🦾'
   },
   {
     type: 'SNIPER',
-    nameTh: 'สไนเปอร์ซุ่มยิง (Sniper)',
+    nameTh: 'SNIPER TANK',
     desc: 'กระสุนความเร็วสูง ยิงทะลุเป้าหมายระยะไกล เกราะบาง (1 HP)',
     hp: 1,
-    speed: 'ปานกลาง',
+    hpBlocks: '■□□□',
+    speed: 'MEDIUM',
+    speedBlocks: '■■■□',
     damage: 2,
+    damageBlocks: '■■□□',
     icon: '🎯'
   }
 ];
 
 const COLORS = [
-  { name: 'เหลืองทอง (Classic)', value: '#eab308' },
-  { name: 'เขียวทหาร', value: '#22c55e' },
-  { name: 'น้ำเงินเทอร์โบ', value: '#3b82f6' },
-  { name: 'แดงเพลิง', value: '#ef4444' },
-  { name: 'ม่วงพลาสม่า', value: '#a855f7' },
-  { name: 'ฟ้าไซเบอร์', value: '#06b6d4' }
+  { name: 'YELLOW', value: '#eab308' },
+  { name: 'GREEN', value: '#22c55e' },
+  { name: 'BLUE', value: '#3b82f6' },
+  { name: 'RED', value: '#ef4444' },
+  { name: 'PURPLE', value: '#a855f7' },
+  { name: 'CYAN', value: '#06b6d4' }
 ];
 
 export const TEAM_PRESETS = [
   {
     id: 'team-1',
-    name: 'ทีมแดงเพลิง (Red)',
+    name: 'RED SQUAD',
+    nameTh: 'ทีมแดงเพลิง',
     color: '#ef4444',
-    bg: 'from-rose-950/70 to-slate-900',
-    border: 'border-rose-500/70',
-    badgeBg: 'bg-rose-500 text-white',
+    bg: 'bg-rose-950/80',
+    border: 'border-rose-500',
+    badgeBg: 'bg-rose-600 text-white',
     textColor: 'text-rose-400',
     icon: '🔥'
   },
   {
     id: 'team-2',
-    name: 'ทีมน้ำเงินพายุ (Blue)',
+    name: 'BLUE SQUAD',
+    nameTh: 'ทีมน้ำเงินพายุ',
     color: '#3b82f6',
-    bg: 'from-blue-950/70 to-slate-900',
-    border: 'border-blue-500/70',
-    badgeBg: 'bg-blue-500 text-white',
+    bg: 'bg-blue-950/80',
+    border: 'border-blue-500',
+    badgeBg: 'bg-blue-600 text-white',
     textColor: 'text-blue-400',
     icon: '⚡'
   },
   {
     id: 'team-3',
-    name: 'ทีมเขียวมรกต (Green)',
+    name: 'GREEN SQUAD',
+    nameTh: 'ทีมเขียวมรกต',
     color: '#22c55e',
-    bg: 'from-emerald-950/70 to-slate-900',
-    border: 'border-emerald-500/70',
-    badgeBg: 'bg-emerald-500 text-white',
+    bg: 'bg-emerald-950/80',
+    border: 'border-emerald-500',
+    badgeBg: 'bg-emerald-600 text-white',
     textColor: 'text-emerald-400',
     icon: '🌿'
   },
   {
     id: 'team-4',
-    name: 'ทีมเหลืองสายฟ้า (Yellow)',
+    name: 'YELLOW SQUAD',
+    nameTh: 'ทีมเหลืองสายฟ้า',
     color: '#eab308',
-    bg: 'from-amber-950/70 to-slate-900',
-    border: 'border-amber-500/70',
-    badgeBg: 'bg-amber-500 text-slate-950',
+    bg: 'bg-amber-950/80',
+    border: 'border-amber-500',
+    badgeBg: 'bg-amber-500 text-black',
     textColor: 'text-amber-400',
     icon: '👑'
   }
@@ -147,8 +167,10 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
   const [selectedRole, setSelectedRole] = useState<PlayerRole>(myPlayer?.role || 'DRIVER');
   const [selectedTeam, setSelectedTeam] = useState<string>(myPlayer?.teamId || 'team-1');
   const [isMuted, setIsMuted] = useState<boolean>(soundFx.getIsMuted());
+  const [isBgmMuted, setIsBgmMuted] = useState<boolean>(!soundFx.isBgmActive());
 
   const handleUpdateTank = (arch: TankArchetype, col: string, rol: PlayerRole, team: string) => {
+    soundFx.playSelect();
     setSelectedArchetype(arch);
     setSelectedColor(col);
     setSelectedRole(rol);
@@ -161,73 +183,95 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
     setIsMuted(muted);
   };
 
+  const handleToggleBgm = () => {
+    const active = soundFx.toggleBgm();
+    setIsBgmMuted(!active);
+  };
+
   const isSquadMode = roomConfig?.mode === 'SQUAD';
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-4 sm:p-6 font-thai text-slate-100 animate-fade-in">
+    <div className="w-full max-w-6xl mx-auto p-3 sm:p-6 font-thai text-slate-100 animate-fade-in">
       
-      {/* Top Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-900/90 border-2 border-slate-800 p-4 rounded-3xl mb-6 shadow-xl">
+      {/* Top Arcade Status Bar */}
+      <div className="pixel-box bg-[#121624] p-4 mb-6 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <span className="text-3xl">🎮</span>
+          <div className="w-12 h-12 bg-amber-500 border-2 border-black flex items-center justify-center text-2xl shadow-[2px_2px_0_#000]">
+            🎮
+          </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-extrabold text-amber-400">
-              {roomConfig?.name || 'สนามรบรถถัง'}
+            <h1 className="font-arcade text-xs sm:text-sm text-amber-400">
+              {roomConfig?.name || 'TANK BATTLE ROOM'}
             </h1>
-            <div className="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
-              <span className={`px-2 py-0.5 rounded border font-bold ${
+            <div className="font-arcade text-[9px] text-slate-400 flex items-center gap-2 mt-1">
+              <span className={`px-2 py-0.5 border border-black ${
                 isSquadMode 
-                  ? 'bg-cyan-950/80 border-cyan-500 text-cyan-300' 
-                  : 'bg-amber-950/80 border-amber-500 text-amber-300'
+                  ? 'bg-cyan-950 text-cyan-300' 
+                  : 'bg-amber-950 text-amber-300'
               }`}>
-                โหมด: {isSquadMode ? 'ทีมเวิร์ก (Squad Co-op)' : 'ประลองอิสระ (FFA Battle Royale)'}
+                MODE: {isSquadMode ? 'SQUAD CO-OP' : 'FFA BATTLE'}
               </span>
-              <span>• รองรับนักเรียนทั้งห้อง (60+ คน)</span>
+              <span>• CAP: 60+ STUDENTS</span>
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <button
-            onClick={handleToggleSound}
-            className="p-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition-all"
-            title="เปิด/ปิดเสียง"
+            onClick={handleToggleBgm}
+            className={`p-2.5 arcade-btn ${isBgmMuted ? 'arcade-btn-slate' : 'arcade-btn-cyan'}`}
+            title="เปิด/ปิดเพลงประกอบ 8-bit"
           >
-            {isMuted ? <VolumeX className="w-5 h-5 text-rose-400" /> : <Volume2 className="w-5 h-5 text-emerald-400" />}
+            <Music className="w-4 h-4" />
           </button>
+          
           <button
-            onClick={onLeaveRoom}
-            className="px-4 py-2 bg-slate-800 hover:bg-rose-900/60 border border-slate-700 hover:border-rose-600 rounded-2xl text-xs font-bold text-slate-300 hover:text-rose-200 transition-all"
+            onClick={handleToggleSound}
+            className={`p-2.5 arcade-btn ${isMuted ? 'arcade-btn-rose' : 'arcade-btn-emerald'}`}
+            title="เปิด/ปิดเสียงเอฟเฟกต์"
           >
-            ออกจากห้อง
+            {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+          </button>
+          
+          <button
+            onClick={() => {
+              soundFx.playSelect();
+              onLeaveRoom();
+            }}
+            className="px-3 py-2 arcade-btn arcade-btn-slate font-arcade text-[10px]"
+          >
+            EXIT
           </button>
         </div>
       </div>
 
       {/* SQUAD / TEAM SELECTION BOARD (For Squad Mode) */}
       {isSquadMode && (
-        <div className="mb-6 bg-slate-900/90 border-2 border-slate-800 p-5 rounded-3xl shadow-xl">
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-800">
+        <div className="mb-6 pixel-box bg-[#151a2d] p-4 sm:p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b-2 border-slate-800">
             <div>
-              <h2 className="text-base font-extrabold text-cyan-400 flex items-center gap-2">
-                <Users className="w-5 h-5" /> การจัดทีมและบทบาท (Team & Role Formation)
+              <h2 className="font-arcade text-xs text-cyan-400 flex items-center gap-2">
+                <span>★</span> SQUAD FORMATION (จัดทีมและบทบาท) <span>★</span>
               </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
-                รองรับนักเรียนทั้งห้อง (60+ คน): มีคนขับรถถังทีมละ 1 คน 🎯 และผู้ช่วยตอบคำถามไม่จำกัดจำนวน 🧠
+              <p className="text-xs text-slate-400 mt-1">
+                รถถัง 1 คันต่อทีม 🎯 • ผู้ช่วยตอบคำถามโหวตเสียงข้างมากไม่จำกัด 🧠
               </p>
             </div>
 
             {isHost && (
               <button
-                onClick={onAutoBalanceTeams}
-                className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-extrabold text-xs rounded-xl shadow-md border border-cyan-400 flex items-center gap-1.5 active:scale-95 transition-all"
+                onClick={() => {
+                  soundFx.playSelect();
+                  onAutoBalanceTeams?.();
+                }}
+                className="px-4 py-2.5 arcade-btn arcade-btn-cyan font-arcade text-[10px] flex items-center gap-1.5 cursor-pointer"
               >
-                <span>⚖️</span> จัดทีมสมดุลอัตโนมัติ (Auto-Balance)
+                <span>⚖️</span> <span>AUTO-BALANCE (จัดทีมสมดุล)</span>
               </button>
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {TEAM_PRESETS.map((team) => {
               const teamPlayers = players.filter(p => p.teamId === team.id);
               const driver = teamPlayers.find(p => p.role === 'DRIVER');
@@ -237,72 +281,71 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
               return (
                 <div
                   key={team.id}
-                  className={`bg-gradient-to-b ${team.bg} border-2 ${
-                    isMyTeam ? `${team.border} shadow-[0_0_20px_rgba(255,255,255,0.1)] ring-2 ring-white/30` : 'border-slate-800 opacity-90'
-                  } rounded-2xl p-4 flex flex-col justify-between transition-all`}
+                  className={`border-4 ${
+                    isMyTeam ? 'border-amber-400 shadow-[4px_4px_0_#f59e0b]' : 'border-black'
+                  } ${team.bg} p-3.5 flex flex-col justify-between`}
                 >
                   {/* Team Header */}
                   <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-2xl">{team.icon}</span>
-                        <span className={`font-extrabold text-sm ${team.textColor}`}>{team.name}</span>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xl">{team.icon}</span>
+                        <span className={`font-arcade text-[11px] ${team.textColor}`}>{team.name}</span>
                       </div>
                       {isMyTeam && (
-                        <span className="px-2 py-0.5 rounded-full bg-white text-slate-950 font-extrabold text-[10px]">
-                          ทีมของคุณ
+                        <span className="px-1.5 py-0.5 bg-amber-400 text-black font-arcade text-[8px]">
+                          YOU
                         </span>
                       )}
                     </div>
 
                     {/* Driver Slot */}
-                    <div className="mb-3 bg-slate-950/60 border border-slate-800 rounded-xl p-2.5">
-                      <div className="text-[11px] font-bold text-amber-400 mb-1 flex items-center justify-between">
-                        <span>🎮 พลขับ (Driver)</span>
-                        {driver && <span className="text-[10px] text-slate-400">{driver.tankArchetype}</span>}
+                    <div className="mb-2 bg-black/70 border-2 border-slate-700 p-2">
+                      <div className="font-arcade text-[9px] text-amber-400 mb-1 flex items-center justify-between">
+                        <span>🎮 DRIVER</span>
+                        {driver && <span className="text-[8px] text-slate-400">{driver.tankArchetype}</span>}
                       </div>
                       {driver ? (
                         <div className="flex items-center justify-between">
                           <div className="font-bold text-xs text-white truncate max-w-[120px]">
-                            {driver.name} {driver.id === myPlayerId && '(คุณ)'}
+                            {driver.name} {driver.id === myPlayerId && '(YOU)'}
                           </div>
-                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
+                          <span className="w-2 h-2 bg-emerald-400 shadow-[0_0_6px_#34d399]" />
                         </div>
                       ) : (
                         <button
                           onClick={() => handleUpdateTank(selectedArchetype, team.color, 'DRIVER', team.id)}
-                          className="w-full py-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 rounded-lg text-xs font-bold text-amber-300 transition-all text-center"
+                          className="w-full py-1 arcade-btn arcade-btn-amber font-arcade text-[8px] text-center"
                         >
-                          + เข้าเป็นคนขับ
+                          + BE DRIVER
                         </button>
                       )}
                     </div>
 
                     {/* Supporters Slot */}
-                    <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-2.5">
-                      <div className="text-[11px] font-bold text-cyan-400 mb-1 flex items-center justify-between">
-                        <span>🧠 ผู้ช่วยตอบคำถาม (Support)</span>
-                        <span className="text-[10px] text-slate-400">{supporters.length} คน</span>
+                    <div className="bg-black/70 border-2 border-slate-700 p-2">
+                      <div className="font-arcade text-[9px] text-cyan-400 mb-1 flex items-center justify-between">
+                        <span>🧠 SQUAD ({supporters.length})</span>
                       </div>
                       {supporters.length > 0 ? (
                         <div className="space-y-1 max-h-20 overflow-y-auto pr-1">
                           {supporters.map((sup) => (
                             <div key={sup.socketId} className="flex items-center justify-between text-xs text-slate-200">
-                              <span className="truncate max-w-[120px]">{sup.name} {sup.id === myPlayerId && '(คุณ)'}</span>
-                              <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                              <span className="truncate max-w-[120px]">{sup.name} {sup.id === myPlayerId && '(YOU)'}</span>
+                              <span className="w-1.5 h-1.5 bg-cyan-400" />
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <div className="text-[11px] text-slate-500 italic mb-1">ยังไม่มีผู้ช่วย</div>
+                        <div className="text-[10px] text-slate-500 font-arcade">NO SUPPORTERS</div>
                       )}
                       
                       {(!isMyTeam || selectedRole !== 'SUPPORT') && (
                         <button
                           onClick={() => handleUpdateTank(selectedArchetype, team.color, 'SUPPORT', team.id)}
-                          className="w-full mt-1.5 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/50 rounded-lg text-xs font-bold text-cyan-300 transition-all text-center"
+                          className="w-full mt-1.5 py-1 arcade-btn arcade-btn-cyan font-arcade text-[8px] text-center"
                         >
-                          + เข้าร่วมช่วยตอบ
+                          + JOIN SQUAD
                         </button>
                       )}
                     </div>
@@ -310,8 +353,7 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
 
                   {/* Team Switch Footer */}
                   {isMyTeam && (
-                    <div className="mt-3 pt-2 border-t border-white/10 flex items-center justify-between text-xs">
-                      <span className="text-slate-400">บทบาทของคุณ:</span>
+                    <div className="mt-2 pt-1.5 border-t border-white/20 flex items-center justify-between text-xs">
                       <button
                         onClick={() => handleUpdateTank(
                           selectedArchetype,
@@ -319,9 +361,9 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                           selectedRole === 'DRIVER' ? 'SUPPORT' : 'DRIVER',
                           team.id
                         )}
-                        className="font-bold text-amber-300 hover:text-amber-200 underline text-[11px]"
+                        className="font-arcade text-[8px] text-amber-300 hover:underline"
                       >
-                        สลับเป็น {selectedRole === 'DRIVER' ? 'ผู้ช่วยตอบ 🧠' : 'คนขับ 🎮'}
+                        ▸ SWITCH TO {selectedRole === 'DRIVER' ? 'SUPPORT' : 'DRIVER'}
                       </button>
                     </div>
                   )}
@@ -338,9 +380,9 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
         <div className="lg:col-span-7 space-y-6">
           
           {/* Tank Archetype Selector */}
-          <div className="bg-slate-900/90 border-2 border-slate-800 p-5 rounded-3xl shadow-lg">
-            <h2 className="text-sm font-extrabold uppercase tracking-wider text-amber-400 mb-4 flex items-center gap-2">
-              <Crosshair className="w-4 h-4" /> 1. เลือกรุ่นรถถัง (Tank Class)
+          <div className="pixel-box bg-[#151a2d] p-4 sm:p-5">
+            <h2 className="font-arcade text-xs text-amber-400 mb-4 flex items-center gap-2">
+              <Crosshair className="w-4 h-4" /> 1. SELECT TANK CLASS
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -350,28 +392,34 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                   <button
                     key={t.type}
                     onClick={() => handleUpdateTank(t.type, selectedColor, selectedRole, selectedTeam)}
-                    className={`p-4 rounded-2xl border-2 text-left transition-all relative overflow-hidden ${
+                    className={`p-3.5 border-4 text-left transition-all ${
                       isSelected
-                        ? 'bg-amber-950/70 border-amber-400 text-white shadow-[0_0_20px_rgba(245,158,11,0.25)]'
-                        : 'bg-slate-800/60 border-slate-700/80 text-slate-300 hover:border-slate-600'
+                        ? 'border-amber-400 bg-amber-950/70 shadow-[4px_4px_0_#f59e0b]'
+                        : 'border-black bg-black/60 hover:border-slate-600'
                     }`}
                   >
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center justify-between mb-1.5">
                       <div className="text-2xl">{t.icon}</div>
                       {isSelected && (
-                        <span className="w-5 h-5 rounded-full bg-amber-500 text-black flex items-center justify-center font-bold text-xs">
-                          ✓
+                        <span className="font-arcade text-[9px] bg-amber-400 text-black px-1.5 py-0.5">
+                          ACTIVE
                         </span>
                       )}
                     </div>
-                    <div className="font-extrabold text-sm text-amber-300">{t.nameTh}</div>
+                    <div className="font-arcade text-xs text-amber-300">{t.nameTh}</div>
                     <p className="text-xs text-slate-400 mt-1 leading-relaxed">{t.desc}</p>
                     
-                    {/* Stats bar */}
-                    <div className="flex items-center gap-3 mt-3 pt-2 border-t border-slate-700/60 text-xs">
-                      <span className="text-rose-400 font-bold">❤️ {t.hp} HP</span>
-                      <span className="text-cyan-400 font-bold">⚡ {t.speed}</span>
-                      <span className="text-amber-400 font-bold">💥 {t.damage} DMG</span>
+                    {/* Retro 8-bit Block Meters */}
+                    <div className="space-y-1 mt-3 pt-2 border-t-2 border-slate-800 font-arcade text-[8px]">
+                      <div className="flex justify-between text-rose-400">
+                        <span>HP:</span> <span>{t.hpBlocks} ({t.hp})</span>
+                      </div>
+                      <div className="flex justify-between text-cyan-400">
+                        <span>SPD:</span> <span>{t.speedBlocks} ({t.speed})</span>
+                      </div>
+                      <div className="flex justify-between text-amber-400">
+                        <span>DMG:</span> <span>{t.damageBlocks} ({t.damage})</span>
+                      </div>
                     </div>
                   </button>
                 );
@@ -381,26 +429,26 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
 
           {/* Tank Color Selector (in FFA mode) */}
           {!isSquadMode && (
-            <div className="bg-slate-900/90 border-2 border-slate-800 p-5 rounded-3xl shadow-lg">
-              <h2 className="text-sm font-extrabold uppercase tracking-wider text-amber-400 mb-4 flex items-center gap-2">
-                <Sparkles className="w-4 h-4" /> 2. เลือกสีรถถัง (Tank Paint)
+            <div className="pixel-box bg-[#151a2d] p-4 sm:p-5">
+              <h2 className="font-arcade text-xs text-amber-400 mb-3 flex items-center gap-2">
+                <Sparkles className="w-4 h-4" /> 2. SELECT TANK COLOR
               </h2>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2.5">
                 {COLORS.map((c) => (
                   <button
                     key={c.value}
                     onClick={() => handleUpdateTank(selectedArchetype, c.value, selectedRole, selectedTeam)}
-                    className={`flex items-center gap-2.5 px-3.5 py-2 rounded-2xl border-2 transition-all ${
+                    className={`flex items-center gap-2 px-3 py-2 border-2 ${
                       selectedColor === c.value
-                        ? 'border-white bg-slate-800 shadow-md scale-105'
-                        : 'border-slate-700 bg-slate-900 hover:border-slate-500'
+                        ? 'border-white bg-slate-800 shadow-[2px_2px_0_#fff]'
+                        : 'border-black bg-black/80 hover:border-slate-600'
                     }`}
                   >
                     <span
-                      className="w-4 h-4 rounded-full border border-white/40 shadow"
+                      className="w-3.5 h-3.5 border border-black shadow"
                       style={{ backgroundColor: c.value }}
                     />
-                    <span className="text-xs font-bold text-slate-200">{c.name}</span>
+                    <span className="font-arcade text-[9px] text-slate-200">{c.name}</span>
                   </button>
                 ))}
               </div>
@@ -412,23 +460,26 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
         {/* Right: Players in Room & Match Control */}
         <div className="lg:col-span-5 space-y-6">
           
-          <div className="bg-slate-900/90 border-2 border-slate-800 p-5 rounded-3xl shadow-lg">
-            <div className="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
-              <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                <Users className="w-4 h-4 text-cyan-400" /> รายชื่อผู้เล่น ({players.length}/{roomConfig?.maxTanks || 6})
+          <div className="pixel-box bg-[#151a2d] p-4 sm:p-5">
+            <div className="flex items-center justify-between mb-4 border-b-2 border-slate-800 pb-2">
+              <h2 className="font-arcade text-xs text-slate-300 flex items-center gap-2">
+                <Users className="w-4 h-4 text-cyan-400" /> ROSTER ({players.length}/{roomConfig?.maxTanks || 6})
               </h2>
               {isHost && (
                 <button
-                  onClick={() => onAddBot('MEDIUM')}
-                  className="px-3 py-1.5 bg-indigo-950 hover:bg-indigo-900 border border-indigo-500/50 rounded-xl text-xs font-bold text-indigo-300 flex items-center gap-1.5 transition-all"
+                  onClick={() => {
+                    soundFx.playSelect();
+                    onAddBot('MEDIUM');
+                  }}
+                  className="px-2.5 py-1 arcade-btn arcade-btn-slate font-arcade text-[8px] flex items-center gap-1"
                 >
-                  <Bot className="w-3.5 h-3.5" /> + เพิ่ม AI Bot
+                  <Bot className="w-3 h-3" /> + AI BOT
                 </button>
               )}
             </div>
 
             {/* Players List */}
-            <div className="space-y-2.5 mb-6 max-h-72 overflow-y-auto pr-1">
+            <div className="space-y-2 mb-6 max-h-72 overflow-y-auto pr-1">
               {players.map((p) => {
                 const isMe = p.id === myPlayerId || p.socketId === myPlayerId;
                 const teamPreset = TEAM_PRESETS.find(t => t.id === p.teamId);
@@ -436,42 +487,42 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                 return (
                   <div
                     key={p.socketId}
-                    className={`flex items-center justify-between p-3 rounded-2xl border ${
+                    className={`flex items-center justify-between p-2.5 border-2 ${
                       isMe
-                        ? 'bg-amber-950/40 border-amber-500/60'
-                        : 'bg-slate-800/60 border-slate-700/60'
+                        ? 'border-amber-400 bg-amber-950/40'
+                        : 'border-black bg-black/60'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5">
                       <span
-                        className="w-4 h-4 rounded-full border border-white/50 shadow shrink-0"
+                        className="w-3.5 h-3.5 border border-black shadow shrink-0"
                         style={{ backgroundColor: p.tankColor }}
                       />
                       <div>
-                        <div className="font-bold text-sm text-white flex items-center gap-1.5">
+                        <div className="font-bold text-xs text-white flex items-center gap-1.5">
                           {p.name}
-                          {p.isHost && <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />}
-                          {isMe && <span className="text-xs text-amber-400 font-normal">(คุณ)</span>}
+                          {p.isHost && <Crown className="w-3 h-3 text-amber-400 fill-amber-400" />}
+                          {isMe && <span className="font-arcade text-[8px] text-amber-400">(YOU)</span>}
                         </div>
-                        <div className="text-xs text-slate-400">
+                        <div className="text-[11px] text-slate-400">
                           {isSquadMode && teamPreset && (
-                            <span className={`font-bold mr-1.5 ${teamPreset.textColor}`}>
+                            <span className={`font-arcade text-[9px] mr-1 ${teamPreset.textColor}`}>
                               [{teamPreset.name.split(' ')[0]}]
                             </span>
                           )}
-                          {p.role === 'DRIVER' ? 'พลขับรถถัง' : 'หน่วยตอบคำถาม'} • {p.tankArchetype}
+                          {p.role === 'DRIVER' ? 'พลขับ' : 'หน่วยโหวต'} • {p.tankArchetype}
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div>
                       {p.isReady ? (
-                        <span className="px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-600/50 text-xs font-bold flex items-center gap-1">
-                          <Check className="w-3 h-3" /> พร้อม
+                        <span className="px-2 py-0.5 bg-emerald-950 text-emerald-400 border border-emerald-500 font-arcade text-[8px]">
+                          READY
                         </span>
                       ) : (
-                        <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-500 text-xs font-bold">
-                          กำลังเลือก
+                        <span className="px-2 py-0.5 bg-slate-900 text-slate-500 border border-slate-700 font-arcade text-[8px]">
+                          CHOOSING
                         </span>
                       )}
                     </div>
@@ -481,40 +532,44 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
             </div>
 
             {/* Ready / Start Buttons */}
-            <div className="space-y-3 pt-3 border-t border-slate-800">
+            <div className="space-y-3 pt-3 border-t-2 border-slate-800">
               {isHost ? (
                 <button
-                  onClick={onStartGame}
-                  className="w-full py-4 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-extrabold text-base rounded-2xl shadow-[0_0_30px_rgba(245,158,11,0.4)] flex items-center justify-center gap-2 active:scale-98 transition-all"
+                  onClick={() => {
+                    soundFx.playStart();
+                    onStartGame();
+                  }}
+                  className="w-full py-4 arcade-btn arcade-btn-amber font-arcade text-xs tracking-wider flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Play className="w-5 h-5 fill-slate-950" /> เริ่มการประลองทันที (START BATTLE)
+                  <Play className="w-4 h-4 fill-black" /> START BATTLE (เริ่มเกม)
                 </button>
               ) : (
                 <button
-                  onClick={() => onSetReady(!myPlayer?.isReady)}
-                  className={`w-full py-4 font-extrabold text-base rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2 ${
-                    myPlayer?.isReady
-                      ? 'bg-slate-800 border-2 border-emerald-500 text-emerald-400'
-                      : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                  onClick={() => {
+                    soundFx.playSelect();
+                    onSetReady(!myPlayer?.isReady);
+                  }}
+                  className={`w-full py-4 arcade-btn font-arcade text-xs tracking-wider cursor-pointer ${
+                    myPlayer?.isReady ? 'arcade-btn-slate' : 'arcade-btn-emerald'
                   }`}
                 >
-                  <Check className="w-5 h-5" /> {myPlayer?.isReady ? 'ยกเลิกพร้อม' : 'กดพร้อมเล่น'}
+                  <Check className="w-4 h-4" /> {myPlayer?.isReady ? 'CANCEL READY' : 'READY (พร้อม)'}
                 </button>
               )}
 
-              <p className="text-center text-xs text-slate-500">
-                {isHost ? '🎮 หัวหน้าห้องสามารถกดเริ่มได้เมื่อมีรถถังพร้อม' : '⏳ รอหัวหน้าห้องกดเริ่มเกม...'}
+              <p className="text-center font-arcade text-[9px] text-slate-500">
+                {isHost ? '★ HOST: PRESS START WHEN READY ★' : '★ WAITING FOR HOST TO START ★'}
               </p>
             </div>
 
           </div>
 
-          {/* Quick Help Card */}
-          <div className="p-4 bg-slate-900/60 border border-slate-800 rounded-3xl text-xs text-slate-400 space-y-1.5 leading-relaxed">
-            <div className="font-bold text-amber-400">💡 กติกาโหมดทีมเวิร์ก (Squad Co-op):</div>
-            <div>• <strong className="text-amber-300">คนขับ 🎮</strong> วิ่งเก็บกล่องคำถาม <strong className="text-yellow-300">[?]</strong> บนแมพ</div>
-            <div>• คำถามจะ <strong className="text-cyan-300">เด้งไปที่หน้าจอของผู้ช่วยตอบคำถาม 🧠 เท่านั้น</strong></div>
-            <div>• เมื่อผู้ช่วยตอบถูก กระสุนจะถูกส่งเข้าตัวรถถังของคนขับทันที! 🚀</div>
+          {/* Quick Rules */}
+          <div className="pixel-box bg-[#151a2d] p-3 text-xs text-slate-400 space-y-1 font-thai leading-relaxed">
+            <div className="font-bold text-amber-400 font-arcade text-[10px]">★ MISSION INTEL:</div>
+            <div>• <strong className="text-amber-300">คนขับ 🎮</strong> วิ่งชนกล่อง <strong className="text-yellow-300">[?]</strong> ในสนาม</div>
+            <div>• คำถามจะ <strong className="text-cyan-300">เด้งเฉพาะหน้าจอผู้ช่วยตอบ 🧠</strong> เพื่อโหวตเสียงส่วนมาก (3-5 วิ)</div>
+            <div>• เมื่อทีมโหวตถูก กระสุนจะส่งให้คนขับทันที! 🚀</div>
           </div>
 
         </div>
