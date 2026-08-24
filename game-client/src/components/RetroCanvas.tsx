@@ -102,7 +102,7 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
         for (let r = 0; r < curMap.length; r++) {
           for (let c = 0; c < curMap[r].length; c++) {
             if (curMap[r][c] === 'BUSH') {
-              drawBushTile(ctx, c * TILE_SIZE, r * TILE_SIZE, tick);
+              drawBushTile(ctx, c * TILE_SIZE, r * TILE_SIZE);
             }
           }
         }
@@ -171,19 +171,18 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
     ctx.fillRect(x + 17, y + 17, 2, 13);
   };
 
-  const drawBushTile = (ctx: CanvasRenderingContext2D, x: number, y: number, tick: number) => {
+  const drawBushTile = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
     ctx.fillStyle = '#15803d';
     ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 
-    // Foliage pattern
+    // Static crisp foliage pattern (no flashing)
     ctx.fillStyle = '#22c55e';
-    for (let i = 0; i < 4; i++) {
-      for (let j = 0; j < 4; j++) {
-        if ((i + j + (tick >> 4)) % 2 === 0) {
-          ctx.fillRect(x + i * 8 + 1, y + j * 8 + 1, 6, 6);
-        }
-      }
-    }
+    ctx.fillRect(x + 2, y + 2, 6, 6);
+    ctx.fillRect(x + 18, y + 2, 6, 6);
+    ctx.fillRect(x + 10, y + 10, 6, 6);
+    ctx.fillRect(x + 2, y + 18, 6, 6);
+    ctx.fillRect(x + 18, y + 18, 6, 6);
+
     ctx.fillStyle = '#14532d';
     ctx.fillRect(x + 4, y + 4, 3, 3);
     ctx.fillRect(x + 20, y + 12, 3, 3);
