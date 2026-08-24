@@ -1,0 +1,228 @@
+# ─────────────────────────────────────────────────
+# Identity for the pod itself, separate from the identity of whoever is
+# logged in
+# ─────────────────────────────────────────────────
+#  Every pod in this namespace used to run as the `default` ServiceAccount, so
+#  the API server saw one caller where there were five. Kubernetes' own audit
+#  log could say "a pod in sudhood did this" and nothing more precise.
+#
+#  This grants no permissions and is not meant to. `default` has none either —
+#  only the self-review verbs every authenticated identity gets — so nothing
+#  about what these pods may do changes. What changes is that they are now
+#  distinguishable.
+#
+#  Two things become possible because of that, and neither is possible without
+#  it: a NetworkPolicy written per service rather than per namespace (WBS
+#  4.2.5), and service-to-service calls that prove who is calling instead of
+#  presenting a key every caller shares.
+# ─────────────────────────────────────────────────
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: m1-curriculum
+  labels:
+    app.kubernetes.io/name: m1-curriculum
+    app.kubernetes.io/part-of: sudhood
+---
+# ─────────────────────────────────────────────────
+# M1 Curriculum — programs, courses, CLO/PLO mapping
+# ─────────────────────────────────────────────────
+#  Someone else's module. This file stands it up on the cluster and does not
+#  reach into its code: the image is built from
+#  use-docker-compose/m1-curriculum-service/ exactly as its owner maintains it.
+#
+#  ✅ Policy decides here now. Its owner wrote m1-curriculum-service/policy/
+#  (package m1.authz) and it reached main with the Leo branch merge; this file
+#  gained the copy-policy init container and the opa sidecar to match — the same
+#  two pieces m0-identity.yaml carries, for the same reasons.
+#
+#  Checked before wiring rather than after: `opa check` compiles the policy, and
+#  the 15 cases in the module's own test_authz.py all pass when replayed against
+#  data.m1.authz.allow. The case worth naming is "resource thesis -> false":
+#  M1's engine refuses to answer for a noun that belongs to M9, which is the
+#  thing a shared engine could not do.
+#
+#  🔴 Kept because the reasoning still applies to M9: before this, M1 defaulted
+#  OPA_URL to the shared engine at http://opa:8181, which no longer exists on
+#  either side, and had no policy/ to hand a sidecar. Every endpoint behind an
+#  OPA check answered 403 — correct fail-closed behaviour, not a porting bug.
+#  M9 is in exactly that state today; the work order is in
+#  m9-service/POLICY_TODO.md.
+#
+#  Still not worked around from this side. Writing a policy for someone else's
+#  module would mean guessing which resources it means to protect, and a guess
+#  that returns `allow` is worse than a visible 403.
+# ─────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: m1-curriculum
+  labels:
+    app.kubernetes.io/name: m1-curriculum
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: m1-curriculum
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: m1-curriculum
+  labels:
+    app.kubernetes.io/name: m1-curriculum
+spec:
+  # One replica. Two would be safe — M1's Alembic setup takes the same advisory
+  # lock M0's does — but there is nothing to prove by scaling a module whose
+  # authorization path is not connected yet.
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: m1-curriculum
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: m1-curriculum
+    spec:
+      # Matches the uid the module's Dockerfile creates (`useradd --uid 10011
+      # m1svc`). Applies to the OPA sidecar too, which only ever reads a file.
+      # Named rather than inherited. The default ServiceAccount is shared
+      # by every pod that does not ask for one, which makes it useless as an
+      # identity.
+      serviceAccountName: m1-curriculum
+      securityContext:
+        runAsUser: 10011
+        runAsGroup: 10011
+      volumes:
+        # Written by copy-policy, read by the opa container. emptyDir rather than
+        # a ConfigMap: a ConfigMap volume materialises as symlinks through a
+        # `..data` directory, and OPA walking that tree finds the same authz.rego
+        # three times and refuses to start with "multiple default rules found".
+        - name: policy
+          emptyDir: {}
+      initContainers:
+        # Lifts policy/ out of the image so the sidecar can read it without the
+        # policy having to exist anywhere but inside the image it belongs to.
+        - name: copy-policy
+          image: localhost:5000/sudhood/m1-curriculum:local
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "cp /app/policy/*.rego /policy/ && ls -l /policy"]
+          volumeMounts:
+            - name: policy
+              mountPath: /policy
+        - name: wait-for-postgres
+          image: postgres:16
+          command:
+            - sh
+            - -c
+            - until pg_isready -h postgres -p 5432 -U "$POSTGRES_USER"; do echo "waiting for postgres..."; sleep 2; done
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: sudhood-config
+                  key: POSTGRES_USER
+
+        # The migrate half of the module's own entrypoint.sh, minus the serve
+        # step — the same split m0-identity uses, and for the same reason: a
+        # failed migration should show up as Init:Error on a pod that never
+        # served a request, not as a CrashLoopBackOff that reads like an
+        # application bug.
+        #
+        # `alembic check` is the half `upgrade head` cannot do: it catches a
+        # model changed without a migration written for it, which is the drift
+        # this module's BUGS.md L3 records.
+        - name: migrate
+          image: localhost:5000/sudhood/m1-curriculum:local
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "alembic upgrade head && alembic check"]
+          envFrom:
+            - configMapRef:
+                name: sudhood-config
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: M1_DATABASE_URL
+            - name: DB_SCHEMA
+              value: "curriculum"
+      containers:
+        - name: m1-curriculum
+          image: localhost:5000/sudhood/m1-curriculum:local
+          imagePullPolicy: IfNotPresent
+          # Skips entrypoint.sh — the migration already ran above.
+          command: ["python", "main.py"]
+          ports:
+            - name: http
+              containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: sudhood-config
+          env:
+            - name: SERVICE_PORT
+              value: "8000"
+            # Connects as m1_service, whose grants stop at the curriculum
+            # schema. Created by postgres/init/02-service-users.sh.
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: M1_DATABASE_URL
+            - name: DB_SCHEMA
+              value: "curriculum"
+            # The sidecar is in this pod, so this is a loopback call that never
+            # leaves it. `env` beats `envFrom`, which is what makes one shared
+            # ConfigMap workable across every service.
+            - name: OPA_URL
+              value: "http://localhost:8181"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+
+        - name: opa
+          image: openpolicyagent/opa:latest
+          args:
+            - run
+            - --server
+            - --addr=127.0.0.1:8181
+            - --log-level=info
+            # A directory, so a policy that does not compile stops OPA from
+            # starting at all. That is the behaviour worth having: a container
+            # that refuses to come up is visible, whereas one serving an empty
+            # policy answers false to everything and reads like a permissions bug.
+            - /policy
+          volumeMounts:
+            - name: policy
+              mountPath: /policy
+              readOnly: true
+          # No probe, deliberately — the same trap m0-identity.yaml documents at
+          # length: the kubelet probes from outside the pod's network namespace,
+          # so it cannot reach a listener bound to 127.0.0.1, and `host:
+          # 127.0.0.1` points it at the *node's* loopback instead. That
+          # misreading had m0's sidecar killed every 40 seconds. An exec probe is
+          # not available either: this image is distroless.
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              memory: 128Mi

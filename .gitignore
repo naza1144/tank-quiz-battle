@@ -1,0 +1,38 @@
+# Node modules
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+**/dist/
+build/
+**/build/
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+*.pem
+!keys/token-service.pem
+
+# Logs and runtime
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Tar archives
+*.tar
+*.tar.gz
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# TypeScript cache
+*.tsbuildinfo

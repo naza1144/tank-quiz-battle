@@ -1,0 +1,103 @@
+# ─────────────────────────────────────────────────
+# pgAdmin — database administration
+# ─────────────────────────────────────────────────
+#  Convenience only; nothing in the platform depends on it. Reached through
+#  scripts/port-forward.sh rather than an IngressRoute — a database console
+#  should not be one misconfigured route away from being public.
+#
+#  Connect it to Postgres with host `postgres`, port 5432, user/password from
+#  your .env.
+# ─────────────────────────────────────────────────
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pgadmin-data
+  labels:
+    app.kubernetes.io/name: pgadmin
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgadmin
+  labels:
+    app.kubernetes.io/name: pgadmin
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: pgadmin
+  ports:
+    - name: http
+      port: 5050
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgadmin
+  labels:
+    app.kubernetes.io/name: pgadmin
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pgadmin
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pgadmin
+    spec:
+      securityContext:
+        # The image runs as uid 5050 and writes its session store and server
+        # list into /var/lib/pgadmin. local-path hands over a root-owned
+        # directory, so without fsGroup the container exits on startup.
+        fsGroup: 5050
+      containers:
+        - name: pgadmin
+          image: dpage/pgadmin4:latest
+          ports:
+            - name: http
+              containerPort: 5050
+          env:
+            - name: PGADMIN_DEFAULT_EMAIL
+              valueFrom:
+                configMapKeyRef:
+                  name: sudhood-config
+                  key: PGADMIN_EMAIL
+            - name: PGADMIN_DEFAULT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: PGADMIN_PASSWORD
+            # Default is 80, which a non-root container cannot bind. Moving the
+            # listener up is the supported way to run this image unprivileged.
+            - name: PGADMIN_LISTEN_PORT
+              value: "5050"
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/pgadmin
+          readinessProbe:
+            httpGet:
+              path: /misc/ping
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pgadmin-data

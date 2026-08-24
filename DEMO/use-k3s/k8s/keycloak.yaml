@@ -1,0 +1,198 @@
+# ─────────────────────────────────────────────────
+# Keycloak — Identity Broker
+# ─────────────────────────────────────────────────
+#  Redirects the user to Google, receives the confirmed identity back, and
+#  keeps the profile. Token Service is an OIDC client of this realm — but
+#  nothing Keycloak signs is trusted by any Sudhood service. Its ID token is
+#  consumed once, at login, and discarded.
+#
+#  Published on the host at :8080, the same way the compose stack did with
+#  `ports: "8080:8080"`. This is not optional convenience: the login flow is a
+#  browser redirect to Keycloak, so if the browser cannot reach it, login cannot
+#  happen at all. An earlier version of this file made it ClusterIP and left the
+#  browser to a manual `kubectl port-forward` — which turned a working flow into
+#  one that failed with ERR_CONNECTION_REFUSED whenever that command was not
+#  running. Matching compose is the right call.
+#
+#  Not routed through Traefik either. KC_HOSTNAME is what Keycloak stamps into
+#  `iss` and into the redirect it hands Google; putting it behind the gateway
+#  would change that address and mean re-registering the URI in Google Cloud
+#  Console for no gain.
+#
+#  Port 9000 (health/metrics) is deliberately absent from the Service. The
+#  probes address the container port by name, so they need no Service, and the
+#  management interface has no business being reachable from the host.
+# ─────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  labels:
+    app.kubernetes.io/name: keycloak
+spec:
+  # ClusterIP, not LoadBalancer. It used to bind :8080 on the node so a browser
+  # could reach Keycloak directly, the way the compose stack published the port.
+  # Now Traefik terminates TLS and routes the auth hostname here, so that door
+  # would be a second, plain-http entrance to a server that tells every client
+  # it lives at https — both a downgrade path and a source of `iss` mismatches
+  # that are miserable to debug.
+  #
+  # Reaching the admin console without a public hostname configured:
+  #     kubectl -n sudhood port-forward svc/keycloak 8080:8080
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: keycloak
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  labels:
+    app.kubernetes.io/name: keycloak
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: keycloak
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: keycloak
+    spec:
+      initContainers:
+        # Keycloak does not retry a failed database connection at startup — it
+        # exits. A crash loop would eventually succeed, but it buries the real
+        # error in restart noise, so wait for Postgres to actually answer a
+        # query first. pg_isready rather than a port check: the port opens
+        # well before the server will serve.
+        - name: wait-for-postgres
+          image: postgres:16
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h postgres -p 5432 -U "$POSTGRES_USER" -q; do
+                echo "waiting for postgres..."
+                sleep 2
+              done
+              echo "postgres is ready"
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: sudhood-config
+                  key: POSTGRES_USER
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:26.0
+          args:
+            # start-dev: no TLS, no hostname strictness, schema auto-created.
+            # Switch to `start` with a real hostname and certificate before
+            # this is anything but a development cluster.
+            - start-dev
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: management
+              containerPort: 9000
+          env:
+            - name: KC_DB
+              value: postgres
+            - name: KC_DB_URL
+              value: jdbc:postgresql://postgres:5432/keycloak
+            - name: KC_DB_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: sudhood-config
+                  key: POSTGRES_USER
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: POSTGRES_PASSWORD
+            - name: KC_HOSTNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: sudhood-config
+                  key: KC_HOSTNAME
+            - name: KC_HTTP_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: sudhood-config
+                  key: KC_HTTP_PORT
+            # TLS ends at Traefik, so the request Keycloak sees arrives as plain
+            # http on 8080. Without this it believes that and hands the browser
+            # http:// redirects mid-login, which the gateway bounces back to
+            # https — a loop that presents as "login just spins". `xforwarded`
+            # tells it to read the real scheme and host from the X-Forwarded-*
+            # headers Traefik sets.
+            #
+            # Safe only because nothing but Traefik can reach this pod: those
+            # headers are trusted, and a client able to set them itself could
+            # forge the origin of every login.
+            - name: KC_PROXY_HEADERS
+              value: "xforwarded"
+            - name: KC_HTTP_ENABLED
+              value: "true"
+            # Publishes /health/* on the management port (9000), which is what
+            # the probes below use. Without this they 404 and the pod never
+            # becomes ready.
+            - name: KC_HEALTH_ENABLED
+              value: "true"
+            # Force the JVM onto IPv4 for outbound connections.
+            #
+            # accounts.google.com resolves to an AAAA record from inside the
+            # cluster, but this cluster's pod network has no IPv6 egress — a
+            # pod can reach Google over IPv4 and not at all over IPv6. curl
+            # hides that by falling back; the JVM does not, so Keycloak's call
+            # to Google simply fails and the user gets Keycloak's own
+            # "Could not send authentication request to identity provider"
+            # page, which says nothing about why.
+            #
+            # Remove this the day the cluster has working IPv6 egress. Until
+            # then it is the difference between Google login working and not.
+            - name: JAVA_OPTS_APPEND
+              value: "-Djava.net.preferIPv4Stack=true"
+            - name: KEYCLOAK_ADMIN
+              valueFrom:
+                configMapKeyRef:
+                  name: sudhood-config
+                  key: KEYCLOAK_ADMIN
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: KEYCLOAK_ADMIN_PASSWORD
+          startupProbe:
+            httpGet:
+              path: /health/started
+              port: management
+            # Keycloak takes 40s or so on a cold start while it builds the
+            # schema. A startupProbe absorbs that without forcing the liveness
+            # probe's threshold to be uselessly loose afterwards.
+            periodSeconds: 5
+            failureThreshold: 40
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: management
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: management
+            periodSeconds: 20
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              memory: 1536Mi

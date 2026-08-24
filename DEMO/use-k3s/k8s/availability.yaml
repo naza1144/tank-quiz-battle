@@ -1,0 +1,191 @@
+# ─────────────────────────────────────────────────
+# Availability — disruption budgets and autoscaling
+# ─────────────────────────────────────────────────
+#  Two different mechanisms that get confused with each other:
+#
+#  * A pod that *dies* is restarted by the kubelet because its liveness probe
+#    failed. That is already configured per-Deployment and needs nothing here.
+#    It is also what "self-healing" usually means.
+#
+#  * A pod that is *overloaded* is answered by adding more pods, which is what
+#    the HorizontalPodAutoscalers below do. Load is not a failure, so no probe
+#    fires and no restart happens — without an HPA the service simply gets
+#    slower until it starts failing.
+#
+#  * A pod that is *evicted* — node drained, cluster upgraded — is covered by
+#    the PodDisruptionBudgets, which stop Kubernetes taking the last replica
+#    away voluntarily.
+#
+#  All three are needed for "stays up during registration week"; none of them
+#  substitutes for another.
+#
+#  The HPAs read CPU and memory from metrics-server, which k3s installs by
+#  default. Check it is alive before expecting these to work:
+#      kubectl top pods -n sudhood
+# ─────────────────────────────────────────────────
+
+# ── PodDisruptionBudgets ─────────────────────────
+#  minAvailable: 1 rather than a percentage. With two replicas a 50% budget
+#  reads the same, but it stops meaning what we want the moment someone scales
+#  to three and Kubernetes decides two may go at once.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: token-service
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: token-service
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: m0-identity
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: m0-identity
+---
+# M10 serves the console as well as the API, so keeping one replica up during a
+# drain also keeps the screen you would be watching during that drain alive.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: m10-platform
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: m10-platform
+---
+# ── HorizontalPodAutoscalers ─────────────────────
+#  minReplicas matches what the Deployments ask for, so the HPA never scales
+#  the login path below two. Setting it to 1 here would quietly undo the
+#  Deployment's replicas: 2 the first time traffic went quiet.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: token-service
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: token-service
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    # 80% of the *request*, not of the node. token-service asks for 100m, so
+    # this fires at roughly 80 millicores per pod — a tenth of one core. That
+    # sounds low until you remember the request is what the scheduler reserved;
+    # a pod steadily using more than it asked for is one the cluster cannot
+    # place a neighbour beside.
+    #
+    # Not 95%: signing a JWT is CPU-bound and bursty, a new pod needs ~10s to
+    # pass its readiness probe, and metrics-server reports on a ~15s delay. By
+    # the time an average reaches 95% the slowest requests have been queuing for
+    # a while. 80% leaves room to react before anyone notices.
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleUp:
+      # React fast. Under a registration surge, waiting the default 5 minutes to
+      # confirm the load is real means the surge is over — or the service is.
+      stabilizationWindowSeconds: 30
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 30
+    scaleDown:
+      # Come down slowly. Traffic that dipped for a minute usually comes back,
+      # and shedding pods just to re-add them makes every graph unreadable.
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 60
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: m0-identity
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: m0-identity
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 30
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 30
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 60
+---
+# M10's own API is still all stubs, so it costs almost nothing to run or scale.
+# It does serve the console, though, which means these replicas are what keeps
+# the screen up while the other two services are being scaled or restarted —
+# a console that goes dark during the event you are watching is no console.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: m10-platform
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: m10-platform
+  minReplicas: 2
+  maxReplicas: 4
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 30
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 30
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 60

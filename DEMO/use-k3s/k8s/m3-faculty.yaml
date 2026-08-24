@@ -1,0 +1,215 @@
+# ─────────────────────────────────────────────────
+# M3 Faculty — professional data about instructors
+# ─────────────────────────────────────────────────
+#  Academic rank, qualifications, expertise tags. FN-M3-001/002/003.
+#
+#  Owns the `faculty` schema and nothing else. Names, emails and avatars belong
+#  to M0 and are fetched over HTTP rather than copied here — m3_service has no
+#  grant on `identity`, which is what stops the copy from being the easy option.
+#
+#  Modelled on m1-curriculum.yaml. The two are the same shape on purpose: a new
+#  module should not be a new set of decisions about probes, uids and init
+#  ordering.
+#
+#  The ServiceAccount below grants no permissions. `default` has none either —
+#  what it buys is that the API server, and a future NetworkPolicy, can tell
+#  this pod apart from the others.
+# ─────────────────────────────────────────────────
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: m3-faculty
+  labels:
+    app.kubernetes.io/name: m3-faculty
+    app.kubernetes.io/part-of: sudhood
+---
+# ─────────────────────────────────────────────────
+# Deployment
+# ─────────────────────────────────────────────────
+#  Its own policy engine, not a shared one. `policy/authz.rego` declares
+#  `package m3.authz` with `default allow := false`, and the module's
+#  test_authz.py covers 21 cases against it.
+#
+#  The sidecar is the reason there is a copy-policy init container and an
+#  emptyDir called `policy` below: OPA loads from a directory, and the
+#  directory has to come out of the image the policy ships in.
+#
+#  Two pieces, both required, and each useless alone — OPA_URL pointing at a
+#  sidecar that is not there means every guarded endpoint answers 403. That is
+#  correct fail-closed behaviour and it reads exactly like a porting bug, which
+#  is why it is worth naming here.
+# ─────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: m3-faculty
+  labels:
+    app.kubernetes.io/name: m3-faculty
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: m3-faculty
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: m3-faculty
+  labels:
+    app.kubernetes.io/name: m3-faculty
+spec:
+  # One replica while this module is new. Alembic takes an advisory lock, so a
+  # second would be safe — but a replica count is a claim about load, and there
+  # is none yet. Raise it when there is traffic to point at.
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: m3-faculty
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: m3-faculty
+    spec:
+      # Matches the uid the module's Dockerfile creates (`useradd --uid 10031
+      # m3svc`). Applies to the OPA sidecar too, which only ever reads a file.
+      # Named rather than inherited. The default ServiceAccount is shared
+      # by every pod that does not ask for one, which makes it useless as an
+      # identity.
+      serviceAccountName: m3-faculty
+      securityContext:
+        runAsUser: 10031
+        runAsGroup: 10031
+      volumes:
+        # Written by copy-policy, read by the opa container. emptyDir rather than
+        # a ConfigMap: a ConfigMap volume materialises as symlinks through a
+        # `..data` directory, and OPA walking that tree finds the same authz.rego
+        # three times and refuses to start with "multiple default rules found".
+        - name: policy
+          emptyDir: {}
+      initContainers:
+        # Lifts policy/ out of the image so the sidecar can read it without the
+        # policy having to exist anywhere but inside the image it belongs to.
+        - name: copy-policy
+          image: localhost:5000/sudhood/m3-faculty:local
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "cp /app/policy/*.rego /policy/ && ls -l /policy"]
+          volumeMounts:
+            - name: policy
+              mountPath: /policy
+        - name: wait-for-postgres
+          image: postgres:16
+          command:
+            - sh
+            - -c
+            - until pg_isready -h postgres -p 5432 -U "$POSTGRES_USER"; do echo "waiting for postgres..."; sleep 2; done
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: sudhood-config
+                  key: POSTGRES_USER
+
+        # The migrate half of the module's own entrypoint.sh, minus the serve
+        # step — the same split m0-identity uses, and for the same reason: a
+        # failed migration should show up as Init:Error on a pod that never
+        # served a request, not as a CrashLoopBackOff that reads like an
+        # application bug.
+        #
+        # `alembic check` is the half `upgrade head` cannot do: it catches a
+        # model edited without a migration written for it. That drift is silent
+        # otherwise — the service starts, and the first query against the missing
+        # column is where it surfaces.
+        - name: migrate
+          image: localhost:5000/sudhood/m3-faculty:local
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "alembic upgrade head && alembic check"]
+          envFrom:
+            - configMapRef:
+                name: sudhood-config
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: M3_DATABASE_URL
+            - name: DB_SCHEMA
+              value: "faculty"
+      containers:
+        - name: m3-faculty
+          image: localhost:5000/sudhood/m3-faculty:local
+          imagePullPolicy: IfNotPresent
+          # Skips entrypoint.sh — the migration already ran above.
+          command: ["python", "main.py"]
+          ports:
+            - name: http
+              containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: sudhood-config
+          env:
+            - name: SERVICE_PORT
+              value: "8000"
+            # Connects as m3_service, whose grants stop at the faculty
+            # schema. Created by postgres/init/02-service-users.sh.
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: M3_DATABASE_URL
+            - name: DB_SCHEMA
+              value: "faculty"
+            # The sidecar is in this pod, so this is a loopback call that never
+            # leaves it. `env` beats `envFrom`, which is what makes one shared
+            # ConfigMap workable across every service.
+            - name: OPA_URL
+              value: "http://localhost:8181"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+
+        - name: opa
+          image: openpolicyagent/opa:latest
+          args:
+            - run
+            - --server
+            - --addr=127.0.0.1:8181
+            - --log-level=info
+            # A directory, so a policy that does not compile stops OPA from
+            # starting at all. That is the behaviour worth having: a container
+            # that refuses to come up is visible, whereas one serving an empty
+            # policy answers false to everything and reads like a permissions bug.
+            - /policy
+          volumeMounts:
+            - name: policy
+              mountPath: /policy
+              readOnly: true
+          # No probe, deliberately — the same trap m0-identity.yaml documents at
+          # length: the kubelet probes from outside the pod's network namespace,
+          # so it cannot reach a listener bound to 127.0.0.1, and `host:
+          # 127.0.0.1` points it at the *node's* loopback instead. That
+          # misreading had m0's sidecar killed every 40 seconds. An exec probe is
+          # not available either: this image is distroless.
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              memory: 128Mi

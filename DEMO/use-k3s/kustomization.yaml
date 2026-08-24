@@ -1,0 +1,95 @@
+# ─────────────────────────────────────────────────
+# Kustomization — the whole Sudhood stack on k3s
+# ─────────────────────────────────────────────────
+#  Apply with:  kubectl apply -k .
+#  Preview with: kubectl kustomize .          (renders without touching the cluster)
+#
+#  This file sits at the folder root rather than inside k8s/ for one concrete
+#  reason: kustomize refuses to read files above its own directory, and the OPA
+#  policy and the Postgres init script live next to the service code. Keeping
+#  the root here means those stay real files — lintable, testable, identical to
+#  the ones the compose stack mounts — instead of shell and Rego transcribed
+#  into YAML string blocks.
+#
+#  Secrets are not here. They are generated from .env by scripts/create-secrets.sh
+#  so nothing secret ever lands in a committed file. See k8s/config.yaml for the
+#  split between the two.
+# ─────────────────────────────────────────────────
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: sudhood
+
+resources:
+  # Order is irrelevant to kustomize — the API server sorts it out — but this
+  # is roughly dependency order, which makes the list easier to read.
+  - k8s/namespace.yaml
+  - k8s/config.yaml
+  - k8s/postgres.yaml
+  - k8s/redis.yaml
+  - k8s/keycloak.yaml
+  # No k8s/opa.yaml. The shared engine is gone — each service carries its own
+  # OPA as a sidecar in its own pod, loaded from the policy that ships in its
+  # own image. Nothing here to apply.
+  - k8s/pgadmin.yaml
+  # Object storage and the event bus. Both carry a PVC and a bootstrap Job.
+  - k8s/minio.yaml
+  - k8s/nats.yaml
+  - k8s/token-service.yaml
+  - k8s/m0-identity.yaml
+  - k8s/m10-rbac.yaml
+  # Serves both the platform API and the React console at /console — there is
+  # no separate frontend Deployment.
+  - k8s/m10-platform.yaml
+  # Other people's modules, stood up here but not maintained here. Both have
+  # their policy engine disconnected — the file headers say why.
+  - k8s/m1-curriculum.yaml
+  - k8s/m3-faculty.yaml
+  - k8s/m9-thesis.yaml
+  - k8s/traefik/middlewares.yaml
+  - k8s/traefik/ingressroutes.yaml
+  # Disruption budgets and autoscalers. Separate from the Deployments so the
+  # availability policy for the whole stack can be read in one file.
+  - k8s/availability.yaml
+  # ServiceMonitors, telling the Prometheus in the monitoring namespace that
+  # these services exist.
+  - k8s/observability.yaml
+
+# k8s/gateway/traefik-ha.yaml is deliberately absent. It targets kube-system,
+# and the `namespace: sudhood` above would rewrite it into the wrong namespace
+# where the API server would accept it and nothing would ever read it.
+# Apply it separately:  kubectl apply -f k8s/gateway/traefik-ha.yaml
+
+configMapGenerator:
+  # The name suffix hash is left on deliberately: editing a script changes the
+  # ConfigMap name, which changes the pod spec, which rolls whatever mounts it.
+  # Turn it off and an edit applies silently to nothing until someone remembers
+  # to restart the pod.
+  #
+  # These directories are this folder's own copies. The identical files also
+  # exist under ../use-docker-compose/ and nothing keeps the two in step — see
+  # the drift check in the header of scripts/build-images.sh.
+  #
+  # There is no opa-policies entry any more. The shared engine is gone; policy
+  # now travels inside each service image and is lifted into an emptyDir by a
+  # copy-policy init container, which also retired the ConfigMap `..data`
+  # symlink bug that had OPA crash-looping on "multiple default rules found".
+
+  # Only read by Postgres on first initialisation of an empty data directory.
+  # Editing it after the volume exists changes nothing until the PVC is deleted.
+  - name: postgres-init
+    files:
+      - 01-create-databases.sh=postgres/init/01-create-databases.sh
+      # Creates m0_service / m1_service / m9_service and grants each one its own
+      # schema. Without it every M*_DATABASE_URL in the Secret names a role that
+      # does not exist and the migrate init container fails at connect time.
+      - 02-service-users.sh=postgres/init/02-service-users.sh
+  # Run by the bootstrap Jobs in k8s/minio.yaml and k8s/nats.yaml. Unlike the
+  # Postgres pair these are not tied to an empty volume — both are idempotent
+  # and re-run on every deploy.
+  - name: minio-init
+    files:
+      - setup-buckets.sh=minio/setup-buckets.sh
+  - name: nats-init
+    files:
+      - init-streams.sh=nats/init-streams.sh

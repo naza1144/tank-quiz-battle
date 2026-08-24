@@ -1,0 +1,150 @@
+# ─────────────────────────────────────────────────
+# ConfigMap — non-secret configuration
+# ─────────────────────────────────────────────────
+#  The split between this file and the Secret is deliberate: anything here is
+#  safe to read in a `kubectl get -o yaml`, safe to commit, and safe to paste
+#  into a bug report. Passwords, the OIDC client secret, and the internal API
+#  key are not, so they come from `sudhood-secrets`, which is generated from
+#  your .env by scripts/create-secrets.sh and never committed.
+#
+#  In-cluster service names are identical to the old compose container names,
+#  so these values carry over from the compose stack unchanged.
+#
+#  After editing this file:  kubectl apply -k .  &&  scripts/restart.sh
+#  A ConfigMap change does not restart pods on its own.
+# ─────────────────────────────────────────────────
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sudhood-config
+  labels:
+    app.kubernetes.io/part-of: sudhood
+data:
+  # ── PostgreSQL ──
+  # One instance, two databases: sudhood (application) + keycloak (Keycloak's
+  # own realm/user tables). See postgres.yaml for how the second one is created.
+  POSTGRES_USER: "sudhood"
+  POSTGRES_DB: "sudhood"
+
+  # ── pgAdmin ──
+  PGADMIN_EMAIL: "admin@localhost.com"
+
+  # ── Keycloak ──
+  # KC_HOSTNAME is what Keycloak stamps into the `iss` claim and into every
+  # redirect it builds, so it must be the address the *browser* uses — not the
+  # in-cluster service name. Reached through `scripts/port-forward.sh`, which
+  # publishes it on 127.0.0.1:8080.
+  #
+  # `localhost`, matching the compose stack — because this string ends up in the
+  # redirect Keycloak hands Google, and the Google OAuth client already has
+  # http://localhost:8080/realms/sudhood/broker/google/endpoint registered.
+  # Changing it to 127.0.0.1 would mean re-registering there for no benefit.
+  #
+  # One prerequisite, and it is the reason this looked broken for a while:
+  # `localhost` resolves to ::1 as well as 127.0.0.1, browsers try ::1 first
+  # (RFC 6724), and k3s' Traefik binds IPv4 only — so Chrome gets
+  # ERR_CONNECTION_REFUSED and does not fall back, while curl does. Comment the
+  # `::1 localhost` line out of /etc/hosts once per machine:
+  #
+  #     sudo sed -i 's/^::1\s*localhost/# &/' /etc/hosts
+  KEYCLOAK_ADMIN: "admin"
+  KC_HOSTNAME: "localhost"
+  KC_HTTP_PORT: "8080"
+
+  # ── Token Service → Keycloak (OIDC) ──
+  # Two issuer URLs, because they genuinely differ. Pods reach Keycloak over
+  # cluster DNS; the browser is redirected to the port-forwarded address, and
+  # that is the one Keycloak signs into `iss`.
+  OIDC_ISSUER_URL: "http://keycloak:8080/realms/sudhood"
+  # Must match byte-for-byte what Keycloak puts in `iss`, which follows
+  # KC_HOSTNAME above. Change one of these and the other has to move with it.
+  OIDC_PUBLIC_ISSUER_URL: "http://localhost:8080/realms/sudhood"
+  OIDC_CLIENT_ID: "sudhood-token-service"
+  # Traefik owns port 80 in the cluster and routes /auth/* to token-service, so
+  # the callback arrives through the gateway. This URI is registered in
+  # keycloak/realm-export.json, which lists the 127.0.0.1 spelling too so either
+  # address works.
+  OIDC_REDIRECT_URI: "http://localhost/auth/callback"
+
+  # ── Membership + token policy ──
+  # Authenticating proves identity, not membership. Leaving the domain empty
+  # would let any Google account in the world reach the account lookup, so the
+  # service refuses to start without it.
+  ALLOWED_EMAIL_DOMAIN: "ubu.ac.th"
+  # Both spellings listed. A CORS origin is compared as an exact string, so a
+  # frontend served from 127.0.0.1 and one served from localhost are two
+  # different origins even though they are the same machine.
+  ALLOWED_ORIGINS: "http://127.0.0.1:3000,http://127.0.0.1:5173,http://localhost:3000,http://localhost:5173"
+  # Where /auth/callback sends the browser once login succeeds. Empty would make
+  # it return the token as raw JSON, which meant copying it out of the page by
+  # hand — fine for a curl test, miserable as a user experience.
+  #
+  # The token rides back in the URL *fragment*, not the query string. Fragments
+  # are never sent to a server, so the access token stays out of gateway access
+  # logs, out of Referer headers, and out of browser history sent upstream. The
+  # page reads it, stores it, and strips it from the address bar.
+  #
+  # Points at the hub rather than at an app. There is one destination available
+  # — /auth/login takes no return path, because the login state holds a nonce
+  # and a PKCE verifier and nothing else — so naming an app here meant every
+  # other app was unreachable after signing in. The hub is that one destination,
+  # and it hands the token to whichever app gets picked. Served by M10 at /hub.
+  LOGIN_SUCCESS_REDIRECT: "http://localhost/hub/"
+
+  # Access tokens are short on purpose: revocation works by refusing to mint a
+  # new one, so this is the worst-case delay between "this person lost access"
+  # and "the platform stops honouring their token".
+  TOKEN_EXPIRY_SECONDS: "900"
+  REFRESH_EXPIRY_SECONDS: "86400"
+
+  JWT_ISSUER: "sudhood-token-service"
+  JWT_AUDIENCE: "sudhood-services"
+  # Tokens that name a service rather than a person. A different audience from
+  # JWT_AUDIENCE is what stops a service token being accepted at a user
+  # endpoint — every user-facing verifier passes JWT_AUDIENCE to jwt.decode and
+  # PyJWT refuses anything else. Set here rather than defaulted in three
+  # separate config.py files, because the two values only work while all three
+  # services agree on them.
+  SERVICE_TOKEN_AUDIENCE: "sudhood-internal"
+  JWT_KEYS_DIR: "/keys"
+  # Empty = use the single key found in JWT_KEYS_DIR. During a rotation this
+  # pins which key signs, while both stay published for verification.
+  JWT_ACTIVE_KID: ""
+
+  # The refresh token is delivered as an httpOnly cookie. A Secure cookie is
+  # never sent over plain HTTP, so on this cluster — which has no TLS yet —
+  # leaving the default on would silently break refresh. Turn it back on the
+  # moment a certificate is in place.
+  COOKIE_SECURE: "false"
+
+  # ── Service-to-service ──
+  M0_INTERNAL_URL: "http://m0-identity:8000"
+  TOKEN_SERVICE_URL: "http://token-service:8100"
+
+  # No OPA_URL here on purpose. There used to be one, pointing at a shared
+  # engine, and a single shared variable name is exactly what kept every service
+  # resolving to that engine long after the design said each should own its own.
+  # Each Deployment now sets OPA_URL to http://localhost:8181 in its own `env`,
+  # naming the sidecar in its own pod. A service that forgets gets no default and
+  # fails at the first policy query instead of quietly asking someone else's
+  # engine about resources it has never heard of.
+  # See use-docker-compose/POLICY_CONVENTION.md.
+
+  # ── Development switches ──
+  # Creates three demo accounts (admin / faculty / student) when the accounts
+  # table is empty. Never true outside a dev cluster: in a real deployment
+  # accounts arrive from the registry import, not from whoever signs in first.
+  SEED_DEMO_ACCOUNTS: "false"
+  DEBUG: "false"
+
+  # ── Self-registration ──
+  # A first sign-in from ALLOWED_EMAIL_DOMAIN creates a PENDING record with no
+  # roles. The person is still refused at login — what changes is that they now
+  # show up in the administrator's list to be approved, instead of the admin
+  # having to be told by email that someone exists and then creating the record
+  # by hand for every student each term.
+  #
+  # Approving is two fields: status ACTIVE, plus whichever roles are right for
+  # that person. Until then the account permits nothing, because OPA denies by
+  # default and an empty role list matches no permission.
+  AUTO_PROVISION_ACCOUNTS: "true"

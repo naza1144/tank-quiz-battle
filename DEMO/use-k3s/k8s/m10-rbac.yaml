@@ -1,0 +1,81 @@
+# ─────────────────────────────────────────────────
+# M10 Platform — permission to look at the cluster
+# ─────────────────────────────────────────────────
+#  The platform console reports on what is running, which means the service
+#  needs to read the Kubernetes API. This grants exactly that and no more.
+#
+#  Two deliberate limits:
+#
+#  * A Role, not a ClusterRole. Everything here stops at the `sudhood`
+#    namespace, so a bug in the console cannot enumerate pods in kube-system or
+#    read another team's Secrets.
+#
+#  * `get`/`list`/`watch` on workloads, plus `patch` on Deployments — nothing
+#    else. In particular no access to Secrets or ConfigMaps: the console has no
+#    reason to read the signing key or the database password, and not granting
+#    it means a template injection bug in the dashboard cannot leak them.
+#
+#  The `patch` verb is what "restart service" needs. It cannot delete anything,
+#  cannot create anything, and cannot change a Deployment's image or replica
+#  count in any way the console exposes — but it is genuine write access to the
+#  Deployment object, so it is gated a second time by CLUSTER_ACTIONS_ENABLED
+#  in config.py.
+# ─────────────────────────────────────────────────
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: m10-platform
+  labels:
+    app.kubernetes.io/name: m10-platform
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: m10-platform-console
+  labels:
+    app.kubernetes.io/name: m10-platform
+rules:
+  # Pod status: phase, container readiness, restart counts, and the waiting
+  # reason (CrashLoopBackOff, ErrImageNeverPull, OOMKilled) that makes the
+  # dashboard useful rather than decorative.
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+
+  # Deployments and ReplicaSets: desired vs ready replicas, and the image tag
+  # currently deployed.
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list", "watch"]
+
+  # The restart button. Separated into its own rule so it is obvious at a
+  # glance that this is the only write the console can perform.
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["patch"]
+
+  # HPA state — what the autoscaler wants and the utilisation behind it.
+  # Without this a replica count changing on its own looks like a glitch.
+  - apiGroups: ["autoscaling"]
+    resources: ["horizontalpodautoscalers"]
+    verbs: ["get", "list", "watch"]
+
+  # Events are how Kubernetes explains itself: why a pod was killed, why one is
+  # Pending, why an image pull failed. Read-only.
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: m10-platform-console
+  labels:
+    app.kubernetes.io/name: m10-platform
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: m10-platform-console
+subjects:
+  - kind: ServiceAccount
+    name: m10-platform

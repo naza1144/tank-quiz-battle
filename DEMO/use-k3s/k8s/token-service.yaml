@@ -1,0 +1,221 @@
+# ─────────────────────────────────────────────────
+# Identity for the pod itself, separate from the identity of whoever is
+# logged in
+# ─────────────────────────────────────────────────
+#  Every pod in this namespace used to run as the `default` ServiceAccount, so
+#  the API server saw one caller where there were five. Kubernetes' own audit
+#  log could say "a pod in sudhood did this" and nothing more precise.
+#
+#  This grants no permissions and is not meant to. `default` has none either —
+#  only the self-review verbs every authenticated identity gets — so nothing
+#  about what these pods may do changes. What changes is that they are now
+#  distinguishable.
+#
+#  Two things become possible because of that, and neither is possible without
+#  it: a NetworkPolicy written per service rather than per namespace (WBS
+#  4.2.5), and service-to-service calls that prove who is calling instead of
+#  presenting a key every caller shares.
+# ─────────────────────────────────────────────────
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: token-service
+  labels:
+    app.kubernetes.io/name: token-service
+    app.kubernetes.io/part-of: sudhood
+---
+# ─────────────────────────────────────────────────
+# Token Service — the only issuer the platform trusts
+# ─────────────────────────────────────────────────
+#  Logs users in through Keycloak, asks M0 whether an account exists, and then
+#  issues the platform's own JWT. Also serves the JWKS every other service uses
+#  to verify those tokens offline, and the /auth/verify endpoint Traefik calls
+#  as forward-auth.
+#
+#  The signing key arrives as a Secret rather than a PersistentVolumeClaim.
+#  That swap is what makes this service scalable: a ReadWriteOnce PVC can only
+#  be attached to one node's pod, so a second replica sat Pending forever
+#  waiting for a volume the first one held. A Secret is mounted by every
+#  replica, so they all sign with the same key and any of them can verify what
+#  another issued.
+#
+#  keys.py needs no change for this. It globs `*.pem` non-recursively, and a
+#  Secret volume exposes exactly one entry per key at the top level — the
+#  `..data` indirection Kubernetes creates underneath does not match the glob.
+#  (Contrast with OPA in opa.yaml, which walks its directory and therefore does
+#  trip over it.)
+#
+#  Create the Secret before deploying:  scripts/create-signing-key.sh
+#  Lose it and every issued token becomes unverifiable — back it up.
+# ─────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: token-service
+  labels:
+    app.kubernetes.io/name: token-service
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: token-service
+  ports:
+    - name: http
+      port: 8100
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: token-service
+  labels:
+    app.kubernetes.io/name: token-service
+spec:
+  # Two, because this sits directly in the login path. A registration window is
+  # exactly when everyone logs in at once, and it is also exactly when you least
+  # want a single pod restart to interrupt the flow.
+  replicas: 2
+  strategy:
+    # RollingUpdate now that nothing holds a ReadWriteOnce volume. Recreate
+    # would take the whole service down for the length of a deploy, which
+    # defeats the point of running two.
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: token-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: token-service
+    spec:
+      # Named rather than inherited. The default ServiceAccount is shared
+      # by every pod that does not ask for one, which makes it useless as an
+      # identity.
+      serviceAccountName: token-service
+      securityContext:
+        # Matches the uid the Dockerfile creates. The signing key is the crown
+        # jewel here, so the process runs unprivileged. fsGroup makes the
+        # mounted Secret readable by the group without making it world-readable.
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+      # Spread the replicas across nodes where there is more than one. On this
+      # single-node cluster both land together and this buys nothing — it is
+      # here so the behaviour is right when a second node appears, rather than
+      # being remembered later.
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: token-service
+      containers:
+        - name: token-service
+          image: localhost:5000/sudhood/token-service:local
+          # Pulled from the registry Terraform runs on this node. It used to be
+          # `Never`, with the image hand-loaded into containerd by
+          # `sudo k3s ctr images import` — which worked, and made every single
+          # deployment need a person typing a root password.
+          #
+          # IfNotPresent is correct only because the tag is not fixed. The
+          # `:local` written here is the default for a plain `kubectl apply -k`;
+          # Terraform overrides it with a hash of the service's source tree, so
+          # a code change produces a tag the node has never pulled.
+          #
+          # Were the tag actually constant, this would be a silent no-op: the
+          # pod template would not change, nothing would roll, and IfNotPresent
+          # would keep the cached image. The deployment would appear to succeed
+          # and change nothing.
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8100
+          envFrom:
+            - configMapRef:
+                name: sudhood-config
+          env:
+            - name: SERVICE_PORT
+              value: "8100"
+            - name: OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: OIDC_CLIENT_SECRET
+            - name: INTERNAL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: INTERNAL_API_KEY
+            # One key per service allowed to ask for a service token. Only
+            # token-service holds all three — that is what makes the tokens it
+            # issues worth more than the shared key they replace: a callee
+            # verifies a signature instead of holding everyone's secret.
+            #
+            # Listed one by one rather than pulled in with envFrom secretRef,
+            # because that would also hand this pod POSTGRES_PASSWORD,
+            # MINIO_ROOT_PASSWORD and every other value in sudhood-secrets,
+            # none of which it has any use for.
+            #
+            # Adding a caller means a name in var.service_callers and a block
+            # here. config.py discovers them from the environment, so nothing
+            # in the code needs to change.
+            - name: SERVICE_KEY_M0_IDENTITY
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: SERVICE_KEY_M0_IDENTITY
+            - name: SERVICE_KEY_M10_PLATFORM
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: SERVICE_KEY_M10_PLATFORM
+            - name: SERVICE_KEY_TOKEN_SERVICE
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: SERVICE_KEY_TOKEN_SERVICE
+            # Carries the Redis password, so it comes from the Secret rather
+            # than being assembled from ConfigMap parts in plain sight.
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: REDIS_URL
+          volumeMounts:
+            - name: keys
+              mountPath: /keys
+          # /health says the process is up; /ready checks keys, Redis, and
+          # Keycloak. Only the second one should gate traffic, because a pod
+          # that cannot reach Redis cannot complete a login.
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+      volumes:
+        - name: keys
+          secret:
+            # Created by scripts/create-signing-key.sh, not by kustomize — the
+            # private key must never sit in a committed file.
+            secretName: token-signing-key
+            # Kubernetes mounts Secret files as root:fsGroup. 0440 lets the
+            # service read the key through its group without making it readable
+            # by anything else that lands in the container.
+            defaultMode: 0440

@@ -1,0 +1,95 @@
+# ─────────────────────────────────────────────────
+# Observability — telling Prometheus what to scrape
+# ─────────────────────────────────────────────────
+#  These describe scrape targets for a prometheus-operator that this stack does
+#  not install. On a cluster that has one — Prometheus, Grafana, Loki in a
+#  `monitoring` namespace — they are the half that was missing: Prometheus had
+#  no idea these services existed, and a ServiceMonitor is how the operator
+#  learns about a target.
+#
+#  On a cluster that does not, applying these fails: the CRD they need is not
+#  there. Terraform skips them for that reason and says so —
+#  `enable_service_monitors` in DEMO/terraform/01-platform/variables.tf. The
+#  services still expose /metrics either way; the question is only whether
+#  anything is scraping them.
+#
+#  Cross-namespace by design — the ServiceMonitors live next to the services
+#  they describe, while Prometheus runs elsewhere. That only works if the
+#  Prometheus instance is configured to watch other namespaces. Check with:
+#
+#      kubectl -n monitoring get prometheus -o yaml | grep -A5 serviceMonitorNamespaceSelector
+#
+#  An empty selector ({}) means "all namespaces" and these are picked up
+#  immediately. If it is scoped to `monitoring` only, add the label the operator
+#  looks for — see scripts/verify-observability.sh, which reports which case
+#  this cluster is in rather than leaving you to guess.
+#
+#  Confirm targets are actually being scraped:
+#      kubectl -n monitoring port-forward svc/prometheus-operated 9090:9090
+#      open http://localhost:9090/targets
+# ─────────────────────────────────────────────────
+
+# ── token-service ────────────────────────────────
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: token-service
+  labels:
+    # The label most kube-prometheus-stack installs select on. Harmless if this
+    # one selects on something else; it is the cheapest way to be compatible
+    # with the common default.
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: token-service
+  namespaceSelector:
+    matchNames:
+      - sudhood
+  endpoints:
+    - port: http
+      path: /metrics
+      # 15s is short enough that a spike during a login surge is visible while
+      # it is happening, rather than being averaged into the minute it ended in.
+      interval: 15s
+      scrapeTimeout: 10s
+---
+# ── m0-identity ──────────────────────────────────
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: m0-identity
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: m0-identity
+  namespaceSelector:
+    matchNames:
+      - sudhood
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
+---
+# ── m10-platform ─────────────────────────────────
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: m10-platform
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: m10-platform
+  namespaceSelector:
+    matchNames:
+      - sudhood
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s

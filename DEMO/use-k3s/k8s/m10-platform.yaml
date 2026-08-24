@@ -1,0 +1,207 @@
+# ─────────────────────────────────────────────────
+# M10 Platform — cross-cutting shared services
+# ─────────────────────────────────────────────────
+#  Notification, audit, storage, events, schema isolation. Every endpoint is
+#  still a stub returning fixed data, which is why this is the one service with
+#  no database, no volume, and no secret of its own — it can be restarted or
+#  scaled freely today, and both of those stop being free the moment real
+#  persistence lands here.
+#
+#  Two replicas because it costs nothing to prove the routing works with more
+#  than one pod behind a Service.
+#
+#  What is in the pod:
+#    initContainer copy-policy  — lift policy/ out of the image
+#    container     m10-platform — the service + the React console at /console
+#    container     opa          — its own policy engine, localhost only
+#
+#  No migrate init container, unlike m0-identity: M10 has no database and no
+#  Alembic. When it grows one, copy that block across.
+# ─────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: m10-platform
+  labels:
+    app.kubernetes.io/name: m10-platform
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: m10-platform
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: m10-platform
+  labels:
+    app.kubernetes.io/name: m10-platform
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: m10-platform
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: m10-platform
+    spec:
+      # Without this the pod gets the namespace's `default` account, which has
+      # no permissions at all — the console would come up and every cluster
+      # panel would report 403.
+      serviceAccountName: m10-platform
+      securityContext:
+        # The uid the Dockerfile creates, stated here so it covers the OPA
+        # sidecar too — that image would otherwise run as root to read one file.
+        # copy-policy writes as the same uid, so the sidecar can read what it
+        # left behind.
+        runAsUser: 10003
+        runAsGroup: 10003
+      volumes:
+        # Written by copy-policy, read by the opa container. An emptyDir rather
+        # than a ConfigMap for the same reason as m0-identity: a ConfigMap
+        # volume materialises as symlinks through a `..data` directory, and OPA
+        # walking that tree finds the same authz.rego three times and refuses to
+        # start with "multiple default rules found".
+        - name: policy
+          emptyDir: {}
+      initContainers:
+        # The sidecar cannot read the service image's filesystem, so the policy
+        # is lifted into a volume both containers can see. It ships inside the
+        # image (see COPY policy/ in the Dockerfile) so policy and code are the
+        # same version — a rollback moves both or neither.
+        - name: copy-policy
+          image: localhost:5000/sudhood/m10-platform:local
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "cp /app/policy/*.rego /policy/ && ls -l /policy"]
+          volumeMounts:
+            - name: policy
+              mountPath: /policy
+      containers:
+        - name: m10-platform
+          image: localhost:5000/sudhood/m10-platform:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: sudhood-config
+          env:
+            - name: SERVICE_PORT
+              value: "8000"
+            # The console's restart button. On here because demonstrating
+            # self-healing is the point of this deployment; it should be false
+            # anywhere the console is reachable by people who should not be
+            # bouncing services.
+            - name: CLUSTER_ACTIONS_ENABLED
+              value: "true"
+            # The sidecar is in this pod, so this is a loopback call that never
+            # touches the network. Overrides the OPA_URL in sudhood-config —
+            # `env` wins over `envFrom`, which is what makes one ConfigMap
+            # shared by every service workable.
+            - name: OPA_URL
+              value: "http://localhost:8181"
+            # Required by the /internal/storage endpoints, which refuse every
+            # request without it rather than serve them unauthenticated. M0
+            # presents the same key when it asks for a presigned URL.
+            - name: INTERNAL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: INTERNAL_API_KEY
+            # ── Object storage broker (FN-X-022) ──
+            # The only MinIO credential in the cluster that spans more than one
+            # bucket, which is the price of every module asking one place for
+            # its URLs instead of each holding its own key. What bounds it is
+            # STORAGE_BUCKET_OWNERS, not the credential.
+            - name: MINIO_ENDPOINT
+              value: "minio:9000"
+            # What goes *into* the signature, which is a different address from
+            # the one above: the URL is redeemed by a browser, and a browser
+            # cannot resolve `minio`. Signing against the internal name produces
+            # a URL that verifies correctly and is unreachable — and the error
+            # names the host, not the signature, which is the confusing half.
+            # 30900 is the NodePort in minio.yaml.
+            - name: MINIO_PUBLIC_ENDPOINT
+              value: "localhost:30900"
+            - name: MINIO_ACCESS_KEY
+              value: "m10_service"
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: MINIO_SERVICE_PASSWORD
+            # No TLS on this cluster yet. Both of these turn on together with
+            # the certificate, not before.
+            - name: MINIO_SECURE
+              value: "false"
+          # This service has no /health at the root — its health endpoint sits
+          # under the same prefix as the rest of its API.
+          livenessProbe:
+            httpGet:
+              path: /api/v1/platform/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /api/v1/platform/health
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 96Mi
+            limits:
+              memory: 256Mi
+
+        # M10's own policy engine. One per service rather than one for the
+        # platform: a policy has to name the resources it protects, so a shared
+        # one ends up naming every module's resources and belonging to no team.
+        # See use-docker-compose/POLICY_CONVENTION.md.
+        #
+        # No Service and no port in the pod spec — only the container beside it
+        # talks to it, over loopback.
+        - name: opa
+          image: openpolicyagent/opa:latest
+          args:
+            - run
+            - --server
+            - --addr=127.0.0.1:8181
+            - --log-level=info
+            # Loading from a directory means a policy that does not compile
+            # stops OPA from starting at all. That is the behaviour worth
+            # having: a container that refuses to come up is visible, whereas
+            # one serving an empty policy answers false to everything and looks
+            # like a permissions problem.
+            - /policy
+          volumeMounts:
+            - name: policy
+              mountPath: /policy
+              readOnly: true
+          # No probe, deliberately. The kubelet runs an httpGet probe from
+          # outside the pod's network namespace, so it cannot reach a listener
+          # bound to 127.0.0.1 — and `host: 127.0.0.1` does not help, it points
+          # the kubelet at the *node's* loopback, where nothing answers. That
+          # misreading had this container killed and restarted every 40 seconds.
+          #
+          # An exec probe is not available either: this image is distroless, so
+          # there is no shell and no wget to run inside it.
+          #
+          # Binding 0.0.0.0 would make a probe possible and is the wrong trade:
+          # every pod in the namespace could then ask this engine who may do
+          # what. What is given up instead is small — OPA refuses to start at all
+          # if the policy does not compile, which is the failure that actually
+          # happens, and a dead engine shows up immediately as the service
+          # failing closed on every request.
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              memory: 128Mi

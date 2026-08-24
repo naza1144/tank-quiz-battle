@@ -1,0 +1,157 @@
+# ─────────────────────────────────────────────────
+# Identity for the pod itself, separate from the identity of whoever is
+# logged in
+# ─────────────────────────────────────────────────
+#  Every pod in this namespace used to run as the `default` ServiceAccount, so
+#  the API server saw one caller where there were five. Kubernetes' own audit
+#  log could say "a pod in sudhood did this" and nothing more precise.
+#
+#  This grants no permissions and is not meant to. `default` has none either —
+#  only the self-review verbs every authenticated identity gets — so nothing
+#  about what these pods may do changes. What changes is that they are now
+#  distinguishable.
+#
+#  Two things become possible because of that, and neither is possible without
+#  it: a NetworkPolicy written per service rather than per namespace (WBS
+#  4.2.5), and service-to-service calls that prove who is calling instead of
+#  presenting a key every caller shares.
+# ─────────────────────────────────────────────────
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: m9-thesis
+  labels:
+    app.kubernetes.io/name: m9-thesis
+    app.kubernetes.io/part-of: sudhood
+---
+# ─────────────────────────────────────────────────
+# M9 Thesis — topics, advisors, defences, repository
+# ─────────────────────────────────────────────────
+#  Someone else's module, same as m1-curriculum.yaml: built from
+#  use-docker-compose/m9-service/ as its owner maintains it, with nothing
+#  reached into from here.
+#
+#  Two things about this file are consequences of the module's current state
+#  rather than choices made for it:
+#
+#  🔴 Policy queries fail closed. M9 defaults OPA_URL to the shared engine that
+#     no longer exists; it has no policy/ directory to hand a sidecar. Endpoints
+#     behind an OPA check answer 403 until its owner follows
+#     use-docker-compose/POLICY_CONVENTION.md.
+#
+#  🔴 One replica, and no migrate init container. M9 builds its schema with
+#     create_all() plus a hand-written _reconcile_columns() inside application
+#     startup, with no advisory lock — two replicas on an empty database race
+#     and one loses with "relation already exists". M0 hit exactly this and
+#     moved to Alembic; the pattern is written up in
+#     use-docker-compose/m0-service/MIGRATIONS.md for whenever its owner wants
+#     it. Pinning replicas at 1 keeps the race from being reachable here without
+#     touching their code.
+# ─────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: m9-thesis
+  labels:
+    app.kubernetes.io/name: m9-thesis
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: m9-thesis
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: m9-thesis
+  labels:
+    app.kubernetes.io/name: m9-thesis
+spec:
+  replicas: 1
+  # Recreate rather than RollingUpdate. During a rolling update the old and new
+  # pods overlap, which is the same two-writers situation the replica count is
+  # avoiding — create_all and _reconcile_columns run at startup and take no lock.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: m9-thesis
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: m9-thesis
+    spec:
+      # Named rather than inherited. The default ServiceAccount is shared
+      # by every pod that does not ask for one, which makes it useless as an
+      # identity.
+      serviceAccountName: m9-thesis
+      initContainers:
+        # The only init container this pod gets. The service builds its own
+        # schema at startup, so the wait is all that can usefully happen first.
+        - name: wait-for-postgres
+          image: postgres:16
+          command:
+            - sh
+            - -c
+            - until pg_isready -h postgres -p 5432 -U "$POSTGRES_USER"; do echo "waiting for postgres..."; sleep 2; done
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: sudhood-config
+                  key: POSTGRES_USER
+      containers:
+        - name: m9-thesis
+          image: localhost:5000/sudhood/m9-thesis:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: sudhood-config
+          env:
+            - name: SERVICE_PORT
+              value: "8000"
+            # Connects as m9_service, whose grants stop at the thesis schema.
+            # Until this named m9_service, `thesis` was a naming convention: the
+            # service connected as the superuser and could read identity.account
+            # directly, which is the coupling every soft FK in the M9 ER exists
+            # to avoid. Created by postgres/init/02-service-users.sh.
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: M9_DATABASE_URL
+            - name: DB_SCHEMA
+              value: "thesis"
+            # Cross-service calls go through the gateway, never to a Service
+            # name — the module's own rule, kept.
+            - name: GATEWAY_URL
+              value: "http://traefik.kube-system:80"
+            # Reference data only (score criteria, milestone plan), no fake
+            # theses. Matches the compose default for this module.
+            - name: SEED_DEMO_DATA
+              value: "true"
+            # No OPA_URL — see the header.
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 512Mi

@@ -1,0 +1,669 @@
+import { Server, Socket } from 'socket.io';
+import { 
+  Player, 
+  GameMode, 
+  PlayerRole, 
+  TankArchetype, 
+  QuizQuestion, 
+  GameEvent,
+  RoomConfig 
+} from './types.js';
+import { GameEngine } from './gameEngine.js';
+import { QuizManager } from './quizBank.js';
+
+interface SquadQuizSession {
+  teamId: string;
+  tankId: string;
+  crateId: string;
+  question: QuizQuestion;
+  timeLimitSeconds: number;
+  startTime: number;
+  endTime: number;
+  votes: Map<string, number>; // socketId -> choiceIndex
+  voterNames: Map<string, string>; // socketId -> playerName
+  timer?: NodeJS.Timeout;
+}
+
+export class RoomManager {
+  private io: Server;
+  private quizManager: QuizManager;
+  private rooms: Map<string, {
+    config: RoomConfig;
+    players: Map<string, Player>;
+    activeSquadQuizzes: Map<string, SquadQuizSession>;
+    engine?: GameEngine;
+    intervalId?: NodeJS.Timeout;
+    state: 'LOBBY' | 'STARTING' | 'IN_GAME' | 'GAME_OVER';
+  }> = new Map();
+
+  private playerRooms: Map<string, string> = new Map(); // socketId -> roomId
+
+  constructor(io: Server, quizManager: QuizManager) {
+    this.io = io;
+    this.quizManager = quizManager;
+
+    // Create default public rooms
+    this.createRoom({
+      id: 'arena-1',
+      name: 'ห้องประลอง รถถังสายฟ้า (FFA 4-6 คัน)',
+      mode: 'FFA',
+      maxTanks: 6,
+      roundTimeSeconds: 240,
+      isPrivate: false
+    });
+
+    this.createRoom({
+      id: 'squad-1',
+      name: 'ห้องทีมเวิร์ก คนขับ & หน่วยตอบโจทย์ (Squad)',
+      mode: 'SQUAD',
+      maxTanks: 4,
+      roundTimeSeconds: 300,
+      isPrivate: false
+    });
+  }
+
+  public createRoom(config: RoomConfig): string {
+    const roomId = config.id || `room-${Date.now().toString(36)}`;
+    this.rooms.set(roomId, {
+      config: { ...config, id: roomId },
+      players: new Map(),
+      activeSquadQuizzes: new Map(),
+      state: 'LOBBY'
+    });
+    return roomId;
+  }
+
+  public getRoomList() {
+    return Array.from(this.rooms.values()).map(r => ({
+      id: r.config.id,
+      name: r.config.name,
+      mode: r.config.mode,
+      maxTanks: r.config.maxTanks,
+      playerCount: r.players.size,
+      state: r.state,
+      isPrivate: r.config.isPrivate
+    }));
+  }
+
+  public joinRoom(socket: Socket, roomId: string, playerInfo: {
+    id: string;
+    name: string;
+    email?: string;
+    avatar?: string;
+    role?: PlayerRole;
+    teamId?: string;
+    tankArchetype?: TankArchetype;
+    tankColor?: string;
+  }) {
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      socket.emit('error_message', 'ไม่พบห้องที่ต้องการ');
+      return;
+    }
+
+    if (room.players.size >= 100) {
+      socket.emit('error_message', 'ห้องเต็มแล้ว (จำกัด 100 คน)');
+      return;
+    }
+
+    // Leave any prior room
+    this.leaveRoom(socket);
+
+    const isFirst = room.players.size === 0;
+    
+    // In SQUAD mode, auto-assign to the team with lowest count for balance
+    let assignedTeam = playerInfo.teamId;
+    let assignedRole = playerInfo.role || 'SUPPORT';
+    
+    if (room.config.mode === 'SQUAD' && !assignedTeam) {
+      const teamCounts: Record<string, number> = { 'team-1': 0, 'team-2': 0, 'team-3': 0, 'team-4': 0 };
+      for (const p of room.players.values()) {
+        if (teamCounts[p.teamId] !== undefined) teamCounts[p.teamId]++;
+      }
+      let minTeam = 'team-1';
+      let minCount = Infinity;
+      for (const [tid, cnt] of Object.entries(teamCounts)) {
+        if (cnt < minCount) {
+          minCount = cnt;
+          minTeam = tid;
+        }
+      }
+      assignedTeam = minTeam;
+
+      // If team doesn't have a driver yet, assign as driver
+      const hasDriver = Array.from(room.players.values()).some(p => p.teamId === assignedTeam && p.role === 'DRIVER');
+      if (!hasDriver) {
+        assignedRole = 'DRIVER';
+      }
+    }
+
+    const teamColorMap: Record<string, string> = {
+      'team-1': '#ef4444',
+      'team-2': '#3b82f6',
+      'team-3': '#22c55e',
+      'team-4': '#eab308'
+    };
+
+    const player: Player = {
+      id: playerInfo.id,
+      socketId: socket.id,
+      name: playerInfo.name || `Player-${socket.id.slice(0, 4)}`,
+      email: playerInfo.email,
+      avatar: playerInfo.avatar,
+      role: assignedRole,
+      teamId: assignedTeam || `team-${room.players.size % 4 + 1}`,
+      tankArchetype: playerInfo.tankArchetype || 'STANDARD',
+      tankColor: playerInfo.tankColor || (assignedTeam ? teamColorMap[assignedTeam] : this.getRandomColor(room.players.size)),
+      isHost: isFirst,
+      isReady: isFirst // Host is automatically ready
+    };
+
+    room.players.set(socket.id, player);
+    this.playerRooms.set(socket.id, roomId);
+    socket.join(roomId);
+
+    this.broadcastRoomState(roomId);
+  }
+
+  public leaveRoom(socket: Socket) {
+    const roomId = this.playerRooms.get(socket.id);
+    if (!roomId) return;
+
+    const room = this.rooms.get(roomId);
+    if (room) {
+      const leavingPlayer = room.players.get(socket.id);
+      room.players.delete(socket.id);
+      socket.leave(roomId);
+
+      // If host left, pass host to next player
+      if (leavingPlayer?.isHost && room.players.size > 0) {
+        const nextHost = room.players.values().next().value;
+        if (nextHost) nextHost.isHost = true;
+      }
+
+      // If game running, remove tank
+      if (room.engine && leavingPlayer) {
+        room.engine.removeTank(socket.id);
+      }
+
+      this.broadcastRoomState(roomId);
+    }
+
+    this.playerRooms.delete(socket.id);
+  }
+
+  public setPlayerReady(socket: Socket, isReady: boolean) {
+    const roomId = this.playerRooms.get(socket.id);
+    if (!roomId) return;
+    const room = this.rooms.get(roomId);
+    if (!room) return;
+
+    const player = room.players.get(socket.id);
+    if (player) {
+      player.isReady = isReady;
+      this.broadcastRoomState(roomId);
+    }
+  }
+
+  public selectTank(socket: Socket, archetype: TankArchetype, color: string, role: PlayerRole, teamId?: string) {
+    const roomId = this.playerRooms.get(socket.id);
+    if (!roomId) return;
+    const room = this.rooms.get(roomId);
+    if (!room) return;
+
+    const player = room.players.get(socket.id);
+    if (!player) return;
+
+    const targetTeamId = teamId || player.teamId;
+
+    // In SQUAD mode, perform balance and driver slot check
+    if (room.config.mode === 'SQUAD') {
+      // 1. Check if driver slot is already taken by another player
+      if (role === 'DRIVER') {
+        const existingDriver = Array.from(room.players.values()).find(
+          p => p.teamId === targetTeamId && p.role === 'DRIVER' && p.socketId !== socket.id
+        );
+        if (existingDriver) {
+          socket.emit('error_message', `ทีมนี้มีคนขับรถถังแล้ว (${existingDriver.name}) คุณได้รับการตั้งค่าเป็นหน่วยตอบคำถาม (Support)`);
+          role = 'SUPPORT';
+        }
+      }
+
+      // 2. Check team balance (prevent extreme skew, max delta 3)
+      if (targetTeamId !== player.teamId) {
+        const teamCounts: Record<string, number> = { 'team-1': 0, 'team-2': 0, 'team-3': 0, 'team-4': 0 };
+        for (const p of room.players.values()) {
+          if (p.socketId !== socket.id && teamCounts[p.teamId] !== undefined) {
+            teamCounts[p.teamId]++;
+          }
+        }
+        const minCount = Math.min(...Object.values(teamCounts));
+        const targetCount = teamCounts[targetTeamId] || 0;
+
+        if (room.players.size >= 8 && targetCount > minCount + 3) {
+          socket.emit('error_message', 'ทีมนี้มีสมาชิกมากกว่าทีมอื่นเกินไป กรุณาเลือกทีมที่มีคนน้อยกว่าเพื่อความสมดุล');
+          return;
+        }
+      }
+    }
+
+    player.tankArchetype = archetype;
+    player.tankColor = color;
+    player.role = role;
+    if (teamId) player.teamId = teamId;
+    this.broadcastRoomState(roomId);
+  }
+
+  public autoBalanceTeams(socket: Socket) {
+    const roomId = this.playerRooms.get(socket.id);
+    if (!roomId) return;
+    const room = this.rooms.get(roomId);
+    if (!room || room.state !== 'LOBBY') return;
+
+    const host = room.players.get(socket.id);
+    if (!host?.isHost) {
+      socket.emit('error_message', 'เฉพาะหัวหน้าห้องเท่านั้นที่สามารถจัดทีมสมดุลได้');
+      return;
+    }
+
+    const teamIds = ['team-1', 'team-2', 'team-3', 'team-4'];
+    const teamColors = ['#ef4444', '#3b82f6', '#22c55e', '#eab308'];
+    const playersList = Array.from(room.players.values());
+
+    // 1. Separate existing drivers and non-drivers
+    const drivers: Player[] = [];
+    const nonDrivers: Player[] = [];
+
+    playersList.forEach(p => {
+      if (p.role === 'DRIVER') {
+        drivers.push(p);
+      } else {
+        nonDrivers.push(p);
+      }
+    });
+
+    // 2. Assign exactly 1 driver per active team (up to 4 teams)
+    teamIds.forEach((tId, idx) => {
+      let driver = drivers[idx];
+      if (!driver && nonDrivers.length > 0) {
+        driver = nonDrivers.shift()!;
+        driver.role = 'DRIVER';
+      }
+      if (driver) {
+        driver.teamId = tId;
+        driver.tankColor = teamColors[idx];
+      }
+    });
+
+    // Convert any surplus drivers into support
+    for (let i = 4; i < drivers.length; i++) {
+      drivers[i].role = 'SUPPORT';
+      nonDrivers.push(drivers[i]);
+    }
+
+    // 3. Evenly distribute all remaining support players across teams (round-robin)
+    let teamIdx = 0;
+    nonDrivers.forEach(p => {
+      p.role = 'SUPPORT';
+      p.teamId = teamIds[teamIdx % 4];
+      p.tankColor = teamColors[teamIdx % 4];
+      teamIdx++;
+    });
+
+    this.broadcastRoomState(roomId);
+  }
+
+  public addBot(socket: Socket, difficulty: 'EASY' | 'MEDIUM' | 'HARD' = 'MEDIUM') {
+    const roomId = this.playerRooms.get(socket.id);
+    if (!roomId) return;
+    const room = this.rooms.get(roomId);
+    if (!room || room.state !== 'LOBBY') return;
+
+    const botCount = Array.from(room.players.values()).filter(p => p.id.startsWith('bot-')).length;
+    const botId = `bot-${botCount + 1}`;
+    const botColors = ['#f59e0b', '#ef4444', '#10b981', '#6366f1', '#ec4899', '#8b5cf6'];
+    const botArchetypes: TankArchetype[] = ['STANDARD', 'SCOUT', 'HEAVY', 'SNIPER'];
+
+    const botPlayer: Player = {
+      id: botId,
+      socketId: botId,
+      name: `🤖 AI Bot ${botCount + 1} (${difficulty})`,
+      role: 'DRIVER',
+      teamId: `team-${botCount + 2}`,
+      tankArchetype: botArchetypes[botCount % botArchetypes.length],
+      tankColor: botColors[botCount % botColors.length],
+      isHost: false,
+      isReady: true
+    };
+
+    room.players.set(botId, botPlayer);
+    this.broadcastRoomState(roomId);
+  }
+
+  public startGame(socket: Socket) {
+    const roomId = this.playerRooms.get(socket.id);
+    if (!roomId) return;
+    const room = this.rooms.get(roomId);
+    if (!room) return;
+
+    const player = room.players.get(socket.id);
+    if (!player?.isHost) {
+      socket.emit('error_message', 'เฉพาะหัวหน้าห้อง (Host) เท่านั้นที่เริ่มเกมได้');
+      return;
+    }
+
+    if (room.players.size < 1) {
+      socket.emit('error_message', 'ต้องมีผู้เล่นอย่างน้อย 1 คน');
+      return;
+    }
+
+    // Initialize Game Engine
+    room.state = 'IN_GAME';
+    const engine = new GameEngine(
+      this.quizManager,
+      {
+        onGameEvent: (event: GameEvent) => {
+          this.io.to(roomId).emit('game_event', event);
+        },
+        onQuizTrigger: (tankId: string, playerId: string, question: QuizQuestion, crateId: string) => {
+          // Send quiz modal to specific player
+          const targetPlayer = Array.from(room.players.values()).find(p => p.id === playerId || p.socketId === tankId);
+          if (targetPlayer) {
+            this.io.to(targetPlayer.socketId).emit('quiz_popup', {
+              tankId,
+              crateId,
+              question
+            });
+          }
+        },
+        onTeamQuizTrigger: (teamId: string, question: QuizQuestion, crateId: string, tankId: string) => {
+          const teamSupporters = Array.from(room.players.values()).filter(p => p.teamId === teamId && p.role === 'SUPPORT');
+          if (teamSupporters.length > 0) {
+            const timeLimitSeconds = question.timeLimitSeconds || (question.difficulty === 'HARD' ? 5 : (question.difficulty === 'MEDIUM' ? 4 : 3));
+            const now = Date.now();
+            const session: SquadQuizSession = {
+              teamId,
+              tankId,
+              crateId,
+              question,
+              timeLimitSeconds,
+              startTime: now,
+              endTime: now + timeLimitSeconds * 1000,
+              votes: new Map(),
+              voterNames: new Map()
+            };
+
+            // Set auto-finalize timer when countdown completes
+            session.timer = setTimeout(() => {
+              this.finalizeTeamQuiz(roomId, teamId);
+            }, (timeLimitSeconds + 0.2) * 1000);
+
+            room.activeSquadQuizzes.set(teamId, session);
+
+            // Send popup with timer ONLY to support teammates! Driver does NOT get popup!
+            teamSupporters.forEach(p => {
+              this.io.to(p.socketId).emit('team_quiz_popup', {
+                teamId,
+                question,
+                crateId,
+                tankId,
+                timeLimitSeconds,
+                startTime: now,
+                endTime: now + timeLimitSeconds * 1000
+              });
+            });
+
+            // Notify the driver
+            const driver = Array.from(room.players.values()).find(p => p.teamId === teamId && p.role === 'DRIVER');
+            if (driver) {
+              this.io.to(driver.socketId).emit('game_event', {
+                type: 'QUIZ_TRIGGERED',
+                message: `📦 เก็บกล่องคำถาม! ทีมกำลังโหวตคำตอบ (${timeLimitSeconds} วิ)...`,
+                sound: 'CRATE_PICKUP',
+                tankId,
+                teamId,
+                timestamp: now
+              });
+            }
+          } else {
+            // If no support player on this team, driver answers as fallback
+            const driver = Array.from(room.players.values()).find(p => p.teamId === teamId && p.role === 'DRIVER');
+            if (driver) {
+              this.io.to(driver.socketId).emit('quiz_popup', {
+                tankId,
+                crateId,
+                question
+              });
+            }
+          }
+        },
+        onGameOver: (winnerTankId, winnerTeamId, winnerName) => {
+          room.state = 'GAME_OVER';
+          this.io.to(roomId).emit('game_over', {
+            winnerTankId,
+            winnerTeamId,
+            winnerName,
+            leaderboard: Array.from(engine.tanks.values()).map(t => ({
+              name: t.playerName,
+              kills: t.kills,
+              score: t.score,
+              correctAnswers: t.correctAnswers,
+              isDead: t.isDead
+            })).sort((a, b) => b.score - a.score)
+          });
+          if (room.intervalId) {
+            clearInterval(room.intervalId);
+            room.intervalId = undefined;
+          }
+        }
+      },
+      room.config.roundTimeSeconds,
+      room.config.mode
+    );
+
+    // Add Tanks for DRIVER players and AI Bots
+    for (const p of room.players.values()) {
+      if (p.role === 'DRIVER' || room.config.mode === 'FFA') {
+        const isBot = p.id.startsWith('bot-');
+        const tank = engine.addTank(
+          p.socketId,
+          p.id,
+          p.name,
+          p.tankColor,
+          p.tankArchetype,
+          p.teamId,
+          isBot,
+          isBot ? 'MEDIUM' : undefined
+        );
+        p.tankId = tank.id;
+      }
+    }
+
+    room.engine = engine;
+
+    // Start 30 FPS Game Loop
+    let lastTime = Date.now();
+    room.intervalId = setInterval(() => {
+      const now = Date.now();
+      const dt = (now - lastTime) / 1000;
+      lastTime = now;
+
+      engine.update(dt);
+      this.io.to(roomId).emit('game_tick', engine.getSnapshot());
+    }, 1000 / 30);
+
+    this.io.to(roomId).emit('game_start', {
+      mode: room.config.mode,
+      map: engine.map,
+      initialState: engine.getSnapshot()
+    });
+  }
+
+  public handleTankInput(socket: Socket, data: { direction: any; isMoving: boolean }) {
+    const roomId = this.playerRooms.get(socket.id);
+    if (!roomId) return;
+    const room = this.rooms.get(roomId);
+    if (!room?.engine) return;
+
+    room.engine.setTankInput(socket.id, data.direction, data.isMoving);
+  }
+
+  public handleTankShoot(socket: Socket) {
+    const roomId = this.playerRooms.get(socket.id);
+    if (!roomId) return;
+    const room = this.rooms.get(roomId);
+    if (!room?.engine) return;
+
+    room.engine.tankShoot(socket.id);
+  }
+
+  public handleQuizAnswer(socket: Socket, data: {
+    tankId: string;
+    crateId: string;
+    questionId: string;
+    selectedIndex: number;
+  }) {
+    const roomId = this.playerRooms.get(socket.id);
+    if (!roomId) return;
+    const room = this.rooms.get(roomId);
+    if (!room?.engine) return;
+
+    const result = room.engine.handleQuizAnswer(
+      data.tankId,
+      data.crateId,
+      data.questionId,
+      data.selectedIndex
+    );
+
+    socket.emit('quiz_result', result);
+  }
+
+  public handleVoteTeamQuiz(socket: Socket, data: { choiceIndex: number }) {
+    const roomId = this.playerRooms.get(socket.id);
+    if (!roomId) return;
+    const room = this.rooms.get(roomId);
+    if (!room) return;
+    const player = room.players.get(socket.id);
+    if (!player || player.role !== 'SUPPORT') return;
+
+    const session = room.activeSquadQuizzes.get(player.teamId);
+    if (!session || Date.now() > session.endTime) return;
+
+    // Record vote
+    session.votes.set(socket.id, data.choiceIndex);
+    session.voterNames.set(socket.id, player.name);
+
+    // Compute live tally
+    const voteCounts = [0, 0, 0, 0];
+    for (const choice of session.votes.values()) {
+      if (choice >= 0 && choice < 4) {
+        voteCounts[choice]++;
+      }
+    }
+    const totalVotes = session.votes.size;
+
+    // Broadcast live vote counts to all members of this team
+    const teamMembers = Array.from(room.players.values()).filter(p => p.teamId === player.teamId);
+    teamMembers.forEach(m => {
+      this.io.to(m.socketId).emit('team_quiz_vote_update', {
+        teamId: player.teamId,
+        voteCounts,
+        totalVotes
+      });
+    });
+
+    // If all support teammates in this team have cast their vote, finalize immediately!
+    const activeSupporters = Array.from(room.players.values()).filter(p => p.teamId === player.teamId && p.role === 'SUPPORT');
+    if (session.votes.size >= activeSupporters.length && activeSupporters.length > 0) {
+      if (session.timer) clearTimeout(session.timer);
+      this.finalizeTeamQuiz(roomId, player.teamId);
+    }
+  }
+
+  private finalizeTeamQuiz(roomId: string, teamId: string) {
+    const room = this.rooms.get(roomId);
+    if (!room || !room.engine) return;
+    const session = room.activeSquadQuizzes.get(teamId);
+    if (!session) return;
+    room.activeSquadQuizzes.delete(teamId);
+    if (session.timer) clearTimeout(session.timer);
+
+    // Count votes
+    const voteCounts = [0, 0, 0, 0];
+    for (const choice of session.votes.values()) {
+      if (choice >= 0 && choice < 4) {
+        voteCounts[choice]++;
+      }
+    }
+
+    let majorityChoice = 0;
+    let maxVotes = -1;
+    for (let i = 0; i < 4; i++) {
+      if (voteCounts[i] > maxVotes) {
+        maxVotes = voteCounts[i];
+        majorityChoice = i;
+      }
+    }
+
+    if (session.votes.size === 0) {
+      majorityChoice = -1;
+    }
+
+    const totalVotes = session.votes.size;
+    const supportName = totalVotes > 0 ? `เสียงส่วนใหญ่ (${maxVotes}/${totalVotes} โหวต)` : 'หมดเวลา (ไม่มีผู้โหวต)';
+
+    const result = room.engine.handleTeamSupportAnswer(
+      teamId,
+      supportName,
+      session.question.id,
+      majorityChoice
+    );
+
+    // Emit final result with majority decision to all players in this team
+    const teamMembers = Array.from(room.players.values()).filter(p => p.teamId === teamId);
+    teamMembers.forEach(m => {
+      this.io.to(m.socketId).emit('team_quiz_final_result', {
+        teamId,
+        questionId: session.question.id,
+        majorityChoice,
+        correctIndex: session.question.correctIndex,
+        voteCounts,
+        totalVotes,
+        isCorrect: result.isCorrect,
+        rewardAmmo: result.rewardAmmo,
+        explanationTh: result.explanationTh
+      });
+    });
+  }
+
+  public handleTeamSupportAnswer(socket: Socket, data: {
+    questionId: string;
+    selectedIndex: number;
+  }) {
+    // Forward single answers directly as a vote
+    this.handleVoteTeamQuiz(socket, { choiceIndex: data.selectedIndex });
+  }
+
+  private broadcastRoomState(roomId: string) {
+    const room = this.rooms.get(roomId);
+    if (!room) return;
+
+    this.io.to(roomId).emit('room_state', {
+      config: room.config,
+      state: room.state,
+      players: Array.from(room.players.values())
+    });
+  }
+
+  private getRandomColor(index: number): string {
+    const colors = [
+      '#eab308', // Yellow (Classic Player 1)
+      '#22c55e', // Green (Classic Player 2)
+      '#3b82f6', // Blue
+      '#ef4444', // Red
+      '#a855f7', // Purple
+      '#06b6d4'  // Cyan
+    ];
+    return colors[index % colors.length];
+  }
+}

@@ -1,0 +1,189 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: game-server
+  namespace: sudhood
+  labels:
+    app: game-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: game-server
+  template:
+    metadata:
+      labels:
+        app: game-server
+    spec:
+      containers:
+        - name: server
+          image: docker.io/library/tank-game-server:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4000
+              name: http
+          env:
+            - name: PORT
+              value: "4000"
+            - name: TOKEN_SERVICE_JWKS_URL
+              value: "http://token-service:8100/.well-known/jwks.json"
+            - name: JWT_ISSUER
+              value: "sudhood-token-service"
+            - name: JWT_AUDIENCE
+              value: "sudhood-services"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: game-server
+  namespace: sudhood
+spec:
+  selector:
+    app: game-server
+  ports:
+    - name: http
+      port: 4000
+      targetPort: 4000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: game-client
+  namespace: sudhood
+  labels:
+    app: game-client
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: game-client
+  template:
+    metadata:
+      labels:
+        app: game-client
+    spec:
+      containers:
+        - name: client
+          image: docker.io/library/tank-game-client:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: game-client
+  namespace: sudhood
+spec:
+  selector:
+    app: game-client
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: game-backend
+  namespace: sudhood
+spec:
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    - match: (Host(`tank.192-168-50-96.sslip.io`) || Host(`game.192-168-50-96.sslip.io`) || Host(`192.168.50.96`)) && (PathPrefix(`/api`) || PathPrefix(`/socket.io`))
+      kind: Rule
+      services:
+        - name: game-server
+          port: 4000
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: game-frontend
+  namespace: sudhood
+spec:
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    - match: Host(`tank.192-168-50-96.sslip.io`) || Host(`game.192-168-50-96.sslip.io`) || Host(`192.168.50.96`)
+      kind: Rule
+      services:
+        - name: game-client
+          port: 80
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-to-hub
+  namespace: sudhood
+spec:
+  redirectRegex:
+    regex: "^https?://sudhood\\.192-168-50-96\\.sslip\\.io/?$"
+    replacement: "https://sudhood.192-168-50-96.sslip.io/hub/"
+    permanent: false
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: sudhood-root-redirect
+  namespace: sudhood
+spec:
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    - match: Host(`sudhood.192-168-50-96.sslip.io`) && Path(`/`)
+      kind: Rule
+      middlewares:
+        - name: redirect-to-hub
+      services:
+        - name: m10-platform
+          port: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: game-client-nodeport
+  namespace: sudhood
+spec:
+  type: NodePort
+  selector:
+    app: game-client
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      nodePort: 30080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: game-server-nodeport
+  namespace: sudhood
+spec:
+  type: NodePort
+  selector:
+    app: game-server
+  ports:
+    - name: http
+      port: 4000
+      targetPort: 4000
+      nodePort: 30400

@@ -1,0 +1,134 @@
+# ─────────────────────────────────────────────────
+# Traefik Middlewares — JWT verification, CORS, rate limiting, headers
+# ─────────────────────────────────────────────────
+#  These are the file-provider middlewares from the compose stack
+#  (traefik/dynamic/middleware.yaml) expressed as Middleware CRDs. k3s ships
+#  Traefik in kube-system and it watches every namespace, so declaring them here
+#  is all that is needed — there is no static config file to mount.
+#
+#  Two deliberate differences from the compose version, both noted inline:
+#  the removal of `sslRedirect` and the rate-limit source criterion.
+# ─────────────────────────────────────────────────
+
+# ── JWT Forward Authentication via Token Service ──
+#  Verification is pure signature checking against the cached JWKS — no Redis
+#  and no database lookup — so this stays cheap. Each service verifies the token
+#  again itself; this exists so an unauthenticated request never reaches a
+#  service at all.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: jwt-auth
+spec:
+  forwardAuth:
+    address: http://token-service.sudhood.svc.cluster.local:8100/auth/verify
+    trustForwardHeader: true
+    # รายการนี้ต้องตรงกับ header ที่ token-service ตอบกลับใน
+    # token-service/main.py verify_forward_auth() — Traefik คัดลอกเฉพาะที่อยู่ใน
+    # รายการนี้ ตัวที่ token-service ส่งแต่ไม่อยู่ในนี้จะถูกทิ้งเงียบ ๆ และตัวที่อยู่
+    # ในนี้แต่ไม่มีใครส่งก็ไม่มีอะไรมาให้คัดลอก
+    #
+    # ตรวจ 21 ส.ค. 2569 พบว่าไม่ตรงกันสองทาง: Account-Type กับ Dept ถูกส่งมาแต่
+    # ไม่ได้อยู่ในรายการจึงถูกทิ้ง · Groups อยู่ในรายการแต่ `groups` ไม่ใช่ claim
+    # ในโทเคนเลย ไม่มีอะไรในระบบผลิตมันได้ จึงตัดออก
+    #
+    # ยังไม่พังเพราะยังไม่มี service ไหนอ่าน X-Forwarded-* เลย ทุกตัวตรวจ JWT เอง
+    # ผ่าน middleware/auth.py แต่ service ตัวแรกที่เชื่อ X-Forwarded-Dept จะได้ค่า
+    # ว่างโดยไม่มี error อะไรบอก แล้วไปหาสาเหตุที่ token-service ซึ่งส่งถูกอยู่แล้ว
+    authResponseHeaders:
+      - X-Forwarded-User
+      - X-Forwarded-Email
+      - X-Forwarded-Roles
+      - X-Forwarded-Name
+      - X-Forwarded-Preferred-Username
+      - X-Forwarded-Account-Type
+      - X-Forwarded-Dept
+---
+# ── CORS ──
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: cors-headers
+spec:
+  headers:
+    accessControlAllowMethods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+      - OPTIONS
+    accessControlAllowHeaders:
+      - Content-Type
+      - Authorization
+      - X-Requested-With
+    accessControlAllowOriginList:
+      - "http://localhost:3000"
+      - "http://localhost:5173"
+    accessControlMaxAge: 600
+    addVaryHeader: true
+---
+# ── Rate Limiting — general API ──
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: rate-limit
+spec:
+  rateLimit:
+    average: 100
+    burst: 50
+    period: 1m
+    # No sourceCriterion, unlike the compose config. There the limit was keyed
+    # off X-Forwarded-For with depth 1; in this cluster no proxy sits in front
+    # of Traefik, so that header is entirely client-supplied and anyone could
+    # rotate it to get a fresh budget. Omitting it makes Traefik key on the real
+    # remote address instead. Put the depth back — with trustedIPs set — only
+    # once there is a real load balancer ahead of the gateway.
+---
+# ── Rate Limiting — auth endpoints ──
+#  Login and refresh are the brute-force targets, so they get a much tighter
+#  budget than ordinary API traffic. Same source-criterion reasoning as above,
+#  and it matters more here: a spoofable key would make this limit decorative.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: auth-rate-limit
+spec:
+  rateLimit:
+    average: 10
+    burst: 5
+    period: 1m
+---
+# ── Security Headers ──
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: security-headers
+spec:
+  headers:
+    frameDeny: true
+    browserXssFilter: true
+    contentTypeNosniff: true
+    referrerPolicy: "strict-origin-when-cross-origin"
+    permissionsPolicy: "camera=(), microphone=(), geolocation=()"
+    customFrameOptionsValue: "SAMEORIGIN"
+    # The compose version carries `sslRedirect: false` here. Traefik v3 removed
+    # that option from the headers middleware, and an unknown field is a hard
+    # error for the CRD, so it is gone rather than translated. When TLS lands,
+    # the redirect belongs on the entrypoint (or a RedirectScheme middleware),
+    # not here.
+---
+# ── Chain: Standard Middleware ──
+#  The order is the point: reject unauthenticated requests before they cost
+#  anything, but answer CORS preflights and apply the rate limit first.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: chain-standard
+spec:
+  chain:
+    middlewares:
+      - name: cors-headers
+      - name: security-headers
+      - name: rate-limit
+      - name: jwt-auth

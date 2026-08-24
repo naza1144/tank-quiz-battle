@@ -1,0 +1,18 @@
+# ─────────────────────────────────────────────────
+# Namespace
+# ─────────────────────────────────────────────────
+#  Everything Sudhood owns lives in one namespace. Two reasons that matter
+#  here: service DNS becomes short and stable (`postgres`, `token-service`,
+#  `m0-identity` — the same names the compose stack used, so no environment
+#  variable has to change), and `kubectl delete ns sudhood` is a complete
+#  teardown with nothing left behind.
+#
+#  k3s' bundled Traefik lives in kube-system and watches all namespaces, so
+#  the IngressRoutes in here are picked up without any extra configuration.
+# ─────────────────────────────────────────────────
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sudhood
+  labels:
+    app.kubernetes.io/part-of: sudhood

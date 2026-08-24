@@ -1,0 +1,300 @@
+# ─────────────────────────────────────────────────
+# Identity for the pod itself, separate from the identity of whoever is
+# logged in
+# ─────────────────────────────────────────────────
+#  Every pod in this namespace used to run as the `default` ServiceAccount, so
+#  the API server saw one caller where there were five. Kubernetes' own audit
+#  log could say "a pod in sudhood did this" and nothing more precise.
+#
+#  This grants no permissions and is not meant to. `default` has none either —
+#  only the self-review verbs every authenticated identity gets — so nothing
+#  about what these pods may do changes. What changes is that they are now
+#  distinguishable.
+#
+#  Two things become possible because of that, and neither is possible without
+#  it: a NetworkPolicy written per service rather than per namespace (WBS
+#  4.2.5), and service-to-service calls that prove who is calling instead of
+#  presenting a key every caller shares.
+# ─────────────────────────────────────────────────
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: m0-identity
+  labels:
+    app.kubernetes.io/name: m0-identity
+    app.kubernetes.io/part-of: sudhood
+---
+# ─────────────────────────────────────────────────
+# M0 Identity — the account authority
+# ─────────────────────────────────────────────────
+#  Owns the answer to "does this person have an account here, and what are they
+#  allowed to be". Google proves identity; this service decides membership.
+#  Token Service calls /internal/accounts/resolve at login and refuses to issue
+#  a token if the lookup fails — an outage must not hand out a default role.
+#
+#  /internal/* is deliberately not routed by any IngressRoute, so it is
+#  reachable only from inside the cluster.
+#
+#  Three containers' worth of moving parts, all in one pod:
+#    initContainer wait-for-postgres  — fail legibly, not as a CrashLoopBackOff
+#    initContainer migrate            — alembic upgrade + drift check
+#    initContainer copy-policy        — lift policy/ out of the image
+#    container     m0-identity        — the service
+#    container     opa                — its own policy engine, localhost only
+# ─────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: m0-identity
+  labels:
+    app.kubernetes.io/name: m0-identity
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: m0-identity
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: m0-identity
+  labels:
+    app.kubernetes.io/name: m0-identity
+spec:
+  # Two, for the same reason as token-service: every login resolves an account
+  # through here, so a registration rush lands on this service as hard as it
+  # lands on the gateway.
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: m0-identity
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: m0-identity
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: m0-identity
+      # Named rather than inherited. The default ServiceAccount is
+      # shared by every pod that does not ask for one, which makes it
+      # useless as an identity.
+      serviceAccountName: m0-identity
+      securityContext:
+        # Matches the uid the Dockerfile creates. This service holds the
+        # account records for the whole ERP; it has no reason to run as root.
+        # Applies to the OPA sidecar too, which only ever reads a file.
+        runAsUser: 10002
+        runAsGroup: 10002
+      volumes:
+        # Written by copy-policy, read by the opa container. An emptyDir rather
+        # than a ConfigMap on purpose: a ConfigMap volume materialises as
+        # symlinks through a `..data` directory, and OPA walking that tree finds
+        # the same authz.rego three times and refuses to start with "multiple
+        # default rules data.m0.authz.allow found". That cost an afternoon once.
+        - name: policy
+          emptyDir: {}
+      initContainers:
+        # Migrations connect, so the database has to be up before the next step
+        # can say anything useful. Waiting here keeps "postgres is not ready"
+        # separate from "the migration failed".
+        - name: wait-for-postgres
+          image: postgres:16
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h postgres -p 5432 -U "$POSTGRES_USER" -q; do
+                echo "waiting for postgres..."
+                sleep 2
+              done
+              echo "postgres is ready"
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: sudhood-config
+                  key: POSTGRES_USER
+
+        # The schema used to be built by create_all() inside the application's
+        # startup hook, which made "the service is running" and "the database is
+        # the shape the code expects" the same event. They are not.
+        #
+        # This is the compose entrypoint.sh minus the serve step. Running it here
+        # rather than in the app container is about legibility: a failed
+        # migration shows up as Init:Error on a pod that never served a request,
+        # instead of a CrashLoopBackOff that looks like an application bug.
+        #
+        # Both replicas run this. env.py takes a pg_advisory_lock first, so one
+        # migrates and the other waits and finds itself at head — tested with
+        # five concurrent instances on the compose side.
+        #
+        # `alembic check` is the half that catches the failure `upgrade head`
+        # cannot: a column added to models/orm.py with no migration written for
+        # it leaves the database at head and the model ahead of it.
+        - name: migrate
+          image: localhost:5000/sudhood/m0-identity:local
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "alembic upgrade head && alembic check"]
+          envFrom:
+            - configMapRef:
+                name: sudhood-config
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: M0_DATABASE_URL
+            # Nothing here calls another service, so this looks unnecessary —
+            # but alembic/env.py imports config.py, and config.py validates its
+            # required settings at import time. A migration container missing
+            # this dies before it reads a single revision, with a message about
+            # an API key that has nothing to do with migrating.
+            - name: INTERNAL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: INTERNAL_API_KEY
+
+        # The sidecar cannot read the service image's filesystem, so the policy
+        # is lifted into a volume both containers can see. It ships inside the
+        # image (see COPY policy/ in the Dockerfile) so that policy and code are
+        # the same version — a rollback moves both or neither.
+        - name: copy-policy
+          image: localhost:5000/sudhood/m0-identity:local
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "cp /app/policy/*.rego /policy/ && ls -l /policy"]
+          volumeMounts:
+            - name: policy
+              mountPath: /policy
+
+      containers:
+        - name: m0-identity
+          image: localhost:5000/sudhood/m0-identity:local
+          imagePullPolicy: IfNotPresent
+          # Skips entrypoint.sh — migration already ran in the init container,
+          # and running it again per replica would only re-take the lock.
+          command: ["python", "main.py"]
+          ports:
+            - name: http
+              containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: sudhood-config
+          env:
+            - name: SERVICE_PORT
+              value: "8000"
+            # The sidecar is in this pod, so this is a loopback call that never
+            # touches the network. Overrides whatever sudhood-config carries —
+            # `env` wins over `envFrom`, which is what makes one ConfigMap
+            # shared by every service workable.
+            - name: OPA_URL
+              value: "http://localhost:8181"
+            - name: INTERNAL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: INTERNAL_API_KEY
+            # This service's own credential, exchanged with token-service for
+            # a token that names it. Only on the serving container: the
+            # `migrate` initContainer talks to Postgres and to nothing else, so
+            # a credential for calling siblings would be one it cannot use.
+            #
+            # SERVICE_KEY rather than SERVICE_KEY_M0_IDENTITY — a service asks
+            # "what is my key", and naming itself in its own variable is how a
+            # copy-pasted Deployment ends up presenting somebody else's.
+            - name: SERVICE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: SERVICE_KEY_M0_IDENTITY
+            # Connects as m0_service, not the superuser: that login reaches the
+            # identity schema and nothing else, which is what turns "no
+            # cross-schema JOIN" from a convention into something Postgres
+            # refuses. Created by postgres/init/02-service-users.sh.
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: M0_DATABASE_URL
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          # /ready runs SELECT 1 and answers 503 when the database is gone,
+          # which is exactly the condition that should pull a pod out of the
+          # Service without restarting it.
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+
+        # M0's own policy engine. One per service rather than one for the
+        # platform: a policy has to name the resources it protects, so a shared
+        # one ends up naming every module's resources and belonging to no team.
+        # See use-docker-compose/POLICY_CONVENTION.md.
+        #
+        # No Service and no port in the pod spec — only the container beside it
+        # talks to it, over loopback. An OPA that answers "who may do what" is
+        # not something to make reachable.
+        - name: opa
+          image: openpolicyagent/opa:latest
+          args:
+            - run
+            - --server
+            - --addr=127.0.0.1:8181
+            - --log-level=info
+            # Loading from a directory means a policy that does not compile
+            # stops OPA from starting at all. That is the behaviour worth
+            # having: a container that refuses to come up is visible, whereas
+            # one serving an empty policy answers false to everything and looks
+            # like a permissions problem.
+            - /policy
+          volumeMounts:
+            - name: policy
+              mountPath: /policy
+              readOnly: true
+          # No probe, deliberately. The kubelet runs an httpGet probe from
+          # outside the pod's network namespace, so it cannot reach a listener
+          # bound to 127.0.0.1 — and `host: 127.0.0.1` does not help, it points
+          # the kubelet at the *node's* loopback, where nothing answers. That
+          # misreading had this container killed and restarted every 40 seconds.
+          #
+          # An exec probe is not available either: this image is distroless, so
+          # there is no shell and no wget to run inside it.
+          #
+          # Binding 0.0.0.0 would make a probe possible and is the wrong trade:
+          # every pod in the namespace could then ask this engine who may do
+          # what. What is given up instead is small — OPA refuses to start at all
+          # if the policy does not compile, which is the failure that actually
+          # happens, and a dead engine shows up immediately as the service
+          # failing closed on every request.
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              memory: 128Mi

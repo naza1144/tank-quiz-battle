@@ -1,0 +1,161 @@
+services:
+  # ── 1. Gateway (Traefik) ─────────────────────────
+  gateway:
+    image: traefik:latest
+    container_name: tank-gateway
+    restart: unless-stopped
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    environment:
+      - DOCKER_API_VERSION=1.45
+    ports:
+      - "80:80"
+      - "8081:8080" # Traefik Dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - game-net
+
+  # ── 2. Game Client (React 2D Canvas) ────────────
+  game-client:
+    build:
+      context: ./game-client
+      dockerfile: Dockerfile
+    container_name: tank-client
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.client.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.client.entrypoints=web"
+      - "traefik.http.routers.client.priority=1"
+    networks:
+      - game-net
+
+  # ── 3. Game Server (Realtime Socket.io & Quiz) ──
+  game-server:
+    build:
+      context: ./game-server
+      dockerfile: Dockerfile
+    container_name: tank-server
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - TOKEN_SERVICE_JWKS_URL=http://token-service:8100/.well-known/jwks.json
+      - JWT_ISSUER=sudhood-token-service
+      - JWT_AUDIENCE=sudhood-services
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.game-api.rule=PathPrefix(`/api`) || PathPrefix(`/socket.io`)"
+      - "traefik.http.routers.game-api.entrypoints=web"
+      - "traefik.http.routers.game-api.priority=10"
+    networks:
+      - game-net
+    depends_on:
+      - redis
+
+  # ── 4. Token Service (Auth & Google OIDC) ────────
+  token-service:
+    build:
+      context: ./DEMO/use-k3s/token-service
+      dockerfile: Dockerfile
+    container_name: tank-token-service
+    restart: unless-stopped
+    ports:
+      - "8100:8100"
+    environment:
+      - SERVICE_PORT=8100
+      - OIDC_ISSUER_URL=http://keycloak:8080/realms/sudhood
+      - OIDC_PUBLIC_ISSUER_URL=http://localhost:8080/realms/sudhood
+      - OIDC_CLIENT_ID=sudhood-token-service
+      - OIDC_CLIENT_SECRET=dev-token-secret
+      - OIDC_REDIRECT_URI=http://localhost/auth/callback
+      - ALLOWED_EMAIL_DOMAIN=ubu.ac.th
+      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:80,http://127.0.0.1:3000,http://127.0.0.1:80
+      - LOGIN_SUCCESS_REDIRECT=http://localhost:3000/#
+      - REDIS_URL=redis://redis:6379/0
+      - JWT_KEYS_DIR=/keys
+      - INTERNAL_API_KEY=dev-internal-key
+      - GAME_MODE=true
+    volumes:
+      - ./keys:/keys
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.auth.rule=PathPrefix(`/auth`) || PathPrefix(`/.well-known/jwks.json`)"
+      - "traefik.http.routers.auth.entrypoints=web"
+      - "traefik.http.routers.auth.priority=20"
+    networks:
+      - game-net
+    depends_on:
+      - redis
+      - keycloak
+
+  # ── 5. Keycloak (Identity Broker) ───────────────
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: tank-keycloak
+    restart: unless-stopped
+    command: start-dev --import-realm
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://postgres:5432/keycloak
+      - KC_DB_USERNAME=sudhood
+      - KC_DB_PASSWORD=sudhood_db_password
+      - KC_HOSTNAME=localhost
+      - KC_HTTP_PORT=8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./DEMO/use-k3s/keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+    networks:
+      - game-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ── 6. PostgreSQL ────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: tank-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=sudhood
+      - POSTGRES_PASSWORD=sudhood_db_password
+      - POSTGRES_DB=sudhood
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./DEMO/use-k3s/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sudhood"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - game-net
+
+  # ── 7. Redis (Session Cache) ─────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: tank-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - game-net
+
+networks:
+  game-net:
+    driver: bridge
+
+volumes:
+  postgres_data:

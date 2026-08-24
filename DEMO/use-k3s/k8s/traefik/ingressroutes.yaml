@@ -1,0 +1,461 @@
+# ─────────────────────────────────────────────────
+# Traefik IngressRoutes — the gateway's routing table
+# ─────────────────────────────────────────────────
+#  A one-for-one translation of traefik/dynamic/routers.yaml. Only services that
+#  actually run are routed: a route pointing at nothing returns a confusing 502
+#  rather than an honest 404.
+#
+#  Route precedence is computed from rule length, exactly as with the file
+#  provider — the longer, more specific rule wins. That is what keeps the health
+#  and docs routes (which take no token) ahead of the authenticated catch-all
+#  prefix for the same service. If you add a route, check it against that rule
+#  rather than relying on file order, which means nothing here.
+#
+#  M0's /internal/* endpoints are deliberately absent. Nothing routes that
+#  prefix, so they are reachable only from inside the cluster.
+#
+#  ── Every route is `websecure` + `tls: {}`, and that is not two settings ────
+#  Traefik will not attach one router to both a plain and a TLS entrypoint: a
+#  router carrying a `tls` section is registered on the TLS side only, and the
+#  same rule on port 80 stops matching. Serving both would mean two copies of
+#  every route here.
+#
+#  So there is one copy, on TLS, and plain http is redirected to it at the
+#  entrypoint — see ports.web.redirectTo in gateway/traefik-ha.yaml. Nothing in
+#  this file has to know about that.
+#
+#  `tls: {}` with no secretName means "use the default certificate", which is
+#  the TLSStore named `default` that Terraform creates in kube-system. One
+#  certificate covers all eighteen, and a nineteenth route needs no
+#  certificate work at all.
+# ─────────────────────────────────────────────────
+
+# ── Token Service — login flow ──
+#  Browser-facing, and the brute-force target, so it gets the tighter limit.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: token-auth
+spec:
+  entryPoints:
+    - websecure
+  tls: {}
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/auth/login`) || PathPrefix(`/auth/callback`) || PathPrefix(`/auth/token`) || PathPrefix(`/auth/refresh`) || PathPrefix(`/auth/logout`)
+      services:
+        - name: token-service
+          port: 8100
+      middlewares:
+        - name: cors-headers
+        - name: security-headers
+        - name: auth-rate-limit
+---
+# ── Token Service — JWKS ──
+#  Public by design: these are public keys, and every service fetches them to
+#  verify tokens offline.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: token-jwks
+spec:
+  entryPoints:
+    - websecure
+  tls: {}
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/.well-known/jwks.json`)
+      services:
+        - name: token-service
+          port: 8100
+      middlewares:
+        - name: cors-headers
+        - name: security-headers
+---
+# ── Token Service — Swagger ──
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: token-swagger
+spec:
+  entryPoints:
+    - websecure
+  tls: {}
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/auth/docs`) || PathPrefix(`/auth/redoc`) || PathPrefix(`/auth/openapi.json`)
+      services:
+        - name: token-service
+          port: 8100
+      middlewares:
+        - name: cors-headers
+        - name: security-headers
+---
+# ── Identity Service (M0) — health probe ──
+#  Unauthenticated on purpose: a probe carries no token, and a health check that
+#  answers 401 tells you nothing about whether the service works.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: identity-health
+spec:
+  entryPoints:
+    - websecure
+  tls: {}
+  routes:
+    - kind: Rule
+      match: Path(`/api/v1/identity/health`)
+      services:
+        - name: m0-identity
+          port: 8000
+      middlewares:
+        - name: security-headers
+---
+# ── Identity Service (M0) — Account Center ──
+#  The page itself, not the API it calls. Deliberately NOT chain-standard: that
+#  chain contains jwt-auth, and a browser opening http://localhost/account/ has
+#  no token to send — the whole point of the page is to get one. Gating the HTML
+#  would mean nobody could ever reach the login button.
+#
+#  The data behind it is still protected: every fetch() on the page goes to
+#  /api/v1/identity/*, which the `identity` route below does put behind
+#  chain-standard.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: identity-app
+spec:
+  entryPoints:
+    - websecure
+  tls: {}
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/account`)
+      services:
+        - name: m0-identity
+          port: 8000
+      middlewares:
+        - name: security-headers
+---
+# ── Identity Service (M0) — Swagger/OpenAPI ──
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: identity-swagger
+spec:
+  entryPoints:
+    - websecure
+  tls: {}
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/api/v1/identity/docs`) || PathPrefix(`/api/v1/identity/redoc`) || PathPrefix(`/api/v1/identity/openapi.json`)
+      services:
+        - name: m0-identity
+          port: 8000
+      middlewares:
+        - name: cors-headers
+        - name: security-headers
+---
+# ── Identity Service (M0) — authenticated API ──
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: identity
+spec:
+  entryPoints:
+    - websecure
+  tls: {}
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/api/v1/identity`)
+      services:
+        - name: m0-identity
+          port: 8000
+      middlewares:
+        - name: chain-standard
+---
+# ── Platform Service (M10) — health probe ──
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: platform-health
+spec:
+  entryPoints:
+    - websecure
+  tls: {}
+  routes:
+    - kind: Rule
+      match: Path(`/api/v1/platform/health`)
+      services:
+        - name: m10-platform
+          port: 8000
+      middlewares:
+        - name: security-headers
+---
+# ── Platform Service (M10) — Swagger/OpenAPI ──
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: platform-swagger
+spec:
+  entryPoints:
+    - websecure
+  tls: {}
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/api/v1/platform/docs`) || PathPrefix(`/api/v1/platform/redoc`) || PathPrefix(`/api/v1/platform/openapi.json`)
+      services:
+        - name: m10-platform
+          port: 8000
+      middlewares:
+        - name: cors-headers
+        - name: security-headers
+---
+# ── Platform Service (M10) — authenticated API ──
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: platform
+spec:
+  entryPoints:
+    - websecure
+  tls: {}
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/api/v1/platform`)
+      services:
+        - name: m10-platform
+          port: 8000
+      middlewares:
+        - name: chain-standard
+---
+# ── Platform Console (the React UI) ──
+#  Served by M10 itself, so this points at the same Service as the API above —
+#  Traefik is a proxy, not a file server, and something has to hand back
+#  index.html.
+#
+#  No JWT middleware here, unlike every other route to this service. A browser
+#  following a link cannot send an Authorization header, so requiring one would
+#  make the console unreachable rather than secure. The files are three static
+#  assets; every number they display comes from /api/v1/platform/cluster/*,
+#  which is behind chain-standard and needs an admin token.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: platform-console
+spec:
+  entryPoints:
+    - websecure
+  tls: {}
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/console`)
+      services:
+        - name: m10-platform
+          port: 8000
+      middlewares:
+        - name: security-headers
+---
+# ── Platform (M10) — Hub ──
+#  Where login lands: LOGIN_SUCCESS_REDIRECT points here, and the page hands the
+#  token on to whichever app the person picks.
+#
+#  Not behind chain-standard, for the same reason as /account and /console: a
+#  browser arriving from Keycloak has no Authorization header to send, and the
+#  whole purpose of the page is to receive the token that follows in the URL
+#  fragment. Gating the HTML would make login land on a 401.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: platform-hub
+spec:
+  entryPoints:
+    - websecure
+  tls: {}
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/hub`)
+      services:
+        - name: m10-platform
+          port: 8000
+      middlewares:
+        - name: security-headers
+---
+# ── Curriculum Service (M1) — health probe ──
+#  Unauthenticated on purpose: a probe carries no token, and a health check that
+#  answers 401 tells you nothing about whether the service works.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: curriculum-health
+spec:
+  entryPoints:
+    - websecure
+  tls: {}
+  routes:
+    - kind: Rule
+      match: Path(`/api/v1/curriculum/health`) || Path(`/api/v1/curriculum/ready`)
+      services:
+        - name: m1-curriculum
+          port: 8000
+      middlewares:
+        - name: security-headers
+---
+# ── Curriculum Service (M1) — Swagger/OpenAPI ──
+#  Declared before the authenticated route. Traefik prioritises the longer rule,
+#  so docs stay reachable without a token.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: curriculum-swagger
+spec:
+  entryPoints:
+    - websecure
+  tls: {}
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/api/v1/curriculum/docs`) || PathPrefix(`/api/v1/curriculum/redoc`) || PathPrefix(`/api/v1/curriculum/openapi.json`)
+      services:
+        - name: m1-curriculum
+          port: 8000
+      middlewares:
+        - name: cors-headers
+        - name: security-headers
+---
+# ── Curriculum Service (M1) — authenticated API ──
+#  The gateway checks the token here; the service checks the policy behind it.
+#  M1's policy engine is not connected yet (see k8s/m1-curriculum.yaml), so a
+#  request that passes this route can still come back 403 from the service —
+#  that is the module's own gap, visible rather than papered over.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: curriculum
+spec:
+  entryPoints:
+    - websecure
+  tls: {}
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/api/v1/curriculum`)
+      services:
+        - name: m1-curriculum
+          port: 8000
+      middlewares:
+        - name: chain-standard
+---
+# ── Faculty Service (M3) — health probe ──
+#  No token. The kubelet probes this and cannot present one, and a health check
+#  that needs a credential is a health check that reports the credential.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: faculty-health
+spec:
+  entryPoints:
+    - websecure
+  tls: {}
+  routes:
+    - kind: Rule
+      match: Path(`/api/v1/faculty/health`) || Path(`/api/v1/faculty/ready`)
+      services:
+        - name: m3-faculty
+          port: 8000
+      middlewares:
+        - name: security-headers
+---
+# ── Faculty Service (M3) — Swagger ──
+#  Ahead of the authenticated prefix below by rule length, which is how Traefik
+#  orders routes — not by position in this file.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: faculty-swagger
+spec:
+  entryPoints:
+    - websecure
+  tls: {}
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/api/v1/faculty/docs`) || PathPrefix(`/api/v1/faculty/redoc`) || PathPrefix(`/api/v1/faculty/openapi.json`)
+      services:
+        - name: m3-faculty
+          port: 8000
+      middlewares:
+        - name: cors-headers
+        - name: security-headers
+---
+# ── Faculty Service (M3) — everything else needs a token ──
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: faculty
+spec:
+  entryPoints:
+    - websecure
+  tls: {}
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/api/v1/faculty`)
+      services:
+        - name: m3-faculty
+          port: 8000
+      middlewares:
+        - name: chain-standard
+---
+# ── Thesis Service (M9) — health probe ──
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: thesis-health
+spec:
+  entryPoints:
+    - websecure
+  tls: {}
+  routes:
+    - kind: Rule
+      match: Path(`/api/v1/thesis/health`) || Path(`/api/v1/thesis/ready`)
+      services:
+        - name: m9-thesis
+          port: 8000
+      middlewares:
+        - name: security-headers
+---
+# ── Thesis Service (M9) — Swagger/OpenAPI ──
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: thesis-swagger
+spec:
+  entryPoints:
+    - websecure
+  tls: {}
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/api/v1/thesis/docs`) || PathPrefix(`/api/v1/thesis/redoc`) || PathPrefix(`/api/v1/thesis/openapi.json`)
+      services:
+        - name: m9-thesis
+          port: 8000
+      middlewares:
+        - name: cors-headers
+        - name: security-headers
+---
+# ── Thesis Service (M9) — authenticated API ──
+#  Same caveat as curriculum above: the token check happens here, the policy
+#  check happens in a service whose engine is not wired up yet.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: thesis
+spec:
+  entryPoints:
+    - websecure
+  tls: {}
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/api/v1/thesis`)
+      services:
+        - name: m9-thesis
+          port: 8000
+      middlewares:
+        - name: chain-standard

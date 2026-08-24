@@ -1,0 +1,127 @@
+# ─────────────────────────────────────────────────
+# Gateway HA — two Traefik replicas
+# ─────────────────────────────────────────────────
+#  Applied on its own, NOT through kustomization.yaml. The kustomization sets
+#  `namespace: sudhood` on everything it renders, and this object has to live in
+#  kube-system to be seen — pulled into the wrong namespace it would be accepted
+#  by the API server and then silently ignored, which is the worst kind of
+#  broken.
+#
+#      kubectl apply -f k8s/gateway/traefik-ha.yaml
+#
+#  Why a HelmChartConfig instead of editing the Deployment: k3s installs Traefik
+#  from a HelmChart and reconciles it. `kubectl scale deploy/traefik` works for
+#  about a minute and is then reverted, usually after you have stopped watching.
+#  This is the supported way to change those values and it survives a k3s
+#  restart or upgrade.
+#
+#  ── What two replicas actually buys on a single node ──
+#  Protection against a Traefik pod crashing, being OOM-killed, or being
+#  replaced during a rolling update — in all three the other replica keeps
+#  serving. It does NOT protect against the node going down, because both pods
+#  are on that node. On a one-node cluster there is no arrangement that does.
+#  Worth stating plainly rather than presenting this as full gateway HA.
+#
+#  Traefik does not bind host ports itself here — the LoadBalancer Service plus
+#  k3s' svclb DaemonSet handle that — so two replicas on one node do not fight
+#  over :80. Confirm after applying:
+#      kubectl -n kube-system get pods -l app.kubernetes.io/name=traefik
+#  Both should reach Running. If the second sticks at Pending with a port
+#  conflict, this cluster runs Traefik with hostPorts and two replicas need a
+#  second node.
+# ─────────────────────────────────────────────────
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  # Merged into the chart's values, not replacing them. Anything not named here
+  # keeps whatever k3s ships as the default.
+  valuesContent: |-
+    deployment:
+      replicas: 2
+
+    # Stop a drain or upgrade taking both replicas at once. Without this the
+    # gateway can go fully dark during routine node maintenance, which is the
+    # one moment it most obviously should not.
+    podDisruptionBudget:
+      enabled: true
+      minAvailable: 1
+
+    # Prefer separate nodes when there is more than one, but schedule anyway on
+    # a single-node cluster instead of leaving the second replica Pending
+    # forever.
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: traefik
+
+    # Requests exist so the HPA-driven services below cannot crowd the gateway
+    # off the node. A cluster that evicts its own front door under load has
+    # solved nothing.
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        memory: 512Mi
+
+    # Traefik's own metrics, in the format the Prometheus already running in the
+    # monitoring namespace expects. This is where request rate, latency, and
+    # per-router 5xx counts come from — the numbers the dashboard shows for the
+    # gateway itself, which no application /metrics endpoint can provide.
+    metrics:
+      prometheus:
+        entryPoint: metrics
+        addRoutersLabels: true
+
+    # `dashboard: true` makes the dashboard available to a router. It does not
+    # attach it to an entrypoint — the chart only does that when `api.insecure`
+    # is set, and it is not set here. So the dashboard is currently reachable
+    # from nowhere, which is worth stating plainly because an earlier version of
+    # this comment claimed a port-forward would reach it.
+    #
+    # Measured against chart 40.1.4 (`port-forward deploy/traefik LOCAL:8080`,
+    # the traefik entrypoint — 8080 in this chart version, 9000 in older ones):
+    #     /ping           200
+    #     /dashboard/     404
+    #     /api/overview   404
+    #
+    # To actually open it, pick one and mean it:
+    #   · `api: {dashboard: true, insecure: true}` — serves the dashboard AND the
+    #     unauthenticated API on the traefik entrypoint. That entrypoint is not
+    #     in the Service, so it stays inside the cluster: reachable by anyone who
+    #     can port-forward, and by any pod that can dial traefik:8080.
+    #   · an IngressRoute to `api@internal` with an auth middleware, if it should
+    #     be reachable from the LAN.
+    api:
+      dashboard: true
+    # Plain http is answered with a redirect to https rather than by a second
+    # copy of every route. A router with a `tls` section is attached to the TLS
+    # entrypoint only, so without this a request to http://<host>/ reaches
+    # Traefik, matches nothing, and comes back 404 — which reads like broken
+    # routing rather than "this cluster is https now".
+    #
+    # Set as Traefik's own arguments rather than through the chart's
+    # `ports.web.redirectTo`. That value exists, and its shape changed between
+    # chart versions — a string in older ones, an object in newer. Written the
+    # wrong way it is accepted silently and produces nothing, which is exactly
+    # what happened here: the rest of this file applied, the gateway went to
+    # two replicas, and the redirect was simply absent. These two lines are the
+    # flags Traefik actually reads, so a mistake in them stops it from starting
+    # instead of disappearing.
+    additionalArguments:
+      # `:443`, not `websecure`. Naming the entrypoint makes Traefik redirect to
+      # the port that entrypoint listens on *inside the pod* — 8443 — and 8443
+      # is not published anywhere, so the browser follows the redirect to a
+      # closed port. The Service maps 443 to it, and Traefik has no idea that
+      # mapping exists. `to` accepts a port for exactly this case.
+      - "--entrypoints.web.http.redirections.entryPoint.to=:443"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entryPoint.permanent=true"
