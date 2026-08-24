@@ -1,0 +1,35 @@
+---
+- name: "Phase 1: Build Game Container Images locally"
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: false
+  tasks:
+    - name: Build Game Client Image
+      ansible.builtin.command:
+        cmd: docker build -t tank-game-client:latest game-client
+        chdir: "{{ playbook_dir }}/.."
+      changed_when: true
+
+    - name: Build Game Server Image
+      ansible.builtin.command:
+        cmd: docker build -t tank-game-server:latest game-server
+        chdir: "{{ playbook_dir }}/.."
+      changed_when: true
+
+    - name: Export Game Client image to tar archive
+      ansible.builtin.command:
+        cmd: docker save tank-game-client:latest -o /tmp/tank-game-client.tar
+      changed_when: true
+
+    - name: Export Game Server image to tar archive
+      ansible.builtin.command:
+        cmd: docker save tank-game-server:latest -o /tmp/tank-game-server.tar
+      changed_when: true
+
+- name: "Phase 2: Deploy & Configure Application on Kubernetes (k3s) Cluster"
+  hosts: k8s_cluster
+  gather_facts: true
+  become: true
+  roles:
+    - role: game_deploy

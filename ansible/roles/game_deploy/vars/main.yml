@@ -1,0 +1,9 @@
+---
+k8s_namespace: "game"
+client_image: "docker.io/library/tank-game-client:latest"
+server_image: "docker.io/library/tank-game-server:latest"
+tar_client_path: "/tmp/tank-game-client.tar"
+tar_server_path: "/tmp/tank-game-server.tar"
+game_port: 30080
+server_api_port: 30400
+jwt_secret: "tank-battle-quiz-secret-2026"

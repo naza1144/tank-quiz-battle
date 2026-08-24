@@ -1,0 +1,97 @@
+---
+- name: Ensure target temporary directory exists
+  ansible.builtin.file:
+    path: /tmp/game_deploy
+    state: directory
+    mode: '0755'
+
+- name: Copy container image archives to k3s server
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0644'
+  loop:
+    - { src: "{{ tar_client_path }}", dest: "{{ tar_client_path }}" }
+    - { src: "{{ tar_server_path }}", dest: "{{ tar_server_path }}" }
+
+- name: Import Game Client image into k3s containerd runtime
+  ansible.builtin.command:
+    cmd: k3s ctr images import {{ tar_client_path }}
+  become: true
+  register: import_client
+  changed_when: "'unpacking' in import_client.stdout or 'saved' in import_client.stdout"
+
+- name: Import Game Server image into k3s containerd runtime
+  ansible.builtin.command:
+    cmd: k3s ctr images import {{ tar_server_path }}
+  become: true
+  register: import_server
+  changed_when: "'unpacking' in import_server.stdout or 'saved' in import_server.stdout"
+
+- name: Ensure Kubernetes namespace exists
+  ansible.builtin.command:
+    cmd: kubectl create namespace {{ k8s_namespace }} --dry-run=client -o yaml
+  become: true
+  register: ns_yaml
+  changed_when: false
+
+- name: Apply Kubernetes Namespace
+  ansible.builtin.command:
+    cmd: kubectl apply -f -
+    stdin: "{{ ns_yaml.stdout }}"
+  become: true
+  changed_when: false
+
+- name: Copy Kubernetes Deployment manifest to server
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../k8s/game-deployment.yaml"
+    dest: /tmp/game_deploy/game-deployment.yaml
+    mode: '0644'
+
+- name: Apply Kubernetes Game Manifests
+  ansible.builtin.command:
+    cmd: kubectl apply -f /tmp/game_deploy/game-deployment.yaml -n {{ k8s_namespace }}
+  become: true
+  register: k8s_apply
+  changed_when: "'configured' in k8s_apply.stdout or 'created' in k8s_apply.stdout"
+
+- name: Restart deployments to pull newly imported images
+  ansible.builtin.command:
+    cmd: kubectl rollout restart deployment/{{ item }} -n {{ k8s_namespace }}
+  become: true
+  loop:
+    - game-client
+    - game-server
+  changed_when: true
+
+- name: Wait for Game Server pods to be ready
+  ansible.builtin.command:
+    cmd: kubectl rollout status deployment/game-server -n {{ k8s_namespace }} --timeout=60s
+  become: true
+  changed_when: false
+
+- name: Wait for Game Client pods to be ready
+  ansible.builtin.command:
+    cmd: kubectl rollout status deployment/game-client -n {{ k8s_namespace }} --timeout=60s
+  become: true
+  changed_when: false
+
+- name: Verify Open REST API Categories endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ game_port }}/api/quiz/categories"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: api_check
+  until: api_check.status == 200
+  retries: 5
+  delay: 3
+
+- name: Display Deployment Success Status
+  ansible.builtin.debug:
+    msg:
+      - "=========================================================="
+      - "🎉 TANK QUIZ BATTLE 1990 DEPLOYED TO K8S SUCCESSFULLY!"
+      - "🎮 Game Client URL : http://{{ ansible_host }}:{{ game_port }}"
+      - "📚 Open REST API   : http://{{ ansible_host }}:{{ game_port }}/api/quiz/categories"
+      - "=========================================================="

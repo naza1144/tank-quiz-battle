@@ -87,20 +87,68 @@ tank-quiz-battle/
 │   │   ├── server.ts                # HTTP Server, Open Quiz REST APIs & WebSockets
 │   │   └── types.ts                 # Shared Server Types & Protocols
 │   ├── test-game.ts                 # Automated Physics, Combat & Quiz Engine Unit Tests
-│   └── Dockerfile
+├── deploy-all.sh                    # Single-Command Automated Deployment Script
+│
+├── terraform/                       # Infrastructure as Code (Terraform for Kubernetes)
+│   ├── main.tf                      # Namespaces, Deployments, Services & NodePorts
+│   ├── variables.tf                 # Configuration Variables & Secrets
+│   ├── outputs.tf                   # Endpoints Output
+│   └── terraform.tfvars             # Production Values
+│
+├── ansible/                         # Configuration Management & Automation Playbook
+│   ├── ansible.cfg                  # SSH & Inventory Configuration
+│   ├── inventory.ini                # K3s Node Server Definitions
+│   ├── playbook.yml                 # Master Orchestration Playbook
+│   └── roles/game_deploy/           # Modular Automated Deployment Tasks
 │
 ├── k8s/                             # Kubernetes Manifests
 │   └── game-deployment.yaml         # Deployment & NodePort Service (Namespace: game)
 │
-├── docker-compose.yml               # Local Multi-container Deployment
 └── README.md                        # Documentation
 ```
 
 ---
 
-## 🚀 วิธีการติดตั้งและรันระบบ (Quick Start)
+## 🚀 วิธีการติดตั้งและรันระบบขึ้นเซิร์ฟเวอร์ (Production Deployment)
 
-### วิธีที่ 1: รันเพื่อพัฒนาในเครื่อง (Local Development)
+### 🌟 วิธีที่ 1: รันคำสั่งเดียวติดตั้งทั้งระบบ (Single-Command Automated Run)
+
+ติดตั้งและตั้งค่าคลัสเตอร์ Kubernetes ทั้งหมดในคำสั่งเดียวผ่าน **Ansible** หรือ **Terraform** โดยไม่ต้องใช้ Docker Compose:
+
+```bash
+# รันติดตั้งแบบ Full Automation ผ่าน Ansible & Kubernetes ในคำสั่งเดียว
+./deploy-all.sh
+
+# หรือระบุให้รันผ่าน Terraform โดยตรง
+./deploy-all.sh --terraform
+
+# หรือระบุให้รันผ่าน Ansible Playbook
+./deploy-all.sh --ansible
+```
+
+---
+
+### 🛠️ วิธีที่ 2: รันผ่าน Terraform โดยตรง
+
+```bash
+cd terraform
+terraform init
+terraform plan
+terraform apply -auto-approve
+```
+
+---
+
+### 📋 วิธีที่ 3: รันผ่าน Ansible Playbook
+
+```bash
+cd ansible
+ansible-playbook -i inventory.ini playbook.yml
+```
+
+---
+
+### 💻 วิธีที่ 4: รันเพื่อพัฒนาในเครื่อง (Local Dev)
 
 **1. เริ่มต้น Game Server:**
 ```bash
@@ -116,31 +164,6 @@ cd game-client
 npm install
 npm run dev
 # Client จะทำงานที่ http://localhost:3000
-```
-
----
-
-### วิธีที่ 2: รันผ่าน Docker Compose
-
-```bash
-docker compose up --build
-```
-- เข้าใช้งานเกมได้ที่: `http://localhost:3000` (หรือ `http://localhost`)
-
----
-
-### วิธีที่ 3: Deploy บน Kubernetes / k3s Cluster
-
-```bash
-# 1. Build และ Import Image
-docker build -t tank-game-client:latest game-client
-docker build -t tank-game-server:latest game-server
-
-# 2. Deploy Manifest
-kubectl apply -f k8s/game-deployment.yaml -n game
-
-# 3. ตรวจสอบสถานะ Pods
-kubectl get pods -n game
 ```
 
 - เข้าใช้งานเกมผ่าน NodePort: `http://<SERVER_IP>:30080`

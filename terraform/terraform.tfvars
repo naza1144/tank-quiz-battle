@@ -1,0 +1,9 @@
+kubeconfig_path  = "~/.kube/config"
+namespace        = "game"
+server_image     = "docker.io/library/tank-game-server:latest"
+client_image     = "docker.io/library/tank-game-client:latest"
+client_replicas  = 2
+server_replicas  = 1
+nodeport         = 30080
+server_nodeport  = 30400
+jwt_secret       = "tank-battle-quiz-secret-2026"
