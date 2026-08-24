@@ -50,20 +50,21 @@ const SOCKET_SERVER_URL = window.location.hostname === 'localhost'
   : window.location.origin;
 
 export const App: React.FC = () => {
-  // Dedicated Teacher Route State (/teacher)
-  const [isTeacherRoute, setIsTeacherRoute] = useState<boolean>(() => {
-    return window.location.pathname === '/teacher' || 
-           window.location.hash === '#/teacher' || 
-           window.location.search.includes('route=teacher');
-  });
+  // Dedicated Teacher & Admin Route State (/admin, /teacher)
+  const isTeacherOrAdminPath = () => {
+    const p = window.location.pathname.toLowerCase();
+    const h = window.location.hash.toLowerCase();
+    const s = window.location.search.toLowerCase();
+    return p.startsWith('/admin') || p.startsWith('/teacher') ||
+           h.includes('/admin') || h.includes('/teacher') ||
+           s.includes('route=admin') || s.includes('route=teacher');
+  };
+
+  const [isTeacherRoute, setIsTeacherRoute] = useState<boolean>(() => isTeacherOrAdminPath());
 
   useEffect(() => {
     const handlePopState = () => {
-      setIsTeacherRoute(
-        window.location.pathname === '/teacher' || 
-        window.location.hash === '#/teacher' || 
-        window.location.search.includes('route=teacher')
-      );
+      setIsTeacherRoute(isTeacherOrAdminPath());
     };
     window.addEventListener('popstate', handlePopState);
     window.addEventListener('hashchange', handlePopState);

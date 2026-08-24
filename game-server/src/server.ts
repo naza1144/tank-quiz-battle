@@ -194,11 +194,67 @@ app.post('/api/quiz/import', (req, res) => {
 
 // 8. รีเซ็ตโจทย์คำถามกลับเป็นโจทย์มาตรฐาน
 app.post('/api/quiz/reset', (req, res) => {
-  const total = quizManager.resetToDefault();
+  quizManager.resetToDefault();
   res.json({
     success: true,
     message: 'รีเซ็ตคลังคำถามกลับเป็นโจทย์ตั้งต้นเรียบร้อย',
-    total
+    total: 15
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 🏰 ADMIN & ROOM MANAGEMENT REST APIS (จัดการและควบคุมห้องแข่งขันสำหรับอาจารย์)
+// ══════════════════════════════════════════════════════════════════════════════
+
+// 1. ดึงรายละเอียดห้องทั้งหมดแบบเรียลไทม์ (Live Active Rooms)
+app.get('/api/admin/rooms', (req, res) => {
+  res.json({
+    success: true,
+    rooms: roomManager.getAllRoomsDetailed()
+  });
+});
+
+// 2. ลบ / บังคับปิดห้องแข่งขันทันที (Force Delete Room)
+app.delete('/api/admin/rooms/:roomId', (req, res) => {
+  const { roomId } = req.params;
+  const success = roomManager.deleteRoom(roomId);
+  if (success) {
+    res.json({ success: true, message: `ปิดและลบห้อง [${roomId}] สำเร็จแล้ว` });
+  } else {
+    res.status(404).json({ success: false, error: `ไม่พบห้อง [${roomId}] ในระบบ` });
+  }
+});
+
+// 3. บังคับรีเซ็ตห้องแข่งขันกลับสู่ล็อบบี้ (Force Reset Room)
+app.post('/api/admin/rooms/:roomId/reset', (req, res) => {
+  const { roomId } = req.params;
+  const success = roomManager.resetRoom(roomId);
+  if (success) {
+    res.json({ success: true, message: `รีเซ็ตห้อง [${roomId}] กลับสู่ล็อบบี้แล้ว` });
+  } else {
+    res.status(404).json({ success: false, error: `ไม่พบห้อง [${roomId}]` });
+  }
+});
+
+// 4. เตะผู้เล่นออกจากห้อง (Kick Player from Room)
+app.post('/api/admin/rooms/:roomId/kick/:playerId', (req, res) => {
+  const { roomId, playerId } = req.params;
+  const success = roomManager.kickPlayer(roomId, playerId);
+  if (success) {
+    res.json({ success: true, message: `เตะผู้เล่นออกจากห้อง [${roomId}] สำเร็จ` });
+  } else {
+    res.status(404).json({ success: false, error: `ไม่พบผู้เล่นหรือห้อง` });
+  }
+});
+
+// 5. สถิติภาพรวมระบบ (Cluster & Game Server Stats)
+app.get('/api/admin/stats', (req, res) => {
+  res.json({
+    success: true,
+    stats: {
+      ...roomManager.getSystemStats(),
+      totalQuestionsInBank: quizManager.getAllQuestions().length
+    }
   });
 });
 

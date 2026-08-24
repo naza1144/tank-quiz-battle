@@ -609,6 +609,166 @@ export class RoomManager {
     this.handleVoteTeamQuiz(socket, { choiceIndex: data.selectedIndex });
   }
 
+  // ══════════════════════════════════════════════════════════════════════════════
+  // 🏰 ADMIN ROOM MANAGEMENT METHODS
+  // ══════════════════════════════════════════════════════════════════════════════
+
+  public getAllRoomsDetailed() {
+    return Array.from(this.rooms.values()).map(r => ({
+      id: r.config.id,
+      name: r.config.name,
+      mode: r.config.mode,
+      maxTanks: r.config.maxTanks,
+      playerCount: r.players.size,
+      state: r.state,
+      isPrivate: r.config.isPrivate,
+      selectedSubject: r.config.selectedSubject || 'ALL',
+      hasActiveEngine: !!r.engine,
+      players: Array.from(r.players.values()).map(p => ({
+        id: p.id,
+        socketId: p.socketId,
+        name: p.name,
+        role: p.role,
+        teamId: p.teamId,
+        tankArchetype: p.tankArchetype,
+        tankColor: p.tankColor,
+        isHost: p.isHost,
+        isReady: p.isReady
+      }))
+    }));
+  }
+
+  public deleteRoom(roomId: string): boolean {
+    const room = this.rooms.get(roomId);
+    if (!room) return false;
+
+    // Clear game loops and timeouts
+    if (room.intervalId) {
+      clearInterval(room.intervalId);
+      room.intervalId = undefined;
+    }
+    for (const session of room.activeSquadQuizzes.values()) {
+      if (session.timer) clearTimeout(session.timer);
+    }
+    room.activeSquadQuizzes.clear();
+
+    // Broadcast room closed notice to all players in that room
+    this.io.to(roomId).emit('room_closed', {
+      roomId,
+      reason: 'ห้องนี้ถูกปิด/ลบโดยอาจารย์หรือผู้ดูแลระบบ (Admin Force Closed Room)'
+    });
+
+    // Remove socket mappings
+    for (const socketId of room.players.keys()) {
+      this.playerRooms.delete(socketId);
+      const s = this.io.sockets.sockets.get(socketId);
+      if (s) {
+        s.leave(roomId);
+        s.emit('game_event', {
+          type: 'ROOM_DELETED',
+          message: 'ห้องแข่งขันถูกลบโดยผู้ดูแลระบบ กำลังนำคุณกลับสู่หน้ารายการห้อง...',
+          sound: 'GAME_OVER',
+          timestamp: Date.now()
+        });
+      }
+    }
+
+    this.rooms.delete(roomId);
+    this.io.emit('room_list', this.getRoomList());
+    return true;
+  }
+
+  public resetRoom(roomId: string): boolean {
+    const room = this.rooms.get(roomId);
+    if (!room) return false;
+
+    if (room.intervalId) {
+      clearInterval(room.intervalId);
+      room.intervalId = undefined;
+    }
+    for (const session of room.activeSquadQuizzes.values()) {
+      if (session.timer) clearTimeout(session.timer);
+    }
+    room.activeSquadQuizzes.clear();
+    room.engine = undefined;
+    room.state = 'LOBBY';
+
+    // Reset player states
+    for (const player of room.players.values()) {
+      player.isReady = player.isHost;
+      player.tankId = undefined;
+    }
+
+    this.io.to(roomId).emit('game_event', {
+      type: 'ROOM_RESET',
+      message: 'อาจารย์/ผู้ดูแลระบบได้ทำการรีเซ็ตห้องแข่งขันกลับสู่ล็อบบี้',
+      sound: 'START',
+      timestamp: Date.now()
+    });
+
+    this.broadcastRoomState(roomId);
+    this.io.emit('room_list', this.getRoomList());
+    return true;
+  }
+
+  public kickPlayer(roomId: string, playerIdOrSocketId: string): boolean {
+    const room = this.rooms.get(roomId);
+    if (!room) return false;
+
+    let targetSocketId: string | null = null;
+    for (const [sId, p] of room.players.entries()) {
+      if (sId === playerIdOrSocketId || p.id === playerIdOrSocketId) {
+        targetSocketId = sId;
+        break;
+      }
+    }
+
+    if (!targetSocketId) return false;
+
+    const player = room.players.get(targetSocketId);
+    room.players.delete(targetSocketId);
+    this.playerRooms.delete(targetSocketId);
+
+    const s = this.io.sockets.sockets.get(targetSocketId);
+    if (s) {
+      s.leave(roomId);
+      s.emit('player_kicked', {
+        reason: 'คุณถูกเชิญออกจากห้องโดยอาจารย์/ผู้ดูแลระบบ (Kicked by Admin)'
+      });
+    }
+
+    // Reassign host if needed
+    if (player?.isHost && room.players.size > 0) {
+      const nextHost = room.players.values().next().value;
+      if (nextHost) {
+        nextHost.isHost = true;
+        nextHost.isReady = true;
+      }
+    }
+
+    this.broadcastRoomState(roomId);
+    this.io.emit('room_list', this.getRoomList());
+    return true;
+  }
+
+  public getSystemStats() {
+    let totalPlayers = 0;
+    let activeGames = 0;
+    for (const r of this.rooms.values()) {
+      totalPlayers += r.players.size;
+      if (r.state === 'IN_GAME') activeGames++;
+    }
+
+    return {
+      totalRooms: this.rooms.size,
+      totalPlayers,
+      activeGames,
+      uptimeSeconds: Math.floor(process.uptime()),
+      memoryUsageMb: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+      timestamp: new Date().toISOString()
+    };
+  }
+
   private broadcastRoomState(roomId: string) {
     const room = this.rooms.get(roomId);
     if (!room) return;
