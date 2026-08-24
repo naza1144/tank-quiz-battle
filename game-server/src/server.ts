@@ -161,10 +161,6 @@ io.on('connection', (socket: Socket) => {
     roomManager.selectTank(socket, data.archetype, data.color, data.role, data.teamId);
   });
 
-  socket.on('add_bot', (data?: { difficulty?: any }) => {
-    roomManager.addBot(socket, data?.difficulty);
-  });
-
   socket.on('start_game', () => {
     roomManager.startGame(socket);
   });

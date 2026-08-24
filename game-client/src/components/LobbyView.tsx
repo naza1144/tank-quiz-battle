@@ -4,7 +4,6 @@ import {
   Shield, 
   Zap, 
   Crosshair, 
-  Bot, 
   Play, 
   Check, 
   Users, 
@@ -40,7 +39,6 @@ interface LobbyViewProps {
   isHost: boolean;
   onSelectTank: (archetype: TankArchetype, color: string, role: PlayerRole, teamId?: string) => void;
   onSetReady: (isReady: boolean) => void;
-  onAddBot: (difficulty: 'EASY' | 'MEDIUM' | 'HARD') => void;
   onAutoBalanceTeams?: () => void;
   onStartGame: () => void;
   onLeaveRoom: () => void;
@@ -181,7 +179,6 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
   isHost,
   onSelectTank,
   onSetReady,
-  onAddBot,
   onAutoBalanceTeams,
   onStartGame,
   onLeaveRoom
@@ -553,17 +550,6 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
               <h2 className="font-arcade text-xs text-slate-300 flex items-center gap-2">
                 <Users className="w-4 h-4 text-cyan-400" /> ROSTER ({players.length}/{roomConfig?.maxTanks || 6})
               </h2>
-              {isHost && (
-                <button
-                  onClick={() => {
-                    soundFx.playSelect();
-                    onAddBot('MEDIUM');
-                  }}
-                  className="px-2.5 py-1 arcade-btn arcade-btn-slate font-arcade text-[8px] flex items-center gap-1"
-                >
-                  <Bot className="w-3 h-3" /> + AI BOT
-                </button>
-              )}
             </div>
 
             {/* Players List */}

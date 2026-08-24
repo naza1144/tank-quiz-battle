@@ -311,10 +311,6 @@ export const App: React.FC = () => {
     socketRef.current?.emit('set_ready', isReady);
   };
 
-  const handleAddBot = (difficulty: 'EASY' | 'MEDIUM' | 'HARD') => {
-    socketRef.current?.emit('add_bot', { difficulty });
-  };
-
   const handleStartGame = () => {
     socketRef.current?.emit('start_game');
   };
@@ -405,7 +401,6 @@ export const App: React.FC = () => {
             isHost={isHost}
             onSelectTank={handleSelectTank}
             onSetReady={handleSetReady}
-            onAddBot={handleAddBot}
             onAutoBalanceTeams={handleAutoBalanceTeams}
             onStartGame={handleStartGame}
             onLeaveRoom={handleLeaveRoom}

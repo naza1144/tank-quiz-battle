@@ -313,33 +313,6 @@ export class RoomManager {
     this.broadcastRoomState(roomId);
   }
 
-  public addBot(socket: Socket, difficulty: 'EASY' | 'MEDIUM' | 'HARD' = 'MEDIUM') {
-    const roomId = this.playerRooms.get(socket.id);
-    if (!roomId) return;
-    const room = this.rooms.get(roomId);
-    if (!room || room.state !== 'LOBBY') return;
-
-    const botCount = Array.from(room.players.values()).filter(p => p.id.startsWith('bot-')).length;
-    const botId = `bot-${botCount + 1}`;
-    const botColors = ['#f59e0b', '#ef4444', '#10b981', '#6366f1', '#ec4899', '#8b5cf6'];
-    const botArchetypes: TankArchetype[] = ['STANDARD', 'SCOUT', 'HEAVY', 'SNIPER'];
-
-    const botPlayer: Player = {
-      id: botId,
-      socketId: botId,
-      name: `🤖 AI Bot ${botCount + 1} (${difficulty})`,
-      role: 'DRIVER',
-      teamId: `team-${botCount + 2}`,
-      tankArchetype: botArchetypes[botCount % botArchetypes.length],
-      tankColor: botColors[botCount % botColors.length],
-      isHost: false,
-      isReady: true
-    };
-
-    room.players.set(botId, botPlayer);
-    this.broadcastRoomState(roomId);
-  }
-
   public startGame(socket: Socket) {
     const roomId = this.playerRooms.get(socket.id);
     if (!roomId) return;

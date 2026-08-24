@@ -349,11 +349,6 @@ export class GameEngine {
     for (const tank of this.tanks.values()) {
       if (tank.isDead) continue;
 
-      // Bot AI behavior
-      if (tank.isBot) {
-        this.updateBotAI(tank, dt, now);
-      }
-
       // Check Movement
       if (tank.isMoving && now >= tank.stunEndTime) {
         let currentSpeed = tank.speed;
@@ -379,15 +374,7 @@ export class GameEngine {
 
             const question = this.quizManager.getRandomQuestion(crate.category);
             
-            if (tank.isBot) {
-              // Bot answers automatically after delay
-              const delay = tank.botDifficulty === 'HARD' ? 1500 : (tank.botDifficulty === 'MEDIUM' ? 2500 : 4000);
-              const accuracy = tank.botDifficulty === 'HARD' ? 0.95 : (tank.botDifficulty === 'MEDIUM' ? 0.8 : 0.6);
-              setTimeout(() => {
-                const choice = Math.random() < accuracy ? question.correctIndex : (question.correctIndex + 1) % 4;
-                this.handleQuizAnswer(tank.id, crate.id, question.id, choice);
-              }, delay);
-            } else if (this.mode === 'SQUAD' && tank.teamId) {
+            if (this.mode === 'SQUAD' && tank.teamId) {
               this.listeners.onTeamQuizTrigger(tank.teamId, question, crate.id, tank.id);
             } else {
               this.listeners.onQuizTrigger(tank.id, tank.playerId, question, crate.id);
@@ -573,78 +560,6 @@ export class GameEngine {
 
   private isPointInBox(px: number, py: number, bx: number, by: number, bw: number, bh: number): boolean {
     return px >= bx && px <= bx + bw && py >= by && py <= by + bh;
-  }
-
-  private updateBotAI(bot: Tank, dt: number, now: number) {
-    if (bot.isDead || now < bot.stunEndTime) return;
-
-    // AI Logic:
-    // 1. If low ammo (ammo === 0), seek nearest active Quiz Crate
-    // 2. If has ammo, seek nearest alive enemy tank and align to shoot
-
-    let targetX = MAP_WIDTH / 2;
-    let targetY = MAP_HEIGHT / 2;
-
-    if (bot.ammo === 0) {
-      // Find nearest active crate
-      let nearestCrate: QuizCrate | null = null;
-      let minDist = Infinity;
-      for (const c of this.crates) {
-        if (c.isActive) {
-          const dist = Math.hypot(c.x - bot.x, c.y - bot.y);
-          if (dist < minDist) {
-            minDist = dist;
-            nearestCrate = c;
-          }
-        }
-      }
-      if (nearestCrate) {
-        targetX = nearestCrate.x;
-        targetY = nearestCrate.y;
-      }
-    } else {
-      // Find nearest enemy tank
-      let nearestEnemy: Tank | null = null;
-      let minDist = Infinity;
-      for (const other of this.tanks.values()) {
-        if (other.id === bot.id || other.isDead) continue;
-        if (bot.teamId && other.teamId === bot.teamId) continue;
-        const dist = Math.hypot(other.x - bot.x, other.y - bot.y);
-        if (dist < minDist) {
-          minDist = dist;
-          nearestEnemy = other;
-        }
-      }
-
-      if (nearestEnemy) {
-        targetX = nearestEnemy.x;
-        targetY = nearestEnemy.y;
-
-        // Check if aligned in line of sight (horizontal or vertical) to shoot
-        const alignTolerance = 20;
-        if (Math.abs(bot.x - nearestEnemy.x) < alignTolerance) {
-          if (nearestEnemy.y < bot.y) bot.direction = 'UP';
-          else bot.direction = 'DOWN';
-          this.tankShoot(bot.id);
-        } else if (Math.abs(bot.y - nearestEnemy.y) < alignTolerance) {
-          if (nearestEnemy.x < bot.x) bot.direction = 'LEFT';
-          else bot.direction = 'RIGHT';
-          this.tankShoot(bot.id);
-        }
-      }
-    }
-
-    // Move towards target
-    const diffX = targetX - bot.x;
-    const diffY = targetY - bot.y;
-
-    if (Math.abs(diffX) > Math.abs(diffY)) {
-      bot.direction = diffX > 0 ? 'RIGHT' : 'LEFT';
-    } else {
-      bot.direction = diffY > 0 ? 'DOWN' : 'UP';
-    }
-
-    bot.isMoving = true;
   }
 
   public checkWinCondition(timeUp: boolean = false) {
