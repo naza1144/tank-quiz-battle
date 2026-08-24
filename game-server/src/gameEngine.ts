@@ -58,17 +58,59 @@ export class GameEngine {
     this.initCrates();
   }
 
-  private initCrates() {
-    this.crates = CRATE_SPAWN_LOCATIONS.map((loc, idx) => ({
-      id: `crate-${this.crateIdCounter++}`,
-      x: loc.x + 4,
-      y: loc.y + 4,
-      width: 24,
-      height: 24,
-      category: loc.category,
-      isActive: true,
-      respawnTime: 0
-    }));
+  private getRandomValidTilePosition(): { x: number; y: number } | null {
+    const validPositions: { r: number; c: number }[] = [];
+
+    // Search interior grid (avoiding border walls)
+    for (let r = 2; r < MAP_GRID_SIZE - 2; r++) {
+      for (let c = 2; c < MAP_GRID_SIZE - 2; c++) {
+        const tile = this.map[r][c];
+        if (tile === 'EMPTY' || tile === 'BUSH' || tile === 'ICE') {
+          const px = c * TILE_SIZE + 4;
+          const py = r * TILE_SIZE + 4;
+          // Check no active crate nearby (within 1.5 tiles)
+          const hasCrateNearby = this.crates.some(
+            crate => crate.isActive && Math.hypot(crate.x - px, crate.y - py) < TILE_SIZE * 1.5
+          );
+          if (!hasCrateNearby) {
+            validPositions.push({ r, c });
+          }
+        }
+      }
+    }
+
+    if (validPositions.length === 0) return null;
+
+    const chosen = validPositions[Math.floor(Math.random() * validPositions.length)];
+    return {
+      x: chosen.c * TILE_SIZE + 4,
+      y: chosen.r * TILE_SIZE + 4
+    };
+  }
+
+  private initCrates(initialCount: number = 8) {
+    const categories = ['MATH', 'SCIENCE', 'ENGLISH', 'LOGIC', 'GENERAL'];
+    this.crates = [];
+
+    for (let i = 0; i < initialCount; i++) {
+      const pos = this.getRandomValidTilePosition();
+      if (pos) {
+        const category = (this.selectedSubject && this.selectedSubject !== 'ALL')
+          ? this.selectedSubject
+          : categories[i % categories.length];
+
+        this.crates.push({
+          id: `crate-${this.crateIdCounter++}`,
+          x: pos.x,
+          y: pos.y,
+          width: 24,
+          height: 24,
+          category,
+          isActive: true,
+          respawnTime: 0
+        });
+      }
+    }
   }
 
   public addTank(
@@ -341,12 +383,43 @@ export class GameEngine {
       return;
     }
 
-    // 2. Respawn crates
+    // 2. Respawn crates at brand-new random positions across the arena
+    const categories = ['MATH', 'SCIENCE', 'ENGLISH', 'LOGIC', 'GENERAL'];
     this.crates.forEach(c => {
       if (!c.isActive && now >= c.respawnTime) {
+        const newPos = this.getRandomValidTilePosition();
+        if (newPos) {
+          c.x = newPos.x;
+          c.y = newPos.y;
+        }
+        c.category = (this.selectedSubject && this.selectedSubject !== 'ALL')
+          ? this.selectedSubject
+          : categories[Math.floor(Math.random() * categories.length)];
         c.isActive = true;
       }
     });
+
+    // Dynamic periodic airdrop if active crates in the arena drop below 6
+    const activeCratesCount = this.crates.filter(c => c.isActive).length;
+    if (activeCratesCount < 6 && this.crates.length < 12) {
+      const newPos = this.getRandomValidTilePosition();
+      if (newPos) {
+        const category = (this.selectedSubject && this.selectedSubject !== 'ALL')
+          ? this.selectedSubject
+          : categories[Math.floor(Math.random() * categories.length)];
+
+        this.crates.push({
+          id: `crate-${this.crateIdCounter++}`,
+          x: newPos.x,
+          y: newPos.y,
+          width: 24,
+          height: 24,
+          category,
+          isActive: true,
+          respawnTime: 0
+        });
+      }
+    }
 
     // 3. Update Tanks
     for (const tank of this.tanks.values()) {
@@ -367,13 +440,16 @@ export class GameEngine {
         this.moveTankWithCollision(tank, dx, dy);
       }
 
-      // Check Crate Pickup Collision
-      if (!tank.answeringQuizId && now >= tank.stunEndTime) {
+      // Check Crate Pickup Collision (In SQUAD mode, driver can pick up crates to add to team queue!)
+      if (now >= tank.stunEndTime && (this.mode === 'SQUAD' || !tank.answeringQuizId)) {
         for (const crate of this.crates) {
           if (crate.isActive && this.isBoxColliding(tank.x, tank.y, tank.width, tank.height, crate.x, crate.y, crate.width, crate.height)) {
             crate.isActive = false;
-            crate.respawnTime = now + 12000;
-            tank.answeringQuizId = crate.id;
+            crate.respawnTime = now + 8000 + Math.random() * 4000; // 8 - 12s respawn
+            
+            if (this.mode !== 'SQUAD') {
+              tank.answeringQuizId = crate.id;
+            }
 
             const categoryToQuery = (this.selectedSubject && this.selectedSubject !== 'ALL') 
               ? this.selectedSubject 
