@@ -376,56 +376,106 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* Left: Tank Customization */}
+        {/* Left: Tank Customization / Support Operator Panel */}
         <div className="lg:col-span-7 space-y-6">
           
-          {/* Tank Archetype Selector */}
-          <div className="pixel-box bg-[#151a2d] p-4 sm:p-5">
-            <h2 className="font-arcade text-xs text-amber-400 mb-4 flex items-center gap-2">
-              <Crosshair className="w-4 h-4" /> 1. SELECT TANK CLASS
-            </h2>
+          {/* If Squad Mode & Player is Support: Show Operator Status Card instead of tank selector */}
+          {isSquadMode && selectedRole === 'SUPPORT' ? (
+            <div className="pixel-box bg-[#151a2d] p-5">
+              <div className="flex items-center gap-3 mb-4 border-b-2 border-slate-800 pb-3">
+                <div className="w-12 h-12 bg-cyan-600 border-2 border-black flex items-center justify-center text-2xl shadow-[2px_2px_0_#000]">
+                  🧠
+                </div>
+                <div>
+                  <h2 className="font-arcade text-xs sm:text-sm text-cyan-400">
+                    SQUAD SUPPORT OPERATOR
+                  </h2>
+                  <div className="text-xs text-slate-300 font-bold mt-0.5 font-thai">
+                    คุณรับหน้าที่: <span className="text-cyan-300 font-extrabold">ผู้ช่วยตอบคำถามประจำทีม</span>
+                  </div>
+                </div>
+              </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {TANK_PRESETS.map((t) => {
-                const isSelected = selectedArchetype === t.type;
-                return (
-                  <button
-                    key={t.type}
-                    onClick={() => handleUpdateTank(t.type, selectedColor, selectedRole, selectedTeam)}
-                    className={`p-3.5 border-4 text-left transition-all ${
-                      isSelected
-                        ? 'border-amber-400 bg-amber-950/70 shadow-[4px_4px_0_#f59e0b]'
-                        : 'border-black bg-black/60 hover:border-slate-600'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="text-2xl">{t.icon}</div>
-                      {isSelected && (
-                        <span className="font-arcade text-[9px] bg-amber-400 text-black px-1.5 py-0.5">
-                          ACTIVE
-                        </span>
-                      )}
-                    </div>
-                    <div className="font-arcade text-xs text-amber-300">{t.nameTh}</div>
-                    <p className="text-xs text-slate-400 mt-1 leading-relaxed">{t.desc}</p>
-                    
-                    {/* Retro 8-bit Block Meters */}
-                    <div className="space-y-1 mt-3 pt-2 border-t-2 border-slate-800 font-arcade text-[8px]">
-                      <div className="flex justify-between text-rose-400">
-                        <span>HP:</span> <span>{t.hpBlocks} ({t.hp})</span>
-                      </div>
-                      <div className="flex justify-between text-cyan-400">
-                        <span>SPD:</span> <span>{t.speedBlocks} ({t.speed})</span>
-                      </div>
-                      <div className="flex justify-between text-amber-400">
-                        <span>DMG:</span> <span>{t.damageBlocks} ({t.damage})</span>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
+              <div className="space-y-3 text-xs text-slate-300 leading-relaxed font-thai">
+                <div className="p-3 bg-black/60 border-2 border-slate-800">
+                  <div className="font-arcade text-[10px] text-amber-400 mb-1">
+                    ★ TANK SELECTION RESTRICTION:
+                  </div>
+                  <div>
+                    ในโหมดทีมเวิร์ก <strong className="text-amber-300">ประเภทและสีของรถถังจะถูกเลือกโดย พลขับ (Driver)</strong> ของทีมเท่านั้น
+                  </div>
+                </div>
+
+                <div className="p-3 bg-black/60 border-2 border-slate-800">
+                  <div className="font-arcade text-[10px] text-cyan-400 mb-1">
+                    ★ YOUR MISSION (ภารกิจของคุณ):
+                  </div>
+                  <div>
+                    • ประจำที่หน้าจอคอนโซลรอคำถามเมื่อคนขับวิ่งชนกล่องคำถาม <strong className="text-yellow-300">[?]</strong><br/>
+                    • ช่วยกันวิเคราะห์และโหวตเลือกคำตอบที่ถูกต้องที่สุดภายใน 3-5 วินาที<br/>
+                    • เมื่อหมดเวลา ระบบจะรวมเสียงโหวตส่วนใหญ่เพื่อเติมกระสุนให้คนขับทันที! 🚀
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3 border-t-2 border-slate-800 flex flex-wrap items-center justify-between gap-2">
+                <span className="font-arcade text-[9px] text-slate-400">WANT TO DRIVE INSTEAD?</span>
+                <button
+                  onClick={() => handleUpdateTank(selectedArchetype, selectedColor, 'DRIVER', selectedTeam)}
+                  className="px-4 py-2 arcade-btn arcade-btn-amber font-arcade text-[9px] cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>🎮</span> <span>SWITCH TO DRIVER (สลับเป็นคนขับ)</span>
+                </button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="pixel-box bg-[#151a2d] p-4 sm:p-5">
+              <h2 className="font-arcade text-xs text-amber-400 mb-4 flex items-center gap-2">
+                <Crosshair className="w-4 h-4" /> 1. SELECT TANK CLASS (สำหรับพลขับ)
+              </h2>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {TANK_PRESETS.map((t) => {
+                  const isSelected = selectedArchetype === t.type;
+                  return (
+                    <button
+                      key={t.type}
+                      onClick={() => handleUpdateTank(t.type, selectedColor, selectedRole, selectedTeam)}
+                      className={`p-3.5 border-4 text-left transition-all ${
+                        isSelected
+                          ? 'border-amber-400 bg-amber-950/70 shadow-[4px_4px_0_#f59e0b]'
+                          : 'border-black bg-black/60 hover:border-slate-600'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="text-2xl">{t.icon}</div>
+                        {isSelected && (
+                          <span className="font-arcade text-[9px] bg-amber-400 text-black px-1.5 py-0.5">
+                            ACTIVE
+                          </span>
+                        )}
+                      </div>
+                      <div className="font-arcade text-xs text-amber-300">{t.nameTh}</div>
+                      <p className="text-xs text-slate-400 mt-1 leading-relaxed">{t.desc}</p>
+                      
+                      {/* Retro 8-bit Block Meters */}
+                      <div className="space-y-1 mt-3 pt-2 border-t-2 border-slate-800 font-arcade text-[8px]">
+                        <div className="flex justify-between text-rose-400">
+                          <span>HP:</span> <span>{t.hpBlocks} ({t.hp})</span>
+                        </div>
+                        <div className="flex justify-between text-cyan-400">
+                          <span>SPD:</span> <span>{t.speedBlocks} ({t.speed})</span>
+                        </div>
+                        <div className="flex justify-between text-amber-400">
+                          <span>DMG:</span> <span>{t.damageBlocks} ({t.damage})</span>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Tank Color Selector (in FFA mode) */}
           {!isSquadMode && (

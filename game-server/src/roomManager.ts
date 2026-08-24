@@ -571,13 +571,6 @@ export class RoomManager {
         totalVotes
       });
     });
-
-    // If all support teammates in this team have cast their vote, finalize immediately!
-    const activeSupporters = Array.from(room.players.values()).filter(p => p.teamId === player.teamId && p.role === 'SUPPORT');
-    if (session.votes.size >= activeSupporters.length && activeSupporters.length > 0) {
-      if (session.timer) clearTimeout(session.timer);
-      this.finalizeTeamQuiz(roomId, player.teamId);
-    }
   }
 
   private finalizeTeamQuiz(roomId: string, teamId: string) {

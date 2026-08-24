@@ -223,6 +223,14 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
             })}
           </div>
 
+          {/* Waiting for timer banner after voting */}
+          {selectedChoice !== null && !finalResult && (
+            <div className="p-2.5 mb-2 bg-cyan-950/70 border-2 border-cyan-500/70 text-cyan-300 font-arcade text-[8px] sm:text-[9px] text-center animate-pulse flex items-center justify-center gap-2">
+              <span>⏳</span>
+              <span>บันทึกการโหวตของคุณแล้ว! กำลังรอหมดเวลาเพื่อรวมคะแนนเสียงส่วนใหญ่...</span>
+            </div>
+          )}
+
           {/* Final Result / Majority Banner */}
           {finalResult && (
             <div className={`p-3 border-2 font-thai text-xs flex items-center gap-2.5 animate-fade-in ${
