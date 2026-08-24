@@ -1,5 +1,13 @@
 import { QuizQuestion } from './types.js';
 
+export function getTimeLimitForDifficulty(difficulty?: string, explicitSeconds?: number): number {
+  if (difficulty === 'HARD') return 7;
+  if (difficulty === 'MEDIUM') return 5;
+  if (difficulty === 'EASY') return 2;
+  if (explicitSeconds && explicitSeconds > 0) return explicitSeconds;
+  return 5;
+}
+
 export const DEFAULT_QUESTIONS: QuizQuestion[] = [
   // ── MATH (คณิตศาสตร์) ──
   {
@@ -10,7 +18,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['6', '7', '8', '9'],
     correctIndex: 2,
     explanationTh: 'การคูณและการหารสัมพันธ์กัน: 56 ÷ 7 = 8',
-    timeLimitSeconds: 12,
+    timeLimitSeconds: 5,
     difficulty: 'MEDIUM',
     rewardAmmo: 3,
     bonusPoints: 100
@@ -23,7 +31,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['90 องศา', '180 องศา', '270 องศา', '360 องศา'],
     correctIndex: 1,
     explanationTh: 'ผลรวมมุมภายในรูปสามเหลี่ยมทุกรูปคือ 180 องศา',
-    timeLimitSeconds: 10,
+    timeLimitSeconds: 2,
     difficulty: 'EASY',
     rewardAmmo: 3,
     bonusPoints: 100
@@ -36,7 +44,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['9', '15', '17', '21'],
     correctIndex: 2,
     explanationTh: '17 มีตัวประกอบแค่ 1 และตัวมันเองเท่านั้น',
-    timeLimitSeconds: 15,
+    timeLimitSeconds: 7,
     difficulty: 'HARD',
     rewardAmmo: 4,
     bonusPoints: 120
@@ -49,7 +57,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['30 กม.', '60 กม.', '90 กม.', '120 กม.'],
     correctIndex: 1,
     explanationTh: '30 นาที = 0.5 ชม. -> ระยะทาง = 120 x 0.5 = 60 กม.',
-    timeLimitSeconds: 15,
+    timeLimitSeconds: 7,
     difficulty: 'HARD',
     rewardAmmo: 4,
     bonusPoints: 150
@@ -62,7 +70,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['10', '16', '32', '64'],
     correctIndex: 2,
     explanationTh: '2 x 2 x 2 x 2 x 2 = 32',
-    timeLimitSeconds: 12,
+    timeLimitSeconds: 5,
     difficulty: 'MEDIUM',
     rewardAmmo: 3,
     bonusPoints: 100
@@ -77,7 +85,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['ดาวศุกร์', 'ดาวพฤหัสบดี', 'ดาวอังคาร', 'ดาวเสาร์'],
     correctIndex: 2,
     explanationTh: 'ดาวอังคาร (Mars) มีผิวที่เต็มไปด้วยเหล็กออกไซด์ (สนิมเหล็ก) จึงเห็นเป็นสีแดง',
-    timeLimitSeconds: 10,
+    timeLimitSeconds: 2,
     difficulty: 'EASY',
     rewardAmmo: 3,
     bonusPoints: 100
@@ -90,7 +98,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['ออกซิเจน', 'คาร์บอนไดออกไซด์', 'ไนโตรเจน', 'ไฮโดรเจน'],
     correctIndex: 1,
     explanationTh: 'พืชดูดซับคาร์บอนไดออกไซด์และปล่อยออกซิเจนออกมา',
-    timeLimitSeconds: 12,
+    timeLimitSeconds: 5,
     difficulty: 'MEDIUM',
     rewardAmmo: 3,
     bonusPoints: 100
@@ -103,7 +111,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['CO₂', 'NaCl', 'H₂O', 'O₂'],
     correctIndex: 2,
     explanationTh: 'น้ำประกอบด้วย ไฮโดรเจน 2 อะตอม และออกซิเจน 1 อะตอม (H₂O)',
-    timeLimitSeconds: 10,
+    timeLimitSeconds: 2,
     difficulty: 'EASY',
     rewardAmmo: 3,
     bonusPoints: 100
@@ -116,7 +124,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['ปอด', 'หัวใจ', 'ตับ', 'ไต'],
     correctIndex: 1,
     explanationTh: 'หัวใจทำหน้าที่เป็นปั๊มสูบฉีดเลือดผ่านระบบไหลเวียนโลหิต',
-    timeLimitSeconds: 10,
+    timeLimitSeconds: 2,
     difficulty: 'EASY',
     rewardAmmo: 3,
     bonusPoints: 100
@@ -131,7 +139,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['DEFEAT', 'WIN', 'CHAMPION', 'SUCCESS'],
     correctIndex: 0,
     explanationTh: 'DEFEAT แปลว่า ความพ่ายแพ้',
-    timeLimitSeconds: 10,
+    timeLimitSeconds: 2,
     difficulty: 'EASY',
     rewardAmmo: 3,
     bonusPoints: 100
@@ -144,7 +152,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['drive', 'drives', 'drove', 'driving'],
     correctIndex: 2,
     explanationTh: 'Yesterday แสดงเหตุการณ์ในอดีต (Past Simple) ต้องใช้กริยาช่อง 2 คือ drove',
-    timeLimitSeconds: 12,
+    timeLimitSeconds: 5,
     difficulty: 'MEDIUM',
     rewardAmmo: 4,
     bonusPoints: 120
@@ -157,7 +165,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['Sword', 'Shield / Armor', 'Bullet', 'Engine'],
     correctIndex: 1,
     explanationTh: 'Shield หรือ Armor แปลว่า เกราะป้องกัน',
-    timeLimitSeconds: 10,
+    timeLimitSeconds: 2,
     difficulty: 'EASY',
     rewardAmmo: 3,
     bonusPoints: 100
@@ -172,7 +180,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['Loop (วนซ้ำ)', 'If-Else (เงื่อนไข)', 'Variable (ตัวแปร)', 'Function (ฟังก์ชัน)'],
     correctIndex: 1,
     explanationTh: 'การตัดสินใจด้วย "ถ้า...แล้ว..." คือเงื่อนไขแบบ If-Else',
-    timeLimitSeconds: 15,
+    timeLimitSeconds: 7,
     difficulty: 'HARD',
     rewardAmmo: 4,
     bonusPoints: 120
@@ -185,7 +193,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['24', '30', '32', '64'],
     correctIndex: 2,
     explanationTh: 'เพิ่มขึ้นทีละ 2 เท่า (คูณ 2 ต่อเนื่อง): 16 x 2 = 32',
-    timeLimitSeconds: 12,
+    timeLimitSeconds: 5,
     difficulty: 'MEDIUM',
     rewardAmmo: 3,
     bonusPoints: 100
@@ -200,7 +208,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['ทิศตะวันออก', 'ทิศใต้', 'ทิศเหนือ', 'ทิศตะวันตก'],
     correctIndex: 2,
     explanationTh: 'เข็มทิศแม่เหล็กจะชี้ขั้วเหนือเข้าหาขั้วแม่เหล็กโลกทางทิศเหนือเสมอ',
-    timeLimitSeconds: 10,
+    timeLimitSeconds: 2,
     difficulty: 'EASY',
     rewardAmmo: 3,
     bonusPoints: 100
@@ -218,9 +226,10 @@ export class QuizManager {
     }
     const idx = Math.floor(Math.random() * pool.length);
     const selected = pool[idx];
+    const timeLimit = getTimeLimitForDifficulty(selected.difficulty, selected.timeLimitSeconds);
     return {
       ...selected,
-      timeLimitSeconds: selected.timeLimitSeconds || 12
+      timeLimitSeconds: timeLimit
     };
   }
 
@@ -249,10 +258,11 @@ export class QuizManager {
 
   public addQuestion(question: Omit<QuizQuestion, 'id'> & { id?: string }): QuizQuestion {
     const newId = question.id || `custom-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const timeLimit = getTimeLimitForDifficulty(question.difficulty, question.timeLimitSeconds);
     const newQ: QuizQuestion = {
       ...question,
       id: newId,
-      timeLimitSeconds: question.timeLimitSeconds && question.timeLimitSeconds >= 5 ? question.timeLimitSeconds : 12,
+      timeLimitSeconds: timeLimit,
       rewardAmmo: question.rewardAmmo || 3,
       bonusPoints: question.bonusPoints || 100
     };
@@ -263,7 +273,9 @@ export class QuizManager {
   public updateQuestion(id: string, updates: Partial<QuizQuestion>): QuizQuestion | null {
     const idx = this.questions.findIndex(q => q.id === id);
     if (idx === -1) return null;
-    this.questions[idx] = { ...this.questions[idx], ...updates, id };
+    const diff = updates.difficulty || this.questions[idx].difficulty;
+    const timeLimit = getTimeLimitForDifficulty(diff, updates.timeLimitSeconds || this.questions[idx].timeLimitSeconds);
+    this.questions[idx] = { ...this.questions[idx], ...updates, timeLimitSeconds: timeLimit, id };
     return this.questions[idx];
   }
 
@@ -300,6 +312,8 @@ export class QuizManager {
     for (let i = 0; i < newQuestions.length; i++) {
       const item = newQuestions[i];
       if (item && item.questionTh && Array.isArray(item.options) && item.options.length >= 2) {
+        const diff = item.difficulty || 'MEDIUM';
+        const timeLimit = getTimeLimitForDifficulty(diff, item.timeLimitSeconds ? Number(item.timeLimitSeconds) : undefined);
         validated.push({
           id: item.id || `imp-${Date.now()}-${i}`,
           category: (item.category || 'CUSTOM').toUpperCase(),
@@ -308,10 +322,10 @@ export class QuizManager {
           options: item.options.slice(0, 4),
           correctIndex: typeof item.correctIndex === 'number' ? item.correctIndex : 0,
           explanationTh: item.explanationTh || 'ตอบถูกต้อง!',
-          timeLimitSeconds: item.timeLimitSeconds && item.timeLimitSeconds >= 5 ? Number(item.timeLimitSeconds) : 12,
+          timeLimitSeconds: timeLimit,
           rewardAmmo: item.rewardAmmo ? Number(item.rewardAmmo) : 3,
           bonusPoints: item.bonusPoints ? Number(item.bonusPoints) : 100,
-          difficulty: item.difficulty || 'MEDIUM'
+          difficulty: diff
         });
       }
     }

@@ -16,7 +16,13 @@ export const QuizModal: React.FC<QuizModalProps> = ({
   onAnswer,
   onClose
 }) => {
-  const totalDuration = question.timeLimitSeconds || 15;
+  const getDuration = (q: QuizQuestion) => {
+    if (q.difficulty === 'HARD') return 7;
+    if (q.difficulty === 'EASY') return 2;
+    if (q.difficulty === 'MEDIUM') return 5;
+    return q.timeLimitSeconds || 5;
+  };
+  const totalDuration = getDuration(question);
   const [timeLeft, setTimeLeft] = useState<number>(totalDuration);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState<boolean>(false);

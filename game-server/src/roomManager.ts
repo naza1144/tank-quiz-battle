@@ -9,7 +9,7 @@ import {
   RoomConfig 
 } from './types.js';
 import { GameEngine } from './gameEngine.js';
-import { QuizManager } from './quizBank.js';
+import { QuizManager, getTimeLimitForDifficulty } from './quizBank.js';
 
 interface SquadQuizSession {
   teamId: string;
@@ -364,7 +364,7 @@ export class RoomManager {
         onTeamQuizTrigger: (teamId: string, question: QuizQuestion, crateId: string, tankId: string) => {
           const teamSupporters = Array.from(room.players.values()).filter(p => p.teamId === teamId && p.role === 'SUPPORT');
           if (teamSupporters.length > 0) {
-            const timeLimitSeconds = question.timeLimitSeconds || (question.difficulty === 'HARD' ? 15 : (question.difficulty === 'MEDIUM' ? 12 : 10));
+            const timeLimitSeconds = getTimeLimitForDifficulty(question.difficulty, question.timeLimitSeconds);
             const item = { question, crateId, tankId, timeLimitSeconds };
             
             if (!room.squadQuizQueues.has(teamId)) {
