@@ -1,8 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GameMode, RoomConfig } from '../types.js';
-import { Users, Plus, Play, LogOut } from 'lucide-react';
+import { Users, LogOut, BookOpen } from 'lucide-react';
 import { soundFx } from '../audio/soundFx.js';
-import { PixelGamepad, PixelStar, PixelTeam, PixelSwords, PixelCrosshair, PixelTank } from './PixelIcons.js';
+import { 
+  PixelGamepad, 
+  PixelStar, 
+  PixelTeam, 
+  PixelSwords, 
+  PixelCrosshair, 
+  PixelBrain 
+} from './PixelIcons.js';
+import { TeacherQuizModal } from './TeacherQuizModal.js';
 
 interface RoomSelectViewProps {
   rooms: {
@@ -12,6 +20,7 @@ interface RoomSelectViewProps {
     maxTanks: number;
     playerCount: number;
     state: string;
+    selectedSubject?: string;
   }[];
   userName: string;
   onJoinRoom: (roomId: string) => void;
@@ -27,9 +36,21 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
   onLogout
 }) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showTeacherModal, setShowTeacherModal] = useState(false);
   const [roomName, setRoomName] = useState('');
   const [mode, setMode] = useState<GameMode>('SQUAD');
   const [maxTanks, setMaxTanks] = useState<number>(4);
+  const [selectedSubject, setSelectedSubject] = useState<string>('ALL');
+  const [categories, setCategories] = useState<{ id: string; nameTh: string; count: number }[]>([]);
+
+  useEffect(() => {
+    fetch('/api/quiz/categories')
+      .then(res => res.json())
+      .then(data => {
+        if (data.categories) setCategories(data.categories);
+      })
+      .catch(err => console.error('Failed to load categories:', err));
+  }, []);
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +60,8 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
       mode,
       maxTanks,
       roundTimeSeconds: 240,
-      isPrivate: false
+      isPrivate: false,
+      selectedSubject
     });
     setShowCreateModal(false);
   };
@@ -65,7 +87,20 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Teacher Quiz Bank & API Button */}
+          <button
+            onClick={() => {
+              soundFx.playSelect();
+              setShowTeacherModal(true);
+            }}
+            className="px-3 py-2.5 arcade-btn arcade-btn-cyan font-arcade text-[9px] flex items-center gap-1.5 cursor-pointer"
+            title="จัดการคลังข้อสอบและดู REST API สำหรับอาจารย์"
+          >
+            <PixelBrain size={14} color="#000000" />
+            <span>QUIZ BANK & API (คลังข้อสอบ)</span>
+          </button>
+
           <button
             onClick={() => {
               soundFx.playSelect();
@@ -109,6 +144,8 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
         ) : (
           rooms.map((room) => {
             const isPlaying = room.state === 'IN_GAME';
+            const catObj = categories.find(c => c.id === room.selectedSubject);
+            const subjectLabel = catObj?.nameTh || (room.selectedSubject && room.selectedSubject !== 'ALL' ? room.selectedSubject : 'ทุกหมวดหมู่วิชา');
 
             return (
               <div
@@ -117,23 +154,29 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
               >
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className={`px-2 py-0.5 border-2 border-black font-arcade text-[9px] flex items-center gap-1.5 ${
-                      room.mode === 'SQUAD' 
-                        ? 'bg-cyan-950 text-cyan-300' 
-                        : 'bg-amber-950 text-amber-300'
-                    }`}>
-                      {room.mode === 'SQUAD' ? (
-                        <>
-                          <PixelTeam size={12} color="#22d3ee" />
-                          <span>SQUAD CO-OP</span>
-                        </>
-                      ) : (
-                        <>
-                          <PixelSwords size={12} color="#f59e0b" />
-                          <span>FFA BATTLE</span>
-                        </>
-                      )}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`px-2 py-0.5 border-2 border-black font-arcade text-[9px] flex items-center gap-1.5 ${
+                        room.mode === 'SQUAD' 
+                          ? 'bg-cyan-950 text-cyan-300' 
+                          : 'bg-amber-950 text-amber-300'
+                      }`}>
+                        {room.mode === 'SQUAD' ? (
+                          <>
+                            <PixelTeam size={12} color="#22d3ee" />
+                            <span>SQUAD CO-OP</span>
+                          </>
+                        ) : (
+                          <>
+                            <PixelSwords size={12} color="#f59e0b" />
+                            <span>FFA BATTLE</span>
+                          </>
+                        )}
+                      </span>
+
+                      <span className="px-2 py-0.5 border border-slate-700 bg-black/80 text-[9px] text-amber-300 font-thai">
+                        📚 {subjectLabel}
+                      </span>
+                    </div>
                     
                     <span className={`px-2 py-0.5 border-2 border-black font-arcade text-[8px] ${
                       isPlaying 
@@ -205,10 +248,28 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
                   type="text"
                   value={roomName}
                   onChange={(e) => setRoomName(e.target.value)}
-                  placeholder="เช่น สนามประลองห้อง ม.1/2"
+                  placeholder="เช่น สนามประลองวิชาคณิต ม.1"
                   maxLength={30}
                   className="w-full px-3 py-2.5 bg-black border-2 border-slate-700 focus:border-amber-400 text-white font-bold text-sm focus:outline-none"
                 />
+              </div>
+
+              <div>
+                <label className="block font-arcade text-[10px] text-slate-400 mb-1">
+                  ▸ SELECT SUBJECT / TOPIC (เลือกวิชา/หมวดข้อสอบ):
+                </label>
+                <select
+                  value={selectedSubject}
+                  onChange={(e) => setSelectedSubject(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-black border-2 border-slate-700 focus:border-amber-400 text-amber-300 font-bold text-sm focus:outline-none font-thai"
+                >
+                  <option value="ALL">🌟 ทุกหมวดหมู่วิชา (All Subjects)</option>
+                  {categories.filter(c => c.id !== 'ALL').map((c) => (
+                    <option key={c.id} value={c.id}>
+                      📖 {c.nameTh} ({c.count} ข้อ)
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
@@ -283,6 +344,12 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
         </div>
       )}
 
+      {/* Teacher Quiz Bank & REST API Modal */}
+      {showTeacherModal && (
+        <TeacherQuizModal onClose={() => setShowTeacherModal(false)} />
+      )}
+
     </div>
   );
 };
+

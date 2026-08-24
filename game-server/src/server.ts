@@ -64,7 +64,7 @@ app.get('/api/rooms', (req, res) => {
 });
 
 app.post('/api/rooms', (req, res) => {
-  const { name, mode, maxTanks, roundTimeSeconds, isPrivate, password } = req.body;
+  const { name, mode, maxTanks, roundTimeSeconds, isPrivate, password, selectedSubject } = req.body;
   const roomId = roomManager.createRoom({
     id: `room-${Date.now().toString(36)}`,
     name: name || 'สนามรบรถถังใหม่',
@@ -72,34 +72,134 @@ app.post('/api/rooms', (req, res) => {
     maxTanks: Math.min(6, Math.max(2, maxTanks || 6)),
     roundTimeSeconds: roundTimeSeconds || 240,
     isPrivate: !!isPrivate,
-    password
+    password,
+    selectedSubject: selectedSubject || 'ALL'
   });
   res.json({ success: true, roomId });
 });
 
-app.get('/api/quizzes', (req, res) => {
-  res.json(quizManager.getAllQuestions());
+// ══════════════════════════════════════════════════════════════════════════════
+// 📚 OPEN QUIZ REST APIS (สำหรับอาจารย์/ผู้ดูแลระบบ ในการดึงและจัดการโจทย์คำถาม)
+// ══════════════════════════════════════════════════════════════════════════════
+
+// 1. ดึงรายการโจทย์คำถามทั้งหมด (รองรับ filter category, difficulty, search)
+app.get(['/api/quiz/questions', '/api/quizzes'], (req, res) => {
+  const { category, difficulty, search } = req.query;
+  const questions = quizManager.getAllQuestions({
+    category: category ? String(category) : undefined,
+    difficulty: difficulty ? String(difficulty) : undefined,
+    search: search ? String(search) : undefined
+  });
+  res.json({
+    success: true,
+    total: questions.length,
+    questions
+  });
 });
 
-app.post('/api/quizzes', (req, res) => {
-  const q = req.body;
-  if (!q.questionTh || !q.options || q.options.length < 2) {
-    return res.status(400).json({ error: 'ข้อมูลคำถามไม่ครบถ้วน' });
-  }
-  quizManager.addQuestion({
-    id: `custom-${Date.now()}`,
-    category: q.category || 'GENERAL',
-    categoryTh: q.categoryTh || 'คำถามทั่วไป',
-    questionTh: q.questionTh,
-    questionEn: q.questionEn,
-    options: q.options,
-    correctIndex: q.correctIndex || 0,
-    explanationTh: q.explanationTh || 'ตอบถูกต้อง!',
-    timeLimitSeconds: q.timeLimitSeconds || 15,
-    rewardAmmo: q.rewardAmmo || 3,
-    bonusPoints: q.bonusPoints || 100
+// 2. ดึงหมวดหมู่และรายวิชาที่มีทั้งหมดพร้อมจำนวนข้อ
+app.get('/api/quiz/categories', (req, res) => {
+  const categories = quizManager.getCategories();
+  res.json({
+    success: true,
+    categories
   });
-  res.json({ success: true, message: 'เพิ่มคำถามสำเร็จ' });
+});
+
+// 3. ดึงโจทย์คำถามรายข้อตาม ID
+app.get('/api/quiz/questions/:id', (req, res) => {
+  const question = quizManager.getQuestionById(req.params.id);
+  if (!question) {
+    return res.status(404).json({ success: false, error: 'ไม่พบโจทย์คำถามที่ระบุ' });
+  }
+  res.json({ success: true, question });
+});
+
+// 4. เพิ่มโจทย์คำถามใหม่
+app.post(['/api/quiz/questions', '/api/quizzes'], (req, res) => {
+  const q = req.body;
+  if (!q.questionTh || !Array.isArray(q.options) || q.options.length < 2) {
+    return res.status(400).json({ 
+      success: false, 
+      error: 'กรุณาระบุคำถาม (questionTh) และตัวเลือก (options) อย่างน้อย 2 ตัวเลือก' 
+    });
+  }
+
+  const correctIndex = Number(q.correctIndex);
+  if (isNaN(correctIndex) || correctIndex < 0 || correctIndex >= q.options.length) {
+    return res.status(400).json({ 
+      success: false, 
+      error: 'ตำแหน่งตัวเลือกที่ถูกต้อง (correctIndex) ไม่ถูกต้อง' 
+    });
+  }
+
+  const newQuestion = quizManager.addQuestion({
+    id: q.id || `quiz-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    category: q.category ? String(q.category).toUpperCase() : 'GENERAL',
+    categoryTh: q.categoryTh || 'ความรู้ทั่วไป',
+    questionTh: q.questionTh.trim(),
+    questionEn: q.questionEn?.trim(),
+    options: q.options.map((opt: any) => String(opt).trim()),
+    correctIndex,
+    explanationTh: q.explanationTh ? q.explanationTh.trim() : 'คำตอบถูกต้อง!',
+    timeLimitSeconds: Number(q.timeLimitSeconds) || 5,
+    rewardAmmo: Number(q.rewardAmmo) || 3,
+    bonusPoints: Number(q.bonusPoints) || 100,
+    difficulty: q.difficulty || 'MEDIUM',
+    subjectCode: q.subjectCode
+  });
+
+  res.status(201).json({ 
+    success: true, 
+    message: 'เพิ่มโจทย์คำถามสำเร็จ', 
+    question: newQuestion 
+  });
+});
+
+// 5. แก้ไขโจทย์คำถาม
+app.put('/api/quiz/questions/:id', (req, res) => {
+  const { id } = req.params;
+  const updates = req.body;
+  const updated = quizManager.updateQuestion(id, updates);
+  if (!updated) {
+    return res.status(404).json({ success: false, error: 'ไม่พบโจทย์คำถามที่ต้องการแก้ไข' });
+  }
+  res.json({ success: true, message: 'แก้ไขคำถามเรียบร้อย', question: updated });
+});
+
+// 6. ลบโจทย์คำถาม
+app.delete('/api/quiz/questions/:id', (req, res) => {
+  const { id } = req.params;
+  const isDeleted = quizManager.deleteQuestion(id);
+  if (!isDeleted) {
+    return res.status(404).json({ success: false, error: 'ไม่พบโจทย์คำถามที่ต้องการลบ' });
+  }
+  res.json({ success: true, message: 'ลบโจทย์คำถามเรียบร้อย', deletedId: id });
+});
+
+// 7. นำเข้าโจทย์คำถามแบบกลุ่ม (Bulk Import JSON สำหรับอาจารย์)
+app.post('/api/quiz/import', (req, res) => {
+  const { questions, mode } = req.body;
+  if (!Array.isArray(questions) || questions.length === 0) {
+    return res.status(400).json({ success: false, error: 'กรุณาส่งอาร์เรย์ของโจทย์คำถาม (questions: [])' });
+  }
+
+  const result = quizManager.bulkImport(questions, mode === 'replace' ? 'replace' : 'append');
+  res.json({
+    success: true,
+    message: `นำเข้าโจทย์สำเร็จ ${result.added} ข้อ (มีโจทย์ในระบบรวม ${result.total} ข้อ)`,
+    ...result
+  });
+});
+
+// 8. รีเซ็ตโจทย์คำถามกลับเป็นโจทย์มาตรฐาน
+app.post('/api/quiz/reset', (req, res) => {
+  const total = quizManager.resetToDefault();
+  res.json({
+    success: true,
+    message: 'รีเซ็ตคลังคำถามกลับเป็นโจทย์ตั้งต้นเรียบร้อย',
+    total
+  });
 });
 
 // Socket.io Middleware for Auth

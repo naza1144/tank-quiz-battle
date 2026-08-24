@@ -35,6 +35,7 @@ export class GameEngine {
   public isRunning: boolean = false;
   public roundTimeRemaining: number;
   public mode: 'FFA' | 'SQUAD';
+  public selectedSubject: string = 'ALL';
   private quizManager: QuizManager;
   private listeners: GameEngineListener;
   private lastTickTime: number = Date.now();
@@ -45,12 +46,14 @@ export class GameEngine {
     quizManager: QuizManager, 
     listeners: GameEngineListener, 
     roundDurationSeconds: number = 300,
-    mode: 'FFA' | 'SQUAD' = 'FFA'
+    mode: 'FFA' | 'SQUAD' = 'FFA',
+    selectedSubject: string = 'ALL'
   ) {
     this.quizManager = quizManager;
     this.listeners = listeners;
     this.roundTimeRemaining = roundDurationSeconds;
     this.mode = mode;
+    this.selectedSubject = selectedSubject || 'ALL';
     this.map = generateClassicMap();
     this.initCrates();
   }
@@ -372,7 +375,10 @@ export class GameEngine {
             crate.respawnTime = now + 12000;
             tank.answeringQuizId = crate.id;
 
-            const question = this.quizManager.getRandomQuestion(crate.category);
+            const categoryToQuery = (this.selectedSubject && this.selectedSubject !== 'ALL') 
+              ? this.selectedSubject 
+              : crate.category;
+            const question = this.quizManager.getRandomQuestion(categoryToQuery);
             
             if (this.mode === 'SQUAD' && tank.teamId) {
               this.listeners.onTeamQuizTrigger(tank.teamId, question, crate.id, tank.id);

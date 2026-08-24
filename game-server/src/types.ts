@@ -120,7 +120,7 @@ export interface QuizCrate {
 
 export interface QuizQuestion {
   id: string;
-  category: 'MATH' | 'SCIENCE' | 'ENGLISH' | 'GENERAL' | 'LOGIC';
+  category: 'MATH' | 'SCIENCE' | 'ENGLISH' | 'GENERAL' | 'LOGIC' | string;
   categoryTh: string;
   questionTh: string;
   questionEn?: string;
@@ -131,6 +131,7 @@ export interface QuizQuestion {
   rewardAmmo: number;
   bonusPoints: number;
   difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
+  subjectCode?: string;
 }
 
 export interface TeamQuizVoteUpdate {
@@ -200,4 +201,5 @@ export interface RoomConfig {
   isPrivate: boolean;
   password?: string;
   mapTemplate?: string;
+  selectedSubject?: string;
 }

@@ -233,6 +233,9 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
               }`}>
                 MODE: {isSquadMode ? 'SQUAD CO-OP' : 'FFA BATTLE'}
               </span>
+              <span className="px-2 py-0.5 border border-slate-700 bg-black text-amber-300">
+                📚 SUBJECT: {roomConfig?.selectedSubject && roomConfig.selectedSubject !== 'ALL' ? roomConfig.selectedSubject : 'ALL SUBJECTS'}
+              </span>
               <span>• CAP: 60+ STUDENTS</span>
             </div>
           </div>

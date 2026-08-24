@@ -213,7 +213,7 @@ export class QuizManager {
   public getRandomQuestion(category?: string): QuizQuestion {
     let pool = this.questions;
     if (category && category !== 'ALL') {
-      pool = this.questions.filter(q => q.category === category);
+      pool = this.questions.filter(q => q.category.toUpperCase() === category.toUpperCase() || q.subjectCode?.toUpperCase() === category.toUpperCase());
       if (pool.length === 0) pool = this.questions;
     }
     const idx = Math.floor(Math.random() * pool.length);
@@ -224,11 +224,118 @@ export class QuizManager {
     return this.questions.find(q => q.id === id);
   }
 
-  public addQuestion(question: QuizQuestion) {
-    this.questions.push(question);
+  public addQuestion(question: QuizQuestion): QuizQuestion {
+    const newQ: QuizQuestion = {
+      id: question.id || `quiz-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      category: question.category || 'GENERAL',
+      categoryTh: question.categoryTh || 'ความรู้ทั่วไป',
+      questionTh: question.questionTh,
+      questionEn: question.questionEn,
+      options: question.options,
+      correctIndex: question.correctIndex,
+      explanationTh: question.explanationTh || 'ตอบถูกต้อง!',
+      timeLimitSeconds: Math.min(30, Math.max(3, question.timeLimitSeconds || 5)),
+      rewardAmmo: Math.min(10, Math.max(1, question.rewardAmmo || 3)),
+      bonusPoints: question.bonusPoints || 100,
+      difficulty: question.difficulty || 'MEDIUM',
+      subjectCode: question.subjectCode
+    };
+    this.questions.push(newQ);
+    return newQ;
   }
 
-  public getAllQuestions(): QuizQuestion[] {
-    return this.questions;
+  public updateQuestion(id: string, updates: Partial<QuizQuestion>): QuizQuestion | null {
+    const idx = this.questions.findIndex(q => q.id === id);
+    if (idx === -1) return null;
+    this.questions[idx] = {
+      ...this.questions[idx],
+      ...updates,
+      id // preserve id
+    };
+    return this.questions[idx];
+  }
+
+  public deleteQuestion(id: string): boolean {
+    const initialLen = this.questions.length;
+    this.questions = this.questions.filter(q => q.id !== id);
+    return this.questions.length < initialLen;
+  }
+
+  public getAllQuestions(filter?: { category?: string; difficulty?: string; search?: string }): QuizQuestion[] {
+    let list = [...this.questions];
+    if (filter?.category && filter.category !== 'ALL') {
+      const cat = filter.category.toUpperCase();
+      list = list.filter(q => q.category.toUpperCase() === cat || q.subjectCode?.toUpperCase() === cat);
+    }
+    if (filter?.difficulty && filter.difficulty !== 'ALL') {
+      list = list.filter(q => q.difficulty === filter.difficulty);
+    }
+    if (filter?.search) {
+      const s = filter.search.toLowerCase();
+      list = list.filter(q => 
+        q.questionTh.toLowerCase().includes(s) || 
+        q.categoryTh.toLowerCase().includes(s) ||
+        (q.questionEn && q.questionEn.toLowerCase().includes(s)) ||
+        q.options.some(opt => opt.toLowerCase().includes(s))
+      );
+    }
+    return list;
+  }
+
+  public getCategories(): { id: string; nameTh: string; count: number }[] {
+    const catMap = new Map<string, { nameTh: string; count: number }>();
+    
+    // Default known labels
+    const KNOWN_LABELS: Record<string, string> = {
+      MATH: 'คณิตศาสตร์',
+      SCIENCE: 'วิทยาศาสตร์',
+      ENGLISH: 'ภาษาอังกฤษ',
+      LOGIC: 'ตรรกะ & โปรแกรมมิ่ง',
+      GENERAL: 'ความรู้รอบตัว'
+    };
+
+    this.questions.forEach(q => {
+      const catKey = q.category.toUpperCase();
+      const existing = catMap.get(catKey);
+      const name = q.categoryTh || KNOWN_LABELS[catKey] || catKey;
+      if (existing) {
+        existing.count++;
+      } else {
+        catMap.set(catKey, { nameTh: name, count: 1 });
+      }
+    });
+
+    const result: { id: string; nameTh: string; count: number }[] = [
+      { id: 'ALL', nameTh: 'ทุกหมวดหมู่วิชา (All Subjects)', count: this.questions.length }
+    ];
+
+    catMap.forEach((val, key) => {
+      result.push({
+        id: key,
+        nameTh: val.nameTh,
+        count: val.count
+      });
+    });
+
+    return result;
+  }
+
+  public bulkImport(newQuestions: QuizQuestion[], mode: 'append' | 'replace' = 'append'): { added: number; total: number } {
+    if (mode === 'replace') {
+      this.questions = [];
+    }
+    let count = 0;
+    for (const q of newQuestions) {
+      if (q.questionTh && Array.isArray(q.options) && q.options.length >= 2) {
+        this.addQuestion(q);
+        count++;
+      }
+    }
+    return { added: count, total: this.questions.length };
+  }
+
+  public resetToDefault(): number {
+    this.questions = [...DEFAULT_QUESTIONS];
+    return this.questions.length;
   }
 }

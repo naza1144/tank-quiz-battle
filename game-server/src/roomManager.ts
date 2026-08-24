@@ -81,7 +81,8 @@ export class RoomManager {
       maxTanks: r.config.maxTanks,
       playerCount: r.players.size,
       state: r.state,
-      isPrivate: r.config.isPrivate
+      isPrivate: r.config.isPrivate,
+      selectedSubject: r.config.selectedSubject || 'ALL'
     }));
   }
 
@@ -431,22 +432,20 @@ export class RoomManager {
         }
       },
       room.config.roundTimeSeconds,
-      room.config.mode
+      room.config.mode,
+      room.config.selectedSubject || 'ALL'
     );
 
-    // Add Tanks for DRIVER players and AI Bots
+    // Add Tanks for DRIVER players
     for (const p of room.players.values()) {
       if (p.role === 'DRIVER' || room.config.mode === 'FFA') {
-        const isBot = p.id.startsWith('bot-');
         const tank = engine.addTank(
           p.socketId,
           p.id,
           p.name,
           p.tankColor,
           p.tankArchetype,
-          p.teamId,
-          isBot,
-          isBot ? 'MEDIUM' : undefined
+          p.teamId
         );
         p.tankId = tank.id;
       }
