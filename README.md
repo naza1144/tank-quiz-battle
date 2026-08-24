@@ -1,5 +1,5 @@
 # 🕹️ TANK QUIZ BATTLE 1990 (เกมยิงรถถังตอบโจทย์แลกกระสุน)
-### 🚀 8-Bit Retro Arcade • Squad Co-op Consensus • Teacher Quiz Open API • Standalone Multiplayer
+### 🚀 8-Bit Retro Arcade • 6-Team Squad Co-op • Procedural Maps • Teacher Portal • Standalone Multiplayer
 
 [![Node.js](https://img.shields.io/badge/Node.js-20.x-green.svg)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-18.x-blue.svg)](https://reactjs.org/)
@@ -8,30 +8,52 @@
 [![Socket.io](https://img.shields.io/badge/Socket.io-4.x-black.svg)](https://socket.io/)
 [![Kubernetes](https://img.shields.io/badge/k3s-Kubernetes-326ce5.svg)](https://k3s.io/)
 
-**Tank Quiz Battle 1990** คือเว็บแอปพลิเคชันเกมยิงรถถังแบบ Real-time Multiplayer สไตล์ตู้เกมอาร์เคดยุค 90 (Battle City 1990) ผสมผสานระบบ **Gamification เพื่อการศึกษาในห้องเรียนจริง** หัวใจหลักของเกมคือ **"การได้กระสุนต้องตอบคำถาม Quiz Multiple Choice ให้ถูกต้อง"** โดยออกแบบมาเพื่อรองรับนักเรียนได้มากถึง 60+ คนพร้อมกันในแต่ละห้องเรียน ใช้งานได้ทั้งบนคอมพิวเตอร์ แท็บเล็ต และสมาร์ตโฟน 100%
+**Tank Quiz Battle 1990** คือเว็บแอปพลิเคชันเกมยิงรถถังแบบ Real-time Multiplayer สไตล์ตู้เกมอาร์เคดยุค 90 (Battle City 1990) ผสมผสานระบบ **Gamification เพื่อการศึกษาในห้องเรียนจริง** หัวใจหลักของเกมคือ **"การได้กระสุนต้องตอบคำถาม Quiz Multiple Choice ให้ถูกต้อง"** โดยออกแบบมาเพื่อรองรับนักเรียนได้มากถึง 60+ คนพร้อมกันในแต่ละห้องเรียน ใช้งานได้สมบูรณ์ทั้งบนคอมพิวเตอร์ แท็บเล็ต และสมาร์ตโฟน 100%
 
 ---
 
 ## 🌟 จุดเด่นและระบบสำคัญ (Key Features)
 
 ### 1. 🎨 8-Bit Retro Arcade Aesthetic & Crisp Pixel Art Icons
-- **Pure Pixel Art & CRT Overlay**: ดีไซน์ UI สไตล์ตู้เกมยุค 90 พร้อมกรอบสแกนไลน์ CRT, หมุดตู้เกม 4 มุม, คาน Bezel, และปุ่มกด 3D Arcade
-- **No OS Emojis**: เปลี่ยน Emoji ทั้งหมดในเกมเป็น **26+ Crisp 8-Bit Vector SVG Icons** (`shape-rendering="crispEdges"`)
-- **8-Bit Chiptune Synthesizer**: เพลงประกอบ BGM และเสียง Sound Effects 11 เสียงสังเคราะห์ขึ้นแบบ Real-time ผ่าน Web Audio API (ไม่พึ่งพาไฟล์เสียงภายนอก)
+- **Pure Pixel Art & CRT Bezel**: ดีไซน์ UI สไตล์ตู้เกมยุค 90 พร้อมกรอบ CRT หมุดตู้เกม 4 มุม และปุ่มกด 3D Arcade
+- **26+ Crisp 8-Bit Vector SVG Icons**: ดีไซน์ไอคอนเวกเตอร์แบบพิกเซล (`shape-rendering="crispEdges"`)
+- **8-Bit Chiptune Synthesizer**: เพลงประกอบ BGM และเสียง Sound Effects สังเคราะห์ขึ้นแบบ Real-time ผ่าน Web Audio API (ไม่พึ่งพาไฟล์เสียงภายนอก)
 
-### 2. 🤝 ระบบทีมเวิร์ก Squad Co-op (คนขับ 1 คน + ผู้ช่วยโหวตคำถามไม่จำกัด)
+### 2. 🤝 ระบบทีมเวิร์ก 6 ทีม Squad Co-op (คนขับ 1 คน + ผู้ช่วยโหวตคำถามไม่จำกัด)
+- **6 ทีมสมดุล**: รองรับการแข่งขันสูงสุด 6 ทีม (`RED`, `BLUE`, `GREEN`, `YELLOW`, `PURPLE`, `CYAN`)
 - **Driver (พลขับ 1 คนต่อทีม)**: ทำหน้าที่ขับรถถัง หลบกระสุน และวิ่งชนกล่องคำถาม `[?]`
 - **Squad Support Console (ผู้ช่วยตอบคำถาม 🧠)**: เมื่อคนขับเก็บกล่อง คำถามจะเด้งขึ้นหน้าจอผู้ช่วยตอบเท่านั้น คนขับสามารถมีสมาธิกับการขับต่อ
-- **Majority Consensus Voting (โหวตเสียงส่วนมาก)**: นับถอยหลัง 3-5 วินาที รวมคะแนนโหวตข้อที่คนในทีมเลือกมากที่สุด หากตอบถูกจะส่งกระสุนไปให้คนขับทันที
-- **Auto-Balance System**: ระบบกระจายนักเรียนเข้า 4 ทีม (Red, Blue, Green, Yellow) ให้สมดุลเท่ากันอัตโนมัติ
+- **Sequential Quiz Queue (ระบบเข้าคิวคำถาม)**: เมื่อคนขับเก็บกล่องซ้อนกัน คำถามจะถูกเก็บเข้าคิว (`squadQuizQueues`) และแสดงผลทีละข้อโดยไม่ข้ามหรือดีดทิ้ง
+- **Anti-Skip Consensus Voting**: ระบบจะรอจนหมดเวลานับถอยหลัง แสดงผลเฉลยและคะแนนเสียงส่วนใหญ่ ~2.8 วินาที แล้วจึงปล่อยข้อถัดไป
+- **Auto-Balance System**: ระบบกระจายนักเรียนเข้า 6 ทีมและจัดสรรพลขับให้สมดุลเท่ากันอัตโนมัติ
 
-### 3. 👥 Human-Only Classroom Multiplayer (100% นักเรียนจริง)
-- ตัดระบบ AI Bot ออกจากเกมอย่างสมบูรณ์ เพื่อให้นักเรียนในห้องเรียนทุกคนมีส่วนร่วมในการแข่งขันและทำงานเป็นทีมอย่างแท้จริง
+### 3. ⏱️ ปรับเวลาทำโจทย์ตามระดับความยาก (Difficulty Time Limits)
+- **🔥 คำถามยาก (HARD)**: ให้เวลา **7 วินาที**
+- **⚡ คำถามปานกลาง (MEDIUM)**: ให้เวลา **5 วินาที**
+- **🟢 คำถามง่าย (EASY)**: ให้เวลา **2 วินาที** (ประลองความไว Speed Quiz)
 
-### 4. 📚 ระบบ Teacher Quiz Bank & Open REST APIs (สำหรับอาจารย์)
-- **คลังข้อสอบในเกม (`TeacherQuizModal.tsx`)**: อาจารย์สามารถเพิ่ม ลบ แก้ไขข้อสอบ กำหนดเวลาตอบ (3-15 วิ) และกระสุนรางวัลได้
-- **Custom Subject per Room**: เมื่อสร้างห้อง สามารถเลือกหมวดหมู่วิชา (คณิตศาสตร์, วิทยาศาสตร์, ภาษาอังกฤษ, โค้ดดิ้ง หรือวิชาที่อาจารย์เพิ่มเอง)
-- **JSON Bulk Import / Export**: นำเข้าและสำเนาชุดข้อสอบทั้งวิชาได้ในคลิกเดียว
+### 4. 🗺️ ระบบสุ่มแมพไม่ซ้ำกันทุกรอบ & หน้าจอขยายใหญ่ (Procedural 20x20 Arena)
+- **สมรภูมิกระชับ 20x20 Grid (640x640px)**: พื้นที่การต่อสู้กระชับ ปะทะกันรวดเร็ว ไม่เวิ้งว้าง
+- **5 ธีมกลยุทธ์สุ่มทุกรอบการเล่น**:
+  1. *Classic Citadel*: ป้อมปราการกลาง คลองน้ำ ทางน้ำแข็ง
+  2. *Jungle Outpost*: ดงพุ่มไม้ขนาดใหญ่สำหรับการซุ่มยิง
+  3. *Frozen River Crossing*: ลำน้ำคู่ขนานพร้อมสะพานน้ำแข็งสไลด์ตัว
+  4. *Desert Labyrinth*: เขาวงกตอิฐและลานประลองกลาง
+  5. *Procedural Symmetric Warzone*: ระบบสุ่มสิ่งกีดขวางแบบ 4-Way Mirroring สดใหม่ทุกรอบ
+- **Enlarged Canvas UI**: ขยายการแสดงผลบนหน้าจอสูงสุดถึง 700px / 68vh (96vw) ชัดเจนเต็มตา
+
+### 5. 📦 ระบบสุ่มเกิดกล่องคำถามไดนามิก (Dynamic Quiz Crates & Airdrop)
+- **สุ่มเกิดใหม่ทั่วแมพ**: เมื่อรถถังเก็บกล่อง กล่องจะสุ่มย้ายไปเกิดยังพิกัดว่างใหม่ในแมพภายใน 8-12 วินาที
+- **Airdrop Replenishment**: หากกล่องในสนามเหลือน้อยกว่า 6 กล่อง ระบบจะทิ้งกล่องสนับสนุนใหม่ลงมาทันที
+
+### 6. 🏆 หน้าจอสรุปผลผู้ชนะทันทีเมื่อจบเกม (Instant Game Over Podium)
+- เมื่อเหลือผู้รอดชีวิตเพียงทีมเดียว หรือเวลาหมดลง หน้าจอ **Victory Podium Modal** จะเด้งขึ้นทันที
+- ฉลองชัยด้วยเสียง Fanfare, เอฟเฟกต์ **Confetti Animation**, และตารางสรุปคะแนน MVP ทั้งพลขับและทีมช่วยเหลือ
+
+### 7. 🔒 หน้าจอจัดการห้องและคลังข้อสอบสำหรับอาจารย์ (Teacher Portal Route: `/teacher`)
+- เข้าใช้งานได้ผ่าน URL `/teacher` หรือคลิกปุ่ม "ระบบอาจารย์" (ป้องกันด้วย PIN: `1990`)
+- **Dashboard จัดการห้องแข่งขัน**: ตรวจสอบสถานะห้อง ลบห้องที่ไม่ได้ใช้งาน และดูจำนวนผู้เล่นแบบสด
+- **คลังข้อสอบครบวงจร**: ค้นหา, กรองหมวดหมู่วิชา, เพิ่ม, แก้ไข, ลบข้อสอบ, และนำเข้าไฟล์ JSON Bulk Import
 - **Open REST API Endpoints**:
   - `GET /api/quiz/questions`: ดึงรายการข้อสอบทั้งหมด (รองรับ `?category=...&difficulty=...&search=...`)
   - `GET /api/quiz/categories`: ดึงรายชื่อหมวดหมู่วิชาทั้งหมดพร้อมจำนวนข้อ
@@ -42,15 +64,10 @@
   - `POST /api/quiz/import`: นำเข้าข้อสอบแบบชุด (JSON Array)
   - `POST /api/quiz/reset`: รีเซ็ตกลับเป็นข้อสอบเริ่มต้น
 
-### 5. 📱 รองรับสมาร์ตโฟนและแท็บเล็ต 100% (Mobile-First)
-- **Touch-Slide Virtual D-Pad**: วางนิ้วโป้งแล้วเลื่อนลากบังคับรถถังได้ต่อเนื่อง 8 ทิศทาง
-- **Large FIRE Button**: ปุ่มยิง 96px ขนาดใหญ่อยู่ตำแหน่งนิ้วโป้งขวา
-- **Thumb-Friendly Voting UI**: ปุ่มตัวเลือก A, B, C, D ความสูง 58px+ แตะง่ายด้วยมือเดียว
-- **Haptic Vibration**: มีการสั่นเตือนเมื่อกดปุ่มหรือเปลี่ยนทิศทาง (สำหรับอุปกรณ์ที่รองรับ)
-
-### 6. ⚡ Standalone Architecture & Isolated Cluster Deployment
-- ระบบทำงานแยกลอยเป็นของตัวเอง 100% ไม่พึ่งพาเซอร์วิสภายนอก
-- รันบน Kubernetes / k3s (`namespace: game`) บนคลัสเตอร์เซิร์ฟเวอร์
+### 8. 📱 รองรับสมาร์ตโฟน 100% ป้องกันภาพกระพริบ (Mobile-Optimized & Anti-Flicker)
+- **Touch-Slide Virtual D-Pad**: บังคับลากนิ้วต่อเนื่อง 8 ทิศทาง
+- **GPU Anti-Flicker Fix**: กำจัดอาการกระพริบของ Canvas บนเบราว์เซอร์มือถือ (iOS Safari / Android Chrome)
+- **High-Precision useRef Countdown**: ตัวนับเวลาแม่นยำสูง ไม่แกว่งหรือค้างจากการ Re-render
 
 ---
 
@@ -66,12 +83,13 @@ tank-quiz-battle/
 │   │   │   ├── RetroCanvas.tsx      # 2D Battle City Canvas Renderer (Auto-scale)
 │   │   │   ├── TouchControls.tsx    # Mobile Virtual Slide D-Pad & Large Fire Button
 │   │   │   ├── SquadSupportView.tsx # Mobile-friendly Squad Voting Console
-│   │   │   ├── LobbyView.tsx        # 90s Arcade Squad Formation & Role Picker
+│   │   │   ├── LobbyView.tsx        # 6-Team Arcade Squad Formation & Role Picker
 │   │   │   ├── RoomSelectView.tsx   # Mission Select & Subject Selection
-│   │   │   ├── TeacherQuizModal.tsx # Quiz Bank Management & API Reference Modal
+│   │   │   ├── TeacherPortalView.tsx# PIN-Protected Teacher Dashboard & Room Manager
+│   │   │   ├── TeacherQuizModal.tsx # Quiz Bank Management Modal
 │   │   │   ├── QuizModal.tsx        # Single-player FFA Quiz Popup
 │   │   │   ├── AuthModal.tsx        # Player Login & Guest Mode
-│   │   │   └── GameOverModal.tsx    # Podium Victory Screen
+│   │   │   └── GameOverModal.tsx    # Global Podium Victory Screen
 │   │   ├── types.ts                 # Client TypeScript Types
 │   │   └── App.tsx                  # Root Game Controller & Socket Listeners
 │   ├── Dockerfile
@@ -81,13 +99,16 @@ tank-quiz-battle/
 │   ├── src/
 │   │   ├── auth.ts                  # Authentication & Guest Token Handler
 │   │   ├── gameEngine.ts            # Authoritative 2D Physics, Collisions & Map Logic
-│   │   ├── mapTemplates.ts          # Battle City 24x24 Map Grid Generator
+│   │   ├── mapTemplates.ts          # 20x20 Procedural & Thematic Map Generators
 │   │   ├── quizBank.ts              # Quiz CRUD Manager, Category Counter & Bulk Importer
-│   │   ├── roomManager.ts           # Room Lifecycle, Squad Auto-balance & Matchmaking
+│   │   ├── roomManager.ts           # 6-Team Lifecycle, Sequential Queues & Auto-balance
 │   │   ├── server.ts                # HTTP Server, Open Quiz REST APIs & WebSockets
 │   │   └── types.ts                 # Shared Server Types & Protocols
 │   ├── test-game.ts                 # Automated Physics, Combat & Quiz Engine Unit Tests
-├── deploy-all.sh                    # Single-Command Automated Deployment Script
+│   ├── Dockerfile
+│   └── package.json
+│
+├── deploy-all.sh                    # Single-Command Automated Deployment Pipeline
 │
 ├── terraform/                       # Infrastructure as Code (Terraform for Kubernetes)
 │   ├── main.tf                      # Namespaces, Deployments, Services & NodePorts
@@ -98,152 +119,46 @@ tank-quiz-battle/
 ├── ansible/                         # Configuration Management & Automation Playbook
 │   ├── ansible.cfg                  # SSH & Inventory Configuration
 │   ├── inventory.ini                # K3s Node Server Definitions
-│   ├── playbook.yml                 # Master Orchestration Playbook
-│   └── roles/game_deploy/           # Modular Automated Deployment Tasks
+│   └── playbook.yml                 # Build, Export, Import & Deploy Playbook
 │
 ├── k8s/                             # Kubernetes Manifests
-│   └── game-deployment.yaml         # Deployment & NodePort Service (Namespace: game)
+│   ├── namespace.yaml
+│   ├── game-server-deployment.yaml
+│   ├── game-client-deployment.yaml
+│   ├── ingress.yaml
+│   └── service.yaml
 │
-└── README.md                        # Documentation
+├── DOCS_PROJECT_MANUAL.md           # คู่มือโครงการและสถาปัตยกรรมระบบอย่างละเอียด
+└── DOCS_IAC_DEPLOYMENT.md           # คู่มือการติดตั้งระบบอัตโนมัติด้วย Terraform & Ansible
 ```
 
 ---
 
-## 🚀 วิธีการติดตั้งและรันระบบขึ้นเซิร์ฟเวอร์ (Production Deployment)
+## 🚀 วิธีการติดตั้งและรันระบบ (Quick Start)
 
-### 🌟 วิธีที่ 1: รันคำสั่งเดียวติดตั้งทั้งระบบ (Single-Command Automated Run)
-
-ติดตั้งและตั้งค่าคลัสเตอร์ Kubernetes ทั้งหมดในคำสั่งเดียวผ่าน **Ansible** หรือ **Terraform** โดยไม่ต้องใช้ Docker Compose:
-
+### 1. ติดตั้งแบบคำสั่งเดียวขึ้น K8s Server (Automated Pipeline)
 ```bash
-# รันติดตั้งแบบ Full Automation ผ่าน Ansible & Kubernetes ในคำสั่งเดียว
+# รันคำสั่งเดียว ทำงานอัตโนมัติครบทุกขั้นตอน (Build, Export, Ansible, K8s Rollout)
 ./deploy-all.sh
-
-# หรือระบุให้รันผ่าน Terraform โดยตรง
-./deploy-all.sh --terraform
-
-# หรือระบุให้รันผ่าน Ansible Playbook
-./deploy-all.sh --ansible
 ```
 
----
-
-### 🛠️ วิธีที่ 2: รันผ่าน Terraform โดยตรง
-
+### 2. รันแบบ Local Development
 ```bash
-cd terraform
-terraform init
-terraform plan
-terraform apply -auto-approve
-```
-
----
-
-### 📋 วิธีที่ 3: รันผ่าน Ansible Playbook
-
-```bash
-cd ansible
-ansible-playbook -i inventory.ini playbook.yml
-```
-
----
-
-### 💻 วิธีที่ 4: รันเพื่อพัฒนาในเครื่อง (Local Dev)
-
-**1. เริ่มต้น Game Server:**
-```bash
+# Terminal 1: Backend Server
 cd game-server
 npm install
 npm run dev
-# Server จะทำงานที่ http://localhost:4000
-```
 
-**2. เริ่มต้น Game Client:**
-```bash
+# Terminal 2: Frontend Client
 cd game-client
 npm install
 npm run dev
-# Client จะทำงานที่ http://localhost:3000
-```
-
-- เข้าใช้งานเกมผ่าน NodePort: `http://<SERVER_IP>:30080`
-
----
-
-## 🌐 ตัวอย่างการใช้งาน Open Quiz REST API (สำหรับอาจารย์)
-
-### 1. ดึงข้อสอบตามหมวดวิชา
-```bash
-curl -X GET "http://192.168.50.96:30080/api/quiz/questions?category=MATH"
-```
-
-### 2. ดึงรายชื่อวิชาทั้งหมด
-```bash
-curl -X GET "http://192.168.50.96:30080/api/quiz/categories"
-```
-
-### 3. เพิ่มข้อสอบใหม่
-```bash
-curl -X POST "http://192.168.50.96:30080/api/quiz/questions" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "category": "PHYSICS",
-    "categoryTh": "ฟิสิกส์",
-    "questionTh": "หน่วย SI ของแรงคือข้อใด?",
-    "options": ["จูล", "นิวตัน", "วัตต์", "พาสคาล"],
-    "correctIndex": 1,
-    "explanationTh": "หน่วยของแรงคือ นิวตัน (N)",
-    "timeLimitSeconds": 4,
-    "rewardAmmo": 3,
-    "difficulty": "MEDIUM"
-  }'
-```
-
-### 4. นำเข้าชุดข้อสอบแบบ JSON (Bulk Import)
-```bash
-curl -X POST "http://192.168.50.96:30080/api/quiz/import" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "mode": "append",
-    "questions": [
-      {
-        "category": "CS101",
-        "categoryTh": "วิทยาการคำนวณ",
-        "questionTh": "คำสั่งใดใช้พิมพ์ข้อความใน Python?",
-        "options": ["echo()", "print()", "System.out()", "console.log()"],
-        "correctIndex": 1,
-        "explanationTh": "ภาษา Python ใช้ฟังก์ชัน print()",
-        "timeLimitSeconds": 4,
-        "rewardAmmo": 3
-      }
-    ]
-  }'
 ```
 
 ---
 
-## 🕹️ การควบคุมเกม (Controls)
-
-| การกระทำ | บนคอมพิวเตอร์ (PC / Laptop) | บนมือถือ / แท็บเล็ต (Mobile / Tablet) |
-| :--- | :--- | :--- |
-| **ขับรถถัง** | ปุ่มลูกศร `↑` `↓` `←` `→` หรือ `W` `A` `S` `D` | เลื่อนลากบน **Virtual Slide D-Pad** |
-| **ยิงกระสุน** | `Spacebar` หรือ `Enter` | แตะปุ่มกลมสีแดง **FIRE!** |
-| **ตอบคำถาม** | คลิกเลือกช้อยส์ A, B, C, D | แตะช้อยส์ขนาดใหญ่ A, B, C, D |
-| **สื่อสารทางวิทยุ** | คลิกปุ่ม Cheer ด้านล่าง | แตะปุ่ม Quick Radio Cheering |
-
----
-
-## 🧪 การทดสอบระบบ (Automated Tests)
-
-รันชุดทดสอบความถูกต้องของฟิสิกส์ การชน การคำนวณคะแนน และคลังข้อสอบ:
-```bash
-cd game-server
-npm test
-```
-
----
-
-## 📄 License & Credits
-- **Project**: Tank Quiz Battle 1990 (Gamification for Education)
-- **Repository**: [https://github.com/naza1144/tank-quiz-battle](https://github.com/naza1144/tank-quiz-battle)
-- **Author**: Educational Technology & Software Engineering Team
+## 🌐 การเข้าใช้งานระบบ (Access Endpoints)
+- **🎮 Game Client URL**: `http://192.168.50.96:30080`
+- **🔒 Teacher Portal (PIN: 1990)**: `http://192.168.50.96:30080/#teacher`
+- **📚 Open REST API Categories**: `http://192.168.50.96:30080/api/quiz/categories`
+- **📚 Open REST API Questions**: `http://192.168.50.96:30080/api/quiz/questions`

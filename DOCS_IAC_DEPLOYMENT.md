@@ -97,6 +97,7 @@ ansible-playbook -i inventory.ini playbook.yml
 | บริการ | URL / Port | รายละเอียด |
 | :--- | :--- | :--- |
 | **🎮 Game Application** | `http://192.168.50.96:30080` | หน้าเว็บแอปพลิเคชันเกมยิงรถถัง (PC / Mobile) |
+| **🔒 Teacher Portal (PIN: 1990)** | `http://192.168.50.96:30080/#teacher` | แดชบอร์ดอาจารย์ จัดการห้องและคลังข้อสอบ |
 | **📚 Open Quiz REST API** | `http://192.168.50.96:30080/api/quiz/categories` | API คลังข้อสอบสำหรับอาจารย์ |
 | **🌐 Ingress Host** | `http://tank.192-168-50-96.sslip.io` | เข้าใช้งานผ่าน Traefik IngressRoute |
 
