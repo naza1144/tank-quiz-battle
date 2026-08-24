@@ -10,7 +10,6 @@ interface RetroCanvasProps {
 }
 
 const TILE_SIZE = 32;
-const MAP_SIZE = 24 * TILE_SIZE; // 768px
 
 export const RetroCanvas: React.FC<RetroCanvasProps> = ({
   map,
@@ -46,9 +45,14 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
         myTankId: curMyTankId 
       } = stateRef.current;
 
+      const gridRows = curMap && curMap.length > 0 ? curMap.length : 28;
+      const gridCols = curMap && curMap[0]?.length > 0 ? curMap[0].length : 28;
+      const mapW = gridCols * TILE_SIZE;
+      const mapH = gridRows * TILE_SIZE;
+
       // 1. Clear background (Classic black battlefield)
       ctx.fillStyle = '#0a0a0c';
-      ctx.fillRect(0, 0, MAP_SIZE, MAP_SIZE);
+      ctx.fillRect(0, 0, mapW, mapH);
 
       // 2. Render Ground & Low Tiles (Ice, Water, Brick, Steel)
       if (curMap && curMap.length > 0) {
@@ -370,12 +374,15 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
     ctx.fillText(ammoText, cx, hudY + 12);
   };
 
+  const canvasW = (map && map[0]?.length ? map[0].length : 28) * TILE_SIZE;
+  const canvasH = (map && map.length ? map.length : 28) * TILE_SIZE;
+
   return (
     <div className="relative flex justify-center items-center p-1 sm:p-2 pixel-box bg-black shadow-2xl w-full max-w-[min(100vw-1.5rem,480px,44vh)] mx-auto aspect-square">
       <canvas
         ref={canvasRef}
-        width={MAP_SIZE}
-        height={MAP_SIZE}
+        width={canvasW}
+        height={canvasH}
         className="w-full h-full aspect-square bg-black object-contain cursor-crosshair rounded-sm"
       />
     </div>
