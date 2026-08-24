@@ -451,27 +451,27 @@ export const App: React.FC = () => {
 
       {/* 4. Active In-Game View */}
       {view === 'GAME' && (
-        <div className="flex-1 flex flex-col p-2 sm:p-4 max-w-6xl mx-auto w-full font-thai">
+        <div className="flex-1 flex flex-col p-1.5 sm:p-4 max-w-6xl mx-auto w-full font-thai">
           
           {/* Top 8-Bit Arcade HUD Bar */}
-          <div className="pixel-box bg-[#121624] p-3 mb-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="pixel-box bg-[#121624] p-2 sm:p-3 mb-2 sm:mb-3 flex flex-wrap items-center justify-between gap-2">
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => {
                   soundFx.playSelect();
                   handleLeaveRoom();
                 }}
-                className="p-2 arcade-btn arcade-btn-slate text-xs"
+                className="p-1.5 sm:p-2 arcade-btn arcade-btn-slate text-xs"
                 title="ออกจากการแข่งขัน"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </button>
               <div>
-                <div className="font-arcade text-[9px] text-amber-400 uppercase tracking-widest flex items-center gap-1.5">
-                  <span>★</span> {currentRoomConfig?.name || 'TANK BATTLE 1990'}
+                <div className="font-arcade text-[8px] sm:text-[9px] text-amber-400 uppercase tracking-widest flex items-center gap-1">
+                  <span>★</span> {currentRoomConfig?.name || 'TANK BATTLE'}
                 </div>
-                <div className="font-arcade text-xs text-white">
+                <div className="font-arcade text-[10px] sm:text-xs text-white">
                   1P: <span className="text-amber-300">{userName}</span>
                 </div>
               </div>
@@ -479,7 +479,7 @@ export const App: React.FC = () => {
 
             {/* Middle Stats (HP & Ammo for Driver) */}
             {myTank && !isSquadSupport && (
-              <div className="flex items-center gap-3 bg-black border-2 border-slate-700 px-3 py-1.5 font-arcade text-[10px]">
+              <div className="flex items-center gap-2 sm:gap-3 bg-black border-2 border-slate-700 px-2 sm:px-3 py-1 font-arcade text-[9px] sm:text-[10px]">
                 <div className="flex items-center gap-1 text-rose-400 font-extrabold">
                   <span>HP:</span>
                   <span>{'■'.repeat(Math.max(0, myTank.hp))}{'□'.repeat(Math.max(0, myTank.maxHp - myTank.hp))}</span>
@@ -488,33 +488,33 @@ export const App: React.FC = () => {
                 <div className={`flex items-center gap-1 font-extrabold ${
                   myTank.ammo > 0 ? 'text-amber-300' : 'text-rose-400 animate-blink'
                 }`}>
-                  <Zap className="w-3.5 h-3.5 fill-current" />
-                  <span>AMMO: {myTank.ammo} {myTank.ammo === 0 ? '(EMPTY!)' : ''}</span>
+                  <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current" />
+                  <span>AMMO: {myTank.ammo}</span>
                 </div>
               </div>
             )}
 
             {/* Right: Round Timer & Audio Controls */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-black border-2 border-amber-500 text-amber-300 font-arcade text-xs">
-                <PixelClock size={12} color="#fbbf24" />
+            <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1 px-2 sm:px-3 py-1 bg-black border-2 border-amber-500 text-amber-300 font-arcade text-[10px] sm:text-xs">
+                <PixelClock size={10} color="#fbbf24" />
                 <span>{formatTimer(roundTimer)}</span>
               </div>
               
               <button
                 onClick={handleToggleBgm}
-                className={`p-2 arcade-btn ${isBgmMuted ? 'arcade-btn-slate' : 'arcade-btn-cyan'}`}
+                className={`p-1.5 sm:p-2 arcade-btn ${isBgmMuted ? 'arcade-btn-slate' : 'arcade-btn-cyan'}`}
                 title="เปิด/ปิดเพลงประกอบ BGM"
               >
-                <PixelMusic size={16} color={isBgmMuted ? '#94a3b8' : '#000000'} />
+                <PixelMusic size={14} color={isBgmMuted ? '#94a3b8' : '#000000'} />
               </button>
 
               <button
                 onClick={handleToggleSound}
-                className={`p-2 arcade-btn ${isMuted ? 'arcade-btn-rose' : 'arcade-btn-emerald'}`}
+                className={`p-1.5 sm:p-2 arcade-btn ${isMuted ? 'arcade-btn-rose' : 'arcade-btn-emerald'}`}
                 title="เปิด/ปิดเสียงเอฟเฟกต์ SFX"
               >
-                <PixelSpeaker size={16} color={isMuted ? '#ffffff' : '#000000'} isMuted={isMuted} />
+                <PixelSpeaker size={14} color={isMuted ? '#ffffff' : '#000000'} isMuted={isMuted} />
               </button>
             </div>
 

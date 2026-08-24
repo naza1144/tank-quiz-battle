@@ -371,7 +371,7 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
   };
 
   return (
-    <div className="relative flex justify-center items-center p-1 sm:p-2.5 pixel-box bg-black shadow-2xl w-full max-w-[min(100vw-1rem,560px,50vh)] mx-auto aspect-square">
+    <div className="relative flex justify-center items-center p-1 sm:p-2 pixel-box bg-black shadow-2xl w-full max-w-[min(100vw-1.5rem,480px,44vh)] mx-auto aspect-square">
       <canvas
         ref={canvasRef}
         width={MAP_SIZE}

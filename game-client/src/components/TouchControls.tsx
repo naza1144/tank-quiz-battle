@@ -86,7 +86,7 @@ export const TouchControls: React.FC<TouchControlsProps> = ({ onMove, onShoot })
   };
 
   return (
-    <div className="w-full flex items-center justify-between px-2 sm:px-6 py-2 select-none touch-none bg-black/70 border-t-2 border-slate-800 backdrop-blur-md rounded-t-xl">
+    <div className="w-full flex items-center justify-between px-3 sm:px-6 py-1 sm:py-2 select-none touch-none bg-black/80 border-t-2 border-slate-800 backdrop-blur-md rounded-t-xl">
       
       {/* 1. Touch-Slide Virtual D-Pad */}
       <div className="flex flex-col items-center">
@@ -96,76 +96,76 @@ export const TouchControls: React.FC<TouchControlsProps> = ({ onMove, onShoot })
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           onTouchCancel={handleTouchEnd}
-          className="relative w-36 h-36 sm:w-40 sm:h-40 bg-[#121624] rounded-full border-4 border-slate-700 shadow-[0_0_20px_rgba(0,0,0,0.8)] flex items-center justify-center cursor-pointer active:border-cyan-400"
+          className="relative w-32 h-32 sm:w-36 sm:h-36 bg-[#121624] rounded-full border-2 sm:border-4 border-slate-700 shadow-[0_0_20px_rgba(0,0,0,0.8)] flex items-center justify-center cursor-pointer active:border-cyan-400"
         >
           {/* UP Button Visual */}
           <div
-            className={`absolute top-1.5 left-1/2 -translate-x-1/2 w-11 h-11 rounded-lg flex items-center justify-center border-2 transition-all ${
+            className={`absolute top-1 left-1/2 -translate-x-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center border-2 transition-all ${
               activeDir === 'UP'
                 ? 'bg-amber-400 text-black border-white shadow-[0_0_15px_#f59e0b]'
                 : 'bg-slate-800/90 text-slate-300 border-slate-600'
             }`}
           >
-            <ArrowUp className="w-6 h-6 stroke-[3]" />
+            <ArrowUp className="w-5 h-5 sm:w-6 sm:h-6 stroke-[3]" />
           </div>
 
           {/* DOWN Button Visual */}
           <div
-            className={`absolute bottom-1.5 left-1/2 -translate-x-1/2 w-11 h-11 rounded-lg flex items-center justify-center border-2 transition-all ${
+            className={`absolute bottom-1 left-1/2 -translate-x-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center border-2 transition-all ${
               activeDir === 'DOWN'
                 ? 'bg-amber-400 text-black border-white shadow-[0_0_15px_#f59e0b]'
                 : 'bg-slate-800/90 text-slate-300 border-slate-600'
             }`}
           >
-            <ArrowDown className="w-6 h-6 stroke-[3]" />
+            <ArrowDown className="w-5 h-5 sm:w-6 sm:h-6 stroke-[3]" />
           </div>
 
           {/* LEFT Button Visual */}
           <div
-            className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-11 h-11 rounded-lg flex items-center justify-center border-2 transition-all ${
+            className={`absolute left-1 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center border-2 transition-all ${
               activeDir === 'LEFT'
                 ? 'bg-amber-400 text-black border-white shadow-[0_0_15px_#f59e0b]'
                 : 'bg-slate-800/90 text-slate-300 border-slate-600'
             }`}
           >
-            <ArrowLeft className="w-6 h-6 stroke-[3]" />
+            <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6 stroke-[3]" />
           </div>
 
           {/* RIGHT Button Visual */}
           <div
-            className={`absolute right-1.5 top-1/2 -translate-y-1/2 w-11 h-11 rounded-lg flex items-center justify-center border-2 transition-all ${
+            className={`absolute right-1 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center border-2 transition-all ${
               activeDir === 'RIGHT'
                 ? 'bg-amber-400 text-black border-white shadow-[0_0_15px_#f59e0b]'
                 : 'bg-slate-800/90 text-slate-300 border-slate-600'
             }`}
           >
-            <ArrowRight className="w-6 h-6 stroke-[3]" />
+            <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 stroke-[3]" />
           </div>
 
           {/* Center Stick */}
-          <div className="w-9 h-9 rounded-full bg-slate-900 border-2 border-cyan-500/70 shadow-inner flex items-center justify-center">
-            <div className="w-3 h-3 rounded-full bg-cyan-400" />
+          <div className="w-8 h-8 rounded-full bg-slate-900 border-2 border-cyan-500/70 shadow-inner flex items-center justify-center">
+            <div className="w-2.5 h-2.5 rounded-full bg-cyan-400" />
           </div>
         </div>
 
-        <span className="text-[9px] font-arcade text-slate-400 mt-1">
-          🕹️ D-PAD (เลื่อนเพื่อบังคับ)
+        <span className="text-[8px] sm:text-[9px] font-arcade text-slate-400 mt-0.5">
+          🕹️ D-PAD (เลื่อนบังคับ)
         </span>
       </div>
 
-      {/* 2. Large Tactical FIRE Arcade Button */}
-      <div className="flex flex-col items-center gap-1.5">
+      {/* 2. Tactical FIRE Arcade Button */}
+      <div className="flex flex-col items-center gap-1">
         <button
           onTouchStart={handleShootTouch}
           onClick={handleShootTouch}
-          className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-br from-rose-500 via-rose-600 to-amber-600 active:scale-90 border-4 border-white shadow-[0_0_30px_rgba(239,68,68,0.6)] flex flex-col items-center justify-center text-white font-arcade text-xs transition-transform active:bg-rose-700 cursor-pointer"
+          className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-rose-500 via-rose-600 to-amber-600 active:scale-90 border-4 border-white shadow-[0_0_25px_rgba(239,68,68,0.6)] flex flex-col items-center justify-center text-white font-arcade text-xs transition-transform active:bg-rose-700 cursor-pointer"
         >
-          <Crosshair className="w-8 h-8 sm:w-10 sm:h-10 mb-1 drop-shadow stroke-[2.5]" />
-          <span className="tracking-widest font-black text-sm">FIRE!</span>
+          <Crosshair className="w-7 h-7 sm:w-8 sm:h-8 mb-0.5 drop-shadow stroke-[2.5]" />
+          <span className="tracking-widest font-black text-xs sm:text-sm">FIRE!</span>
         </button>
 
-        <span className="text-[9px] font-arcade text-amber-300">
-          💥 ปุ่มยิงกระสุน
+        <span className="text-[8px] sm:text-[9px] font-arcade text-amber-300">
+          💥 ปุ่มยิง
         </span>
       </div>
 

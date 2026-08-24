@@ -213,49 +213,49 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
   const isSquadMode = roomConfig?.mode === 'SQUAD';
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-3 sm:p-6 font-thai text-slate-100 animate-fade-in">
+    <div className="w-full max-w-6xl mx-auto p-2 sm:p-5 font-thai text-slate-100 animate-fade-in space-y-4 sm:space-y-6">
       
       {/* Top Arcade Status Bar */}
-      <div className="pixel-box bg-[#121624] p-4 mb-6 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-amber-500 border-2 border-black flex items-center justify-center shadow-[2px_2px_0_#000]">
-            <PixelGamepad size={28} color="#000000" />
+      <div className="pixel-box bg-[#121624] p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-500 border-2 border-black flex items-center justify-center shadow-[2px_2px_0_#000] shrink-0">
+            <PixelGamepad size={24} color="#000000" />
           </div>
           <div>
-            <h1 className="font-arcade text-xs sm:text-sm text-amber-400">
+            <h1 className="font-arcade text-xs sm:text-sm text-amber-400 truncate max-w-[200px] sm:max-w-none">
               {roomConfig?.name || 'TANK BATTLE ROOM'}
             </h1>
-            <div className="font-arcade text-[9px] text-slate-400 flex items-center gap-2 mt-1">
-              <span className={`px-2 py-0.5 border border-black ${
+            <div className="font-arcade text-[8px] sm:text-[9px] text-slate-400 flex flex-wrap items-center gap-1.5 mt-0.5">
+              <span className={`px-1.5 py-0.5 border border-black ${
                 isSquadMode 
                   ? 'bg-cyan-950 text-cyan-300' 
                   : 'bg-amber-950 text-amber-300'
               }`}>
-                MODE: {isSquadMode ? 'SQUAD CO-OP' : 'FFA BATTLE'}
+                {isSquadMode ? 'SQUAD' : 'FFA'}
               </span>
-              <span className="px-2 py-0.5 border border-slate-700 bg-black text-amber-300">
-                📚 SUBJECT: {roomConfig?.selectedSubject && roomConfig.selectedSubject !== 'ALL' ? roomConfig.selectedSubject : 'ALL SUBJECTS'}
+              <span className="px-1.5 py-0.5 border border-slate-700 bg-black text-amber-300">
+                📚 {roomConfig?.selectedSubject && roomConfig.selectedSubject !== 'ALL' ? roomConfig.selectedSubject : 'ALL'}
               </span>
-              <span>• CAP: 60+ STUDENTS</span>
+              <span>• 60+ PLAYERS</span>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={handleToggleBgm}
-            className={`p-2.5 arcade-btn ${isBgmMuted ? 'arcade-btn-slate' : 'arcade-btn-cyan'}`}
+            className={`p-2 arcade-btn ${isBgmMuted ? 'arcade-btn-slate' : 'arcade-btn-cyan'}`}
             title="เปิด/ปิดเพลงประกอบ 8-bit"
           >
-            <PixelMusic size={16} color={isBgmMuted ? '#94a3b8' : '#000000'} />
+            <PixelMusic size={14} color={isBgmMuted ? '#94a3b8' : '#000000'} />
           </button>
           
           <button
             onClick={handleToggleSound}
-            className={`p-2.5 arcade-btn ${isMuted ? 'arcade-btn-rose' : 'arcade-btn-emerald'}`}
+            className={`p-2 arcade-btn ${isMuted ? 'arcade-btn-rose' : 'arcade-btn-emerald'}`}
             title="เปิด/ปิดเสียงเอฟเฟกต์"
           >
-            <PixelSpeaker size={16} color={isMuted ? '#ffffff' : '#000000'} isMuted={isMuted} />
+            <PixelSpeaker size={14} color={isMuted ? '#ffffff' : '#000000'} isMuted={isMuted} />
           </button>
           
           <button
@@ -263,7 +263,7 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
               soundFx.playSelect();
               onLeaveRoom();
             }}
-            className="px-3 py-2 arcade-btn arcade-btn-slate font-arcade text-[10px]"
+            className="px-2.5 py-2 arcade-btn arcade-btn-slate font-arcade text-[9px]"
           >
             EXIT
           </button>
@@ -272,19 +272,18 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
 
       {/* SQUAD / TEAM SELECTION BOARD (For Squad Mode) */}
       {isSquadMode && (
-        <div className="mb-6 pixel-box bg-[#151a2d] p-4 sm:p-5">
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b-2 border-slate-800">
+        <div className="pixel-box bg-[#151a2d] p-3 sm:p-5">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2.5 border-b-2 border-slate-800">
             <div>
               <h2 className="font-arcade text-xs text-cyan-400 flex items-center gap-1.5">
                 <PixelStar size={10} color="#22d3ee" />
                 <span>SQUAD FORMATION (จัดทีมและบทบาท)</span>
                 <PixelStar size={10} color="#22d3ee" />
               </h2>
-              <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
+              <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 flex items-center gap-1">
                 <span>รถถัง 1 คันต่อทีม</span>
                 <PixelCrosshair size={12} color="#f59e0b" />
-                <span>• ผู้ช่วยตอบคำถามโหวตเสียงข้างมากไม่จำกัด</span>
-                <PixelBrain size={12} color="#22d3ee" />
+                <span>• ผู้ช่วยตอบคำถามโหวตเสียงส่วนมากไม่จำกัด</span>
               </p>
             </div>
 
@@ -294,15 +293,15 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                   soundFx.playSelect();
                   onAutoBalanceTeams?.();
                 }}
-                className="px-4 py-2.5 arcade-btn arcade-btn-cyan font-arcade text-[10px] flex items-center gap-1.5 cursor-pointer"
+                className="px-3 py-1.5 sm:px-4 sm:py-2 arcade-btn arcade-btn-cyan font-arcade text-[8px] sm:text-[9px] flex items-center gap-1.5 cursor-pointer"
               >
-                <PixelScale size={14} color="#000000" />
+                <PixelScale size={12} color="#000000" />
                 <span>AUTO-BALANCE (จัดทีมสมดุล)</span>
               </button>
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
             {TEAM_PRESETS.map((team) => {
               const teamPlayers = players.filter(p => p.teamId === team.id);
               const driver = teamPlayers.find(p => p.role === 'DRIVER');
@@ -312,9 +311,9 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
               return (
                 <div
                   key={team.id}
-                  className={`border-4 ${
-                    isMyTeam ? 'border-amber-400 shadow-[4px_4px_0_#f59e0b]' : 'border-black'
-                  } ${team.bg} p-3.5 flex flex-col justify-between`}
+                  className={`border-2 sm:border-4 ${
+                    isMyTeam ? 'border-amber-400 shadow-[2px_2px_0_#f59e0b]' : 'border-black'
+                  } ${team.bg} p-2.5 sm:p-3 flex flex-col justify-between`}
                 >
                   {/* Team Header */}
                   <div>
