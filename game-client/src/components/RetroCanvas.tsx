@@ -374,11 +374,11 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
     ctx.fillText(ammoText, cx, hudY + 12);
   };
 
-  const canvasW = (map && map[0]?.length ? map[0].length : 28) * TILE_SIZE;
-  const canvasH = (map && map.length ? map.length : 28) * TILE_SIZE;
+  const canvasW = (map && map[0]?.length ? map[0].length : 20) * TILE_SIZE;
+  const canvasH = (map && map.length ? map.length : 20) * TILE_SIZE;
 
   return (
-    <div className="relative flex justify-center items-center p-1 sm:p-2 pixel-box bg-black shadow-2xl w-full max-w-[min(100vw-1.5rem,480px,44vh)] mx-auto aspect-square">
+    <div className="relative flex justify-center items-center p-1 sm:p-2.5 pixel-box bg-black shadow-2xl w-full max-w-[min(96vw,700px,68vh)] mx-auto aspect-square">
       <canvas
         ref={canvasRef}
         width={canvasW}

@@ -1,9 +1,9 @@
 import { TileType } from './types.js';
 
-export const MAP_GRID_SIZE = 28; // Expanded to 28x28 grid!
-export const TILE_SIZE = 32;     // 32px per tile => 896x896 battlefield
-export const MAP_WIDTH = MAP_GRID_SIZE * TILE_SIZE;  // 896
-export const MAP_HEIGHT = MAP_GRID_SIZE * TILE_SIZE; // 896
+export const MAP_GRID_SIZE = 20; // Compact, fast-paced 20x20 arena!
+export const TILE_SIZE = 32;     // 32px per tile => 640x640 battlefield
+export const MAP_WIDTH = MAP_GRID_SIZE * TILE_SIZE;  // 640
+export const MAP_HEIGHT = MAP_GRID_SIZE * TILE_SIZE; // 640
 
 // Helper to create empty grid with steel borders
 function createEmptyGrid(): TileType[][] {
@@ -47,21 +47,21 @@ function clearSpawnZones(grid: TileType[][]) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// MAP 1: CLASSIC CITADEL (ป้อมปราการคลาสสิก)
+// MAP 1: CLASSIC CITADEL (ป้อมปราการคลาสสิก 20x20)
 // ══════════════════════════════════════════════════════════════════════════════
 export function generateClassicCitadelMap(): TileType[][] {
   const grid = createEmptyGrid();
 
   // Brick Patterns
   const brickPatterns = [
-    { r1: 3, r2: 9, c1: 4, c2: 5 },
-    { r1: 3, r2: 9, c1: 22, c2: 23 },
-    { r1: 18, r2: 24, c1: 4, c2: 5 },
-    { r1: 18, r2: 24, c1: 22, c2: 23 },
-    { r1: 7, r2: 8, c1: 8, c2: 19 },
-    { r1: 19, r2: 20, c1: 8, c2: 19 },
-    { r1: 11, r2: 16, c1: 9, c2: 10 },
-    { r1: 11, r2: 16, c1: 17, c2: 18 }
+    { r1: 2, r2: 6, c1: 4, c2: 5 },
+    { r1: 2, r2: 6, c1: 14, c2: 15 },
+    { r1: 13, r2: 17, c1: 4, c2: 5 },
+    { r1: 13, r2: 17, c1: 14, c2: 15 },
+    { r1: 5, r2: 6, c1: 7, c2: 12 },
+    { r1: 13, r2: 14, c1: 7, c2: 12 },
+    { r1: 8, r2: 11, c1: 7, c2: 7 },
+    { r1: 8, r2: 11, c1: 12, c2: 12 }
   ];
 
   brickPatterns.forEach(({ r1, r2, c1, c2 }) => {
@@ -74,49 +74,45 @@ export function generateClassicCitadelMap(): TileType[][] {
 
   // Steel Pillars
   const steel = [
-    [5, 13], [5, 14],
-    [22, 13], [22, 14],
-    [13, 5], [14, 5],
-    [13, 22], [14, 22],
-    [13, 13], [14, 14]
+    [4, 9], [4, 10],
+    [15, 9], [15, 10],
+    [9, 4], [10, 4],
+    [9, 15], [10, 15],
+    [9, 9], [10, 10]
   ];
   steel.forEach(([r, c]) => { grid[r][c] = 'STEEL'; });
 
   // Bushes for stealth
-  for (let r = 11; r <= 16; r++) {
+  for (let r = 8; r <= 11; r++) {
     grid[r][2] = 'BUSH';
-    grid[r][3] = 'BUSH';
-    grid[r][24] = 'BUSH';
-    grid[r][25] = 'BUSH';
+    grid[r][17] = 'BUSH';
   }
 
-  // Water moat in middle
-  for (let c = 12; c <= 15; c++) {
-    grid[13][c] = 'WATER';
-    grid[14][c] = 'WATER';
-  }
+  // Center water pond
+  grid[9][9] = 'WATER'; grid[9][10] = 'WATER';
+  grid[10][9] = 'WATER'; grid[10][10] = 'WATER';
 
   // Ice paths
-  grid[9][13] = 'ICE'; grid[9][14] = 'ICE';
-  grid[18][13] = 'ICE'; grid[18][14] = 'ICE';
+  grid[7][9] = 'ICE'; grid[7][10] = 'ICE';
+  grid[12][9] = 'ICE'; grid[12][10] = 'ICE';
 
   clearSpawnZones(grid);
   return grid;
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// MAP 2: JUNGLE OUTPOST (ป่าดงดิบซุ่มยิง)
+// MAP 2: JUNGLE OUTPOST (ป่าดงดิบซุ่มยิง 20x20)
 // ══════════════════════════════════════════════════════════════════════════════
 export function generateJungleOutpostMap(): TileType[][] {
   const grid = createEmptyGrid();
 
-  // Large Bush Clusters
+  // Bush Clusters
   const bushAreas = [
-    { r1: 4, r2: 8, c1: 7, c2: 11 },
-    { r1: 4, r2: 8, c1: 16, c2: 20 },
-    { r1: 19, r2: 23, c1: 7, c2: 11 },
-    { r1: 19, r2: 23, c1: 16, c2: 20 },
-    { r1: 11, r2: 16, c1: 12, c2: 15 }
+    { r1: 3, r2: 6, c1: 6, c2: 8 },
+    { r1: 3, r2: 6, c1: 11, c2: 13 },
+    { r1: 13, r2: 16, c1: 6, c2: 8 },
+    { r1: 13, r2: 16, c1: 11, c2: 13 },
+    { r1: 8, r2: 11, c1: 8, c2: 11 }
   ];
   bushAreas.forEach(({ r1, r2, c1, c2 }) => {
     for (let r = r1; r <= r2; r++) {
@@ -128,12 +124,12 @@ export function generateJungleOutpostMap(): TileType[][] {
 
   // Brick maze walls
   const brickWalls = [
-    { r1: 3, r2: 10, c1: 4, c2: 5 },
-    { r1: 3, r2: 10, c1: 22, c2: 23 },
-    { r1: 17, r2: 24, c1: 4, c2: 5 },
-    { r1: 17, r2: 24, c1: 22, c2: 23 },
-    { r1: 10, r2: 11, c1: 8, c2: 19 },
-    { r1: 16, r2: 17, c1: 8, c2: 19 }
+    { r1: 2, r2: 7, c1: 4, c2: 4 },
+    { r1: 2, r2: 7, c1: 15, c2: 15 },
+    { r1: 12, r2: 17, c1: 4, c2: 4 },
+    { r1: 12, r2: 17, c1: 15, c2: 15 },
+    { r1: 7, r2: 8, c1: 6, c2: 13 },
+    { r1: 11, r2: 12, c1: 6, c2: 13 }
   ];
   brickWalls.forEach(({ r1, r2, c1, c2 }) => {
     for (let r = r1; r <= r2; r++) {
@@ -144,7 +140,7 @@ export function generateJungleOutpostMap(): TileType[][] {
   });
 
   // Steel bunkers
-  [[6, 6], [6, 21], [21, 6], [21, 21], [13, 8], [14, 19]].forEach(([r, c]) => {
+  [[4, 4], [4, 15], [15, 4], [15, 15], [9, 6], [10, 13]].forEach(([r, c]) => {
     grid[r][c] = 'STEEL';
   });
 
@@ -153,40 +149,40 @@ export function generateJungleOutpostMap(): TileType[][] {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// MAP 3: FROZEN RIVER CROSSING (สมรภูมิแม่น้ำน้ำแข็ง)
+// MAP 3: FROZEN RIVER CROSSING (สมรภูมิแม่น้ำน้ำแข็ง 20x20)
 // ══════════════════════════════════════════════════════════════════════════════
 export function generateFrozenRiverMap(): TileType[][] {
   const grid = createEmptyGrid();
 
   // Dual horizontal river channels
-  for (let c = 3; c < MAP_GRID_SIZE - 3; c++) {
-    grid[10][c] = 'WATER';
-    grid[17][c] = 'WATER';
+  for (let c = 2; c < MAP_GRID_SIZE - 2; c++) {
+    grid[7][c] = 'WATER';
+    grid[12][c] = 'WATER';
   }
 
   // Ice bridges across the rivers
-  const bridges = [6, 7, 13, 14, 20, 21];
+  const bridges = [4, 5, 9, 10, 14, 15];
   bridges.forEach(c => {
-    grid[10][c] = 'ICE';
-    grid[17][c] = 'ICE';
+    grid[7][c] = 'ICE';
+    grid[12][c] = 'ICE';
+    grid[8][c] = 'ICE';
     grid[11][c] = 'ICE';
-    grid[16][c] = 'ICE';
   });
 
-  // Central fortress on the island between the two rivers
-  for (let c = 9; c <= 18; c++) {
-    grid[13][c] = 'BRICK';
-    grid[14][c] = 'BRICK';
+  // Central island base
+  for (let c = 7; c <= 12; c++) {
+    grid[9][c] = 'BRICK';
+    grid[10][c] = 'BRICK';
   }
-  grid[13][13] = 'STEEL'; grid[13][14] = 'STEEL';
-  grid[14][13] = 'STEEL'; grid[14][14] = 'STEEL';
+  grid[9][9] = 'STEEL'; grid[9][10] = 'STEEL';
+  grid[10][9] = 'STEEL'; grid[10][10] = 'STEEL';
 
   // Corner brick networks
   [
-    { r1: 3, r2: 7, c1: 4, c2: 8 },
-    { r1: 3, r2: 7, c1: 19, c2: 23 },
-    { r1: 20, r2: 24, c1: 4, c2: 8 },
-    { r1: 20, r2: 24, c1: 19, c2: 23 }
+    { r1: 2, r2: 5, c1: 4, c2: 6 },
+    { r1: 2, r2: 5, c1: 13, c2: 15 },
+    { r1: 14, r2: 17, c1: 4, c2: 6 },
+    { r1: 14, r2: 17, c1: 13, c2: 15 }
   ].forEach(({ r1, r2, c1, c2 }) => {
     for (let r = r1; r <= r2; r++) {
       grid[r][c1] = 'BRICK';
@@ -199,37 +195,36 @@ export function generateFrozenRiverMap(): TileType[][] {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// MAP 4: DESERT LABYRINTH (เขาวงกตทะเลทราย)
+// MAP 4: DESERT LABYRINTH (เขาวงกตทะเลทราย 20x20)
 // ══════════════════════════════════════════════════════════════════════════════
 export function generateDesertLabyrinthMap(): TileType[][] {
   const grid = createEmptyGrid();
 
-  // Grid maze corridors
-  for (let r = 3; r < MAP_GRID_SIZE - 3; r += 3) {
-    for (let c = 3; c < MAP_GRID_SIZE - 3; c += 3) {
+  // Grid maze columns
+  for (let r = 2; r < MAP_GRID_SIZE - 2; r += 3) {
+    for (let c = 2; c < MAP_GRID_SIZE - 2; c += 3) {
       grid[r][c] = 'STEEL';
-      grid[r + 1][c] = 'BRICK';
-      grid[r][c + 1] = 'BRICK';
+      if (r + 1 < MAP_GRID_SIZE - 2) grid[r + 1][c] = 'BRICK';
+      if (c + 1 < MAP_GRID_SIZE - 2) grid[r][c + 1] = 'BRICK';
     }
   }
 
-  // Cross center arena
-  for (let r = 11; r <= 16; r++) {
-    for (let c = 11; c <= 16; c++) {
+  // Open center diamond
+  for (let r = 8; r <= 11; r++) {
+    for (let c = 8; c <= 11; c++) {
       grid[r][c] = 'EMPTY';
     }
   }
 
-  // Center treasure island surrounded by bushes
-  grid[13][13] = 'BUSH'; grid[13][14] = 'BUSH';
-  grid[14][13] = 'BUSH'; grid[14][14] = 'BUSH';
+  grid[9][9] = 'BUSH'; grid[9][10] = 'BUSH';
+  grid[10][9] = 'BUSH'; grid[10][10] = 'BUSH';
 
   clearSpawnZones(grid);
   return grid;
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// MAP 5: PROCEDURAL SYMMETRIC WARZONE (สมรภูมิสุ่มเชิงกลยุทธ์)
+// MAP 5: PROCEDURAL SYMMETRIC WARZONE (สมรภูมิสุ่มเชิงกลยุทธ์ 20x20)
 // ══════════════════════════════════════════════════════════════════════════════
 export function generateProceduralSymmetricMap(): TileType[][] {
   const grid = createEmptyGrid();
@@ -243,13 +238,13 @@ export function generateProceduralSymmetricMap(): TileType[][] {
 
       if (rand < 0.22) {
         tile = 'BRICK';
-      } else if (rand < 0.27) {
+      } else if (rand < 0.28) {
         tile = 'STEEL';
-      } else if (rand < 0.35) {
+      } else if (rand < 0.36) {
         tile = 'BUSH';
-      } else if (rand < 0.40) {
+      } else if (rand < 0.42) {
         tile = 'ICE';
-      } else if (rand < 0.44 && r > 4 && c > 4) {
+      } else if (rand < 0.46 && r > 3 && c > 3) {
         tile = 'WATER';
       }
 
@@ -281,7 +276,7 @@ export function generateClassicMap(): TileType[][] {
   return chosenGenerator();
 }
 
-// 6 spawn positions spaced across the 28x28 arena for 4-6 players
+// 6 spawn positions spaced across the 20x20 arena for 4-6 players
 export const TANK_SPAWN_POINTS = [
   { x: 2 * TILE_SIZE, y: 2 * TILE_SIZE, direction: 'DOWN' as const },
   { x: (MAP_GRID_SIZE - 3) * TILE_SIZE, y: 2 * TILE_SIZE, direction: 'DOWN' as const },
@@ -293,12 +288,12 @@ export const TANK_SPAWN_POINTS = [
 
 // Locations where Quiz Crates can spawn
 export const CRATE_SPAWN_LOCATIONS = [
-  { x: 7 * TILE_SIZE, y: 5 * TILE_SIZE, category: 'MATH' },
-  { x: 20 * TILE_SIZE, y: 5 * TILE_SIZE, category: 'SCIENCE' },
-  { x: 7 * TILE_SIZE, y: 22 * TILE_SIZE, category: 'ENGLISH' },
-  { x: 20 * TILE_SIZE, y: 22 * TILE_SIZE, category: 'LOGIC' },
-  { x: 14 * TILE_SIZE, y: 10 * TILE_SIZE, category: 'GENERAL' },
-  { x: 14 * TILE_SIZE, y: 17 * TILE_SIZE, category: 'MATH' },
-  { x: 3 * TILE_SIZE, y: 14 * TILE_SIZE, category: 'SCIENCE' },
-  { x: 24 * TILE_SIZE, y: 14 * TILE_SIZE, category: 'LOGIC' }
+  { x: 5 * TILE_SIZE, y: 4 * TILE_SIZE, category: 'MATH' },
+  { x: 14 * TILE_SIZE, y: 4 * TILE_SIZE, category: 'SCIENCE' },
+  { x: 5 * TILE_SIZE, y: 15 * TILE_SIZE, category: 'ENGLISH' },
+  { x: 14 * TILE_SIZE, y: 15 * TILE_SIZE, category: 'LOGIC' },
+  { x: 10 * TILE_SIZE, y: 7 * TILE_SIZE, category: 'GENERAL' },
+  { x: 10 * TILE_SIZE, y: 12 * TILE_SIZE, category: 'MATH' },
+  { x: 3 * TILE_SIZE, y: 10 * TILE_SIZE, category: 'SCIENCE' },
+  { x: 16 * TILE_SIZE, y: 10 * TILE_SIZE, category: 'LOGIC' }
 ];

@@ -647,25 +647,32 @@ export class GameEngine {
   public checkWinCondition(timeUp: boolean = false) {
     if (!this.isRunning) return;
 
-    const aliveTanks = Array.from(this.tanks.values()).filter(t => !t.isDead);
+    const allTanks = Array.from(this.tanks.values());
+    const aliveTanks = allTanks.filter(t => !t.isDead && t.hp > 0);
 
     let isGameOver = false;
     if (timeUp) {
       isGameOver = true;
+    } else if (allTanks.length === 0) {
+      isGameOver = false;
+    } else if (allTanks.length === 1) {
+      if (aliveTanks.length === 0) {
+        isGameOver = true;
+      }
     } else if (this.mode === 'SQUAD') {
       const aliveTeams = new Set(aliveTanks.map(t => t.teamId).filter(Boolean));
-      if (aliveTeams.size <= 1 && this.tanks.size >= 2) {
+      if (aliveTeams.size <= 1) {
         isGameOver = true;
       }
     } else {
-      if (aliveTanks.length <= 1 && this.tanks.size >= 2) {
+      if (aliveTanks.length <= 1) {
         isGameOver = true;
       }
     }
 
     if (isGameOver) {
       this.isRunning = false;
-      const sortedTanks = Array.from(this.tanks.values()).sort((a, b) => b.score - a.score);
+      const sortedTanks = [...allTanks].sort((a, b) => b.score - a.score);
       const winner = aliveTanks[0] || sortedTanks[0];
       
       let winnerDisplayName = winner ? winner.playerName : 'ทุกคนเก่งมาก!';
