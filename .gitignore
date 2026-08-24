@@ -36,3 +36,11 @@ __pycache__/
 
 # TypeScript cache
 *.tsbuildinfo
+
+.terraform/
+*.tfstate*
+
+
+.terraform/
+*.tfstate*
+
