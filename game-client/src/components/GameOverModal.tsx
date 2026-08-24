@@ -2,7 +2,15 @@ import React, { useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { LeaderboardEntry } from '../types.js';
 import { soundFx } from '../audio/soundFx.js';
-import { Trophy, RotateCcw, Medal, Zap, Skull } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
+import { 
+  PixelTrophy, 
+  PixelMedal, 
+  PixelCrown, 
+  PixelSwords, 
+  PixelBrain, 
+  PixelStar 
+} from './PixelIcons.js';
 
 interface GameOverModalProps {
   winnerName?: string;
@@ -39,16 +47,20 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
         <div className="absolute bottom-2 right-2 w-2 h-2 bg-amber-400 border border-black" />
 
         {/* 8-bit Victory Trophy */}
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-500 border-4 border-black shadow-[4px_4px_0_#000] text-3xl mb-3 animate-bounce-short">
-          🏆
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-500 border-4 border-black shadow-[4px_4px_0_#000] mb-3 animate-bounce-short">
+          <PixelTrophy size={40} color="#000000" />
         </div>
 
         {/* Arcade Stage Clear Title */}
-        <h2 className="font-arcade text-lg sm:text-xl text-amber-400 mb-1 arcade-glow-gold">
-          ★ STAGE CLEAR ★
+        <h2 className="font-arcade text-lg sm:text-xl text-amber-400 mb-1 arcade-glow-gold flex items-center justify-center gap-2">
+          <PixelStar size={14} color="#fbbf24" />
+          <span>STAGE CLEAR</span>
+          <PixelStar size={14} color="#fbbf24" />
         </h2>
-        <div className="font-arcade text-[10px] text-slate-300 mb-5">
-          WINNER: <strong className="text-yellow-300 text-xs">{winnerName || 'ALL PLAYERS'}</strong> 👑
+        <div className="font-arcade text-[10px] text-slate-300 mb-5 flex items-center justify-center gap-1.5">
+          <span>WINNER:</span>
+          <strong className="text-yellow-300 text-xs">{winnerName || 'ALL PLAYERS'}</strong>
+          <PixelCrown size={14} color="#fbbf24" />
         </div>
 
         {/* Arcade High Score Rankings */}
@@ -60,7 +72,7 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
 
           <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1">
             {leaderboard.map((entry, idx) => {
-              const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+              const rankNum = (idx + 1) as 1 | 2 | 3;
               
               return (
                 <div
@@ -72,15 +84,25 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
                   }`}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="w-6 text-center font-arcade text-xs text-amber-400">
-                      {medal}
+                    <span className="w-6 flex items-center justify-center font-arcade text-xs text-amber-400">
+                      {idx < 3 ? (
+                        <PixelMedal rank={rankNum} size={18} />
+                      ) : (
+                        `#${idx + 1}`
+                      )}
                     </span>
                     <span className="truncate max-w-[140px]">{entry.name}</span>
                   </div>
 
                   <div className="flex items-center gap-2.5 font-arcade text-[9px]">
-                    <span className="text-rose-400">⚔️{entry.kills}</span>
-                    <span className="text-cyan-400">🧠{entry.correctAnswers}</span>
+                    <span className="text-rose-400 flex items-center gap-1">
+                      <PixelSwords size={12} color="#f87171" />
+                      <span>{entry.kills}</span>
+                    </span>
+                    <span className="text-cyan-400 flex items-center gap-1">
+                      <PixelBrain size={12} color="#22d3ee" />
+                      <span>{entry.correctAnswers}</span>
+                    </span>
                     <span className="text-yellow-300 font-extrabold">{entry.score}P</span>
                   </div>
                 </div>

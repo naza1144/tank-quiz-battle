@@ -26,6 +26,13 @@ import { SquadSupportView } from './components/SquadSupportView.js';
 import { GameOverModal } from './components/GameOverModal.js';
 import { TouchControls } from './components/TouchControls.js';
 import { 
+  PixelClock, 
+  PixelMusic, 
+  PixelSpeaker, 
+  PixelStar, 
+  PixelAmmo 
+} from './components/PixelIcons.js';
+import { 
   Zap, 
   Heart, 
   Shield, 
@@ -454,7 +461,7 @@ export const App: React.FC = () => {
             {/* Right: Round Timer & Audio Controls */}
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1.5 px-3 py-1 bg-black border-2 border-amber-500 text-amber-300 font-arcade text-xs">
-                <span>⏱</span>
+                <PixelClock size={12} color="#fbbf24" />
                 <span>{formatTimer(roundTimer)}</span>
               </div>
               
@@ -463,7 +470,7 @@ export const App: React.FC = () => {
                 className={`p-2 arcade-btn ${isBgmMuted ? 'arcade-btn-slate' : 'arcade-btn-cyan'}`}
                 title="เปิด/ปิดเพลงประกอบ BGM"
               >
-                🎵
+                <PixelMusic size={16} color={isBgmMuted ? '#94a3b8' : '#000000'} />
               </button>
 
               <button
@@ -471,7 +478,7 @@ export const App: React.FC = () => {
                 className={`p-2 arcade-btn ${isMuted ? 'arcade-btn-rose' : 'arcade-btn-emerald'}`}
                 title="เปิด/ปิดเสียงเอฟเฟกต์ SFX"
               >
-                {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                <PixelSpeaker size={16} color={isMuted ? '#ffffff' : '#000000'} isMuted={isMuted} />
               </button>
             </div>
 
@@ -484,13 +491,13 @@ export const App: React.FC = () => {
               // Squad Support Console View
               <SquadSupportView
                 teamId={myPlayer?.teamId || ''}
+                myTeamId={myPlayer?.teamId || ''}
                 teamTank={tanks.find(t => t.teamId === myPlayer?.teamId)}
-                playerName={userName}
                 currentQuestion={squadQuiz}
-                quizSessionData={squadQuizSession}
+                quizSession={squadQuizSession}
                 voteUpdate={squadVoteUpdate}
                 finalResult={squadFinalResult}
-                onVoteQuestion={handleSquadVote}
+                onVote={handleSquadVote}
                 onSendCheer={(msg) => {
                   socketRef.current?.emit('send_cheer', { message: msg });
                 }}

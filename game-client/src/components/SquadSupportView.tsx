@@ -1,13 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { QuizQuestion, Tank, TeamQuizVoteUpdate, TeamQuizFinalResult } from '../types.js';
 import { soundFx } from '../audio/soundFx.js';
-import { Zap, Heart, CheckCircle2, XCircle, Users, Send, Clock, Award, Radio, Shield } from 'lucide-react';
+import { 
+  PixelBrain, 
+  PixelHeart, 
+  PixelAmmo, 
+  PixelClock, 
+  PixelStar, 
+  PixelCheck, 
+  PixelCross, 
+  PixelRadar, 
+  PixelCrate, 
+  PixelExplosion, 
+  PixelTrophy, 
+  PixelShield 
+} from './PixelIcons.js';
 
 interface SquadSupportViewProps {
-  teamId: string;
+  teamId?: string;
+  myTeamId?: string;
   teamTank?: Tank;
-  playerName: string;
+  playerName?: string;
   currentQuestion: QuizQuestion | null;
+  quizSession?: {
+    durationSeconds?: number;
+    expireAt?: number;
+    timeLimitSeconds?: number;
+    startTime?: number;
+    endTime?: number;
+  } | null;
   quizSessionData?: {
     timeLimitSeconds: number;
     startTime: number;
@@ -15,98 +36,113 @@ interface SquadSupportViewProps {
   } | null;
   voteUpdate?: TeamQuizVoteUpdate | null;
   finalResult?: TeamQuizFinalResult | null;
-  onVoteQuestion: (choiceIndex: number) => void;
+  onVote?: (choiceIndex: number) => void;
+  onVoteQuestion?: (choiceIndex: number) => void;
   onSendCheer: (msg: string) => void;
 }
 
 export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
-  teamId,
+  myTeamId,
   teamTank,
   playerName,
   currentQuestion,
+  quizSession,
   quizSessionData,
   voteUpdate,
   finalResult,
+  onVote,
   onVoteQuestion,
   onSendCheer
 }) => {
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
-  const [timeLeft, setTimeLeft] = useState<number>(0);
+  const [timeLeft, setTimeLeft] = useState<number>(5);
 
-  // Reset selected choice when question changes
+  const activeSession = quizSession || (quizSessionData ? {
+    durationSeconds: quizSessionData.timeLimitSeconds,
+    expireAt: quizSessionData.endTime
+  } : null);
+
+  // Reset local state when a new question pops up
   useEffect(() => {
-    setSelectedChoice(null);
+    if (currentQuestion) {
+      setSelectedChoice(null);
+    }
   }, [currentQuestion?.id]);
 
-  // Live Countdown Timer with chiptune tick
+  // Smooth Countdown Loop
   useEffect(() => {
-    if (!quizSessionData?.endTime) {
-      setTimeLeft(0);
-      return;
-    }
+    if (!activeSession?.expireAt || !currentQuestion) return;
 
     const interval = setInterval(() => {
-      const remainingMs = Math.max(0, quizSessionData.endTime - Date.now());
-      const remainingSec = remainingMs / 1000;
+      const remainingMs = activeSession.expireAt! - Date.now();
+      const remainingSec = Math.max(0, remainingMs / 1000);
       setTimeLeft(remainingSec);
 
-      if (remainingSec <= 1.0 && remainingSec > 0.05) {
-        soundFx.playCountdownTick(true);
+      // Play tick sound when 3 seconds remaining
+      if (remainingSec > 0 && remainingSec <= 3 && Math.floor(remainingSec * 10) % 10 === 0) {
+        soundFx.playCountdownTick();
       }
 
-      if (remainingMs <= 0) {
+      if (remainingSec <= 0) {
         clearInterval(interval);
       }
     }, 100);
 
     return () => clearInterval(interval);
-  }, [quizSessionData?.endTime]);
+  }, [activeSession?.expireAt, currentQuestion]);
 
-  const handleVote = (idx: number) => {
+  const handleVote = (index: number) => {
     if (selectedChoice !== null || finalResult || timeLeft <= 0) return;
     soundFx.playVote();
-    setSelectedChoice(idx);
-    onVoteQuestion(idx);
+    setSelectedChoice(index);
+    if (onVote) onVote(index);
+    if (onVoteQuestion) onVoteQuestion(index);
   };
 
-  const totalVotes = voteUpdate?.totalVotes || (selectedChoice !== null ? 1 : 0);
   const voteCounts = voteUpdate?.voteCounts || [0, 0, 0, 0];
-  const maxTime = quizSessionData?.timeLimitSeconds || 4;
-  const progressPercent = Math.max(0, Math.min(100, (timeLeft / maxTime) * 100));
+  const totalVotes = voteUpdate?.totalVotes || 0;
+  const duration = activeSession?.durationSeconds || 5;
+  const progressPercent = Math.max(0, Math.min(100, (timeLeft / duration) * 100));
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-4 sm:p-6 pixel-box bg-[#101422] text-slate-100 font-thai crt-overlay">
+    <div className="w-full max-w-4xl mx-auto p-3 sm:p-4 font-thai text-slate-100 animate-fade-in">
       
-      {/* Top Arcade Tactical Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-slate-800 pb-3 mb-4">
+      {/* Top Tactical Command Uplink Header */}
+      <div className="pixel-box bg-[#121624] p-3 sm:p-4 mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-cyan-600 border-2 border-black flex items-center justify-center text-xl shadow-[2px_2px_0_#000]">
-            📡
+          <div className="w-10 h-10 bg-cyan-600 border-2 border-black flex items-center justify-center shadow-[2px_2px_0_#000]">
+            <PixelBrain size={24} color="#000000" />
           </div>
           <div>
-            <div className="font-arcade text-[9px] text-cyan-400 uppercase tracking-widest flex items-center gap-1.5">
-              <span>★</span> SQUAD TACTICAL CONSOLE <span>★</span>
+            <div className="font-arcade text-[9px] text-cyan-400 flex items-center gap-1.5">
+              <PixelStar size={10} color="#22d3ee" />
+              <span>SQUAD SUPPORT COMMAND CONSOLE</span>
+              <PixelStar size={10} color="#22d3ee" />
             </div>
-            <div className="font-arcade text-xs text-white">
-              SUPPORT: <span className="text-amber-300">{playerName}</span>
+            <div className="text-xs sm:text-sm font-bold text-white">
+              หน่วยสนับสนุนตอบคำถาม • <span className="text-amber-300">ระบบโหวตเสียงส่วนมาก</span>
             </div>
           </div>
         </div>
 
-        {/* Live Tank Stats */}
-        {teamTank && (
-          <div className="flex items-center gap-2 bg-black border-2 border-slate-700 px-3 py-1.5 font-arcade text-[9px]">
-            <span className="text-rose-400">HP: {teamTank.hp}/{teamTank.maxHp}</span>
-            <span className="text-slate-600">|</span>
-            <span className="text-amber-400">AMMO: {teamTank.ammo}</span>
+        {/* Live Driver Tank Status */}
+        <div className="flex items-center gap-3 bg-black/80 border-2 border-slate-700 px-3 py-1.5 font-arcade text-xs">
+          <div className="text-rose-400 flex items-center gap-1">
+            <PixelHeart size={14} color="#ef4444" />
+            <span>HP: {teamTank?.hp || 0}/{teamTank?.maxHp || 2}</span>
           </div>
-        )}
+          <div className="text-amber-300 flex items-center gap-1">
+            <PixelAmmo size={14} color="#fbbf24" />
+            <span>AMMO: {teamTank?.ammo || 0}</span>
+          </div>
+        </div>
       </div>
 
-      {/* Driver Info Banner */}
-      <div className="p-2.5 mb-4 bg-black border-2 border-slate-800 flex items-center justify-between font-arcade text-[9px]">
-        <span className="text-slate-300">
-          ▸ DRIVER: <strong className="text-cyan-300">{teamTank?.playerName || 'READY'}</strong>
+      {/* Driver Tank Vital Bar */}
+      <div className="mb-4 bg-[#151a2d] border-2 border-black p-2.5 flex items-center justify-between font-arcade text-[9px] text-slate-300">
+        <span className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 border border-black shadow shrink-0" style={{ backgroundColor: teamTank?.color || '#3b82f6' }} />
+          <span>DRIVER: {teamTank?.playerName || playerName || 'กำลังรอพลขับ...'} ({teamTank?.archetype || 'STANDARD'})</span>
         </span>
         <span className="text-amber-400">
           SCORE: {teamTank?.score || 0}
@@ -129,12 +165,13 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
             </div>
             
             {/* Live 8-bit Countdown */}
-            <div className={`px-2.5 py-0.5 border-2 text-[10px] ${
+            <div className={`px-2.5 py-0.5 border-2 text-[10px] flex items-center gap-1.5 ${
               timeLeft <= 1.5 
                 ? 'bg-rose-950 text-rose-300 border-rose-500 animate-blink' 
                 : 'bg-black text-amber-300 border-amber-500'
             }`}>
-              ⏱ {timeLeft.toFixed(1)}s
+              <PixelClock size={12} color={timeLeft <= 1.5 ? '#f43f5e' : '#fbbf24'} />
+              <span>{timeLeft.toFixed(1)}s</span>
             </div>
           </div>
 
@@ -155,8 +192,14 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
 
           {/* Voting Consensus Header */}
           <div className="flex items-center justify-between font-arcade text-[8px] text-slate-400 mb-2 px-1">
-            <span>🗳️ SQUAD VOTES: {totalVotes}</span>
-            <span className="text-amber-400">+{currentQuestion.rewardAmmo} AMMO REWARD</span>
+            <span className="flex items-center gap-1">
+              <PixelStar size={10} color="#38bdf8" />
+              <span>SQUAD VOTES: {totalVotes}</span>
+            </span>
+            <span className="text-amber-400 flex items-center gap-1">
+              <PixelAmmo size={10} color="#fbbf24" />
+              <span>+{currentQuestion.rewardAmmo} AMMO REWARD</span>
+            </span>
           </div>
 
           {/* Options with Live Voting Percentage Bars */}
@@ -214,8 +257,9 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
                   </div>
 
                   {isSelected && (
-                    <div className="relative z-10 mt-1 font-arcade text-[7px] text-amber-300">
-                      ★ YOUR VOTE
+                    <div className="relative z-10 mt-1 font-arcade text-[7px] text-amber-300 flex items-center gap-1">
+                      <PixelStar size={8} color="#fbbf24" />
+                      <span>YOUR VOTE</span>
                     </div>
                   )}
                 </button>
@@ -226,7 +270,7 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
           {/* Waiting for timer banner after voting */}
           {selectedChoice !== null && !finalResult && (
             <div className="p-2.5 mb-2 bg-cyan-950/70 border-2 border-cyan-500/70 text-cyan-300 font-arcade text-[8px] sm:text-[9px] text-center animate-pulse flex items-center justify-center gap-2">
-              <span>⏳</span>
+              <PixelClock size={12} color="#38bdf8" />
               <span>บันทึกการโหวตของคุณแล้ว! กำลังรอหมดเวลาเพื่อรวมคะแนนเสียงส่วนใหญ่...</span>
             </div>
           )}
@@ -238,12 +282,22 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
                 ? 'bg-emerald-950 border-emerald-500 text-emerald-200' 
                 : 'bg-rose-950 border-rose-500 text-rose-200'
             }`}>
-              <span className="text-2xl">{finalResult.isCorrect ? '🎉' : '❌'}</span>
+              <div className="shrink-0">
+                {finalResult.isCorrect ? (
+                  <PixelCheck size={28} color="#34d399" />
+                ) : (
+                  <PixelCross size={28} color="#f87171" />
+                )}
+              </div>
               <div>
-                <div className="font-extrabold text-white font-arcade text-[10px]">
-                  {finalResult.isCorrect 
-                    ? `★ MAJORITY CORRECT! (+${finalResult.rewardAmmo} AMMO DELIVERED) ★` 
-                    : '★ MAJORITY WRONG! (NO AMMO) ★'}
+                <div className="font-extrabold text-white font-arcade text-[10px] flex items-center gap-1.5">
+                  <PixelStar size={10} color={finalResult.isCorrect ? '#34d399' : '#f87171'} />
+                  <span>
+                    {finalResult.isCorrect 
+                      ? `MAJORITY CORRECT! (+${finalResult.rewardAmmo} AMMO DELIVERED)` 
+                      : 'MAJORITY WRONG! (NO AMMO)'}
+                  </span>
+                  <PixelStar size={10} color={finalResult.isCorrect ? '#34d399' : '#f87171'} />
                 </div>
                 <div className="text-slate-300 text-xs mt-0.5">
                   {finalResult.explanationTh}
@@ -255,12 +309,18 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
         </div>
       ) : (
         <div className="text-center p-6 pixel-box bg-black/60 mb-4">
-          <div className="text-3xl mb-2 animate-bounce-short">📡</div>
-          <div className="font-arcade text-xs text-amber-400 mb-1">
-            RADAR SCANNING FOR CRATES...
+          <div className="inline-block mb-3 animate-bounce-short">
+            <PixelRadar size={36} color="#06b6d4" />
           </div>
-          <div className="text-xs text-slate-400">
-            เมื่อคนขับเก็บกล่อง [?] โหมดโหวตเสียงส่วนมาก (3-5 วินาที) จะเริ่มต้นขึ้นทันที!
+          <div className="font-arcade text-xs text-amber-400 mb-1 flex items-center justify-center gap-1.5">
+            <PixelStar size={10} color="#fbbf24" />
+            <span>RADAR SCANNING FOR CRATES...</span>
+            <PixelStar size={10} color="#fbbf24" />
+          </div>
+          <div className="text-xs text-slate-400 flex items-center justify-center gap-1.5 mt-1">
+            <span>เมื่อคนขับเก็บกล่อง</span>
+            <PixelCrate size={14} color="#f59e0b" />
+            <span>โหมดโหวตเสียงส่วนมาก (3-5 วินาที) จะเริ่มต้นขึ้นทันที!</span>
           </div>
         </div>
       )}
@@ -270,29 +330,42 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
         <button
           onClick={() => {
             soundFx.playSelect();
-            onSendCheer('เติมกระสุนแล้วนะ สู้ๆ! 💥');
+            onSendCheer('เติมกระสุนแล้วนะ สู้ๆ!');
           }}
-          className="px-3 py-1.5 arcade-btn arcade-btn-slate font-arcade text-[8px] flex items-center gap-1 cursor-pointer"
+          className="px-3 py-1.5 arcade-btn arcade-btn-slate font-arcade text-[8px] flex items-center gap-1.5 cursor-pointer"
         >
-          <span>💥</span> <span>AMMO SENT!</span>
+          <PixelAmmo size={12} color="#fbbf24" />
+          <span>AMMO SENT!</span>
         </button>
         <button
           onClick={() => {
             soundFx.playSelect();
-            onSendCheer('ระวังศัตรูทางซ้าย! 👈');
+            onSendCheer('ระวังศัตรูทางซ้าย!');
           }}
-          className="px-3 py-1.5 arcade-btn arcade-btn-rose font-arcade text-[8px] flex items-center gap-1 cursor-pointer"
+          className="px-3 py-1.5 arcade-btn arcade-btn-rose font-arcade text-[8px] flex items-center gap-1.5 cursor-pointer"
         >
-          <span>⚠️</span> <span>ENEMY LEFT!</span>
+          <PixelExplosion size={12} color="#ffffff" />
+          <span>ENEMY LEFT!</span>
         </button>
         <button
           onClick={() => {
             soundFx.playSelect();
-            onSendCheer('ลุยเลยเพื่อน รอดแน่นอน! 🏆');
+            onSendCheer('ลุยเลยเพื่อน รอดแน่นอน!');
           }}
-          className="px-3 py-1.5 arcade-btn arcade-btn-amber font-arcade text-[8px] flex items-center gap-1 cursor-pointer"
+          className="px-3 py-1.5 arcade-btn arcade-btn-amber font-arcade text-[8px] flex items-center gap-1.5 cursor-pointer"
         >
-          <span>👑</span> <span>GO TEAM!</span>
+          <PixelTrophy size={12} color="#000000" />
+          <span>WE GOT THIS!</span>
+        </button>
+        <button
+          onClick={() => {
+            soundFx.playSelect();
+            onSendCheer('รวมพลังโหวตข้อถูกเร็ว!');
+          }}
+          className="px-3 py-1.5 arcade-btn arcade-btn-cyan font-arcade text-[8px] flex items-center gap-1.5 cursor-pointer"
+        >
+          <PixelBrain size={12} color="#000000" />
+          <span>VOTE FAST!</span>
         </button>
       </div>
 

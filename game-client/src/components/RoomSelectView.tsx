@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { GameMode, RoomConfig } from '../types.js';
-import { Users, Plus, Play, Shield, Zap, Sparkles, LogOut, Swords, Crown } from 'lucide-react';
+import { Users, Plus, Play, LogOut } from 'lucide-react';
 import { soundFx } from '../audio/soundFx.js';
+import { PixelGamepad, PixelStar, PixelTeam, PixelSwords, PixelCrosshair, PixelTank } from './PixelIcons.js';
 
 interface RoomSelectViewProps {
   rooms: {
@@ -49,12 +50,14 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
       {/* Top Arcade Mission Header */}
       <div className="pixel-box bg-[#121624] p-4 sm:p-5 mb-6 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-amber-500 border-2 border-black flex items-center justify-center text-2xl shadow-[2px_2px_0_#000]">
-            🕹️
+          <div className="w-12 h-12 bg-amber-500 border-2 border-black flex items-center justify-center shadow-[2px_2px_0_#000]">
+            <PixelGamepad size={28} color="#000000" />
           </div>
           <div>
             <div className="font-arcade text-[10px] text-amber-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">
-              <span>★</span> MISSION SELECT / BATTLE ROOMS <span>★</span>
+              <PixelStar size={10} color="#fbbf24" />
+              <span>MISSION SELECT / BATTLE ROOMS</span>
+              <PixelStar size={10} color="#fbbf24" />
             </div>
             <div className="font-arcade text-xs sm:text-sm text-white">
               PLAYER: <span className="text-amber-300">{userName}</span>
@@ -114,12 +117,22 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
               >
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className={`px-2 py-0.5 border-2 border-black font-arcade text-[9px] ${
+                    <span className={`px-2 py-0.5 border-2 border-black font-arcade text-[9px] flex items-center gap-1.5 ${
                       room.mode === 'SQUAD' 
                         ? 'bg-cyan-950 text-cyan-300' 
                         : 'bg-amber-950 text-amber-300'
                     }`}>
-                      {room.mode === 'SQUAD' ? '🤝 SQUAD CO-OP' : '⚔️ FFA BATTLE'}
+                      {room.mode === 'SQUAD' ? (
+                        <>
+                          <PixelTeam size={12} color="#22d3ee" />
+                          <span>SQUAD CO-OP</span>
+                        </>
+                      ) : (
+                        <>
+                          <PixelSwords size={12} color="#f59e0b" />
+                          <span>FFA BATTLE</span>
+                        </>
+                      )}
                     </span>
                     
                     <span className={`px-2 py-0.5 border-2 border-black font-arcade text-[8px] ${
@@ -132,7 +145,8 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
                   </div>
 
                   <h3 className="font-bold text-base text-amber-300 mb-1 flex items-center gap-2">
-                    <span>🎯</span> {room.name}
+                    <PixelCrosshair size={16} color="#fbbf24" />
+                    <span>{room.name}</span>
                   </h3>
                   
                   <p className="text-xs text-slate-400 mb-3">
@@ -169,8 +183,10 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in crt-overlay">
           <div className="w-full max-w-md pixel-box bg-[#121624] p-6 text-slate-100">
             <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-slate-800">
-              <h2 className="font-arcade text-xs sm:text-sm text-amber-400">
-                ★ CREATE BATTLE ROOM ★
+              <h2 className="font-arcade text-xs sm:text-sm text-amber-400 flex items-center gap-1.5">
+                <PixelStar size={12} color="#fbbf24" />
+                <span>CREATE BATTLE ROOM</span>
+                <PixelStar size={12} color="#fbbf24" />
               </h2>
               <button
                 onClick={() => setShowCreateModal(false)}
@@ -206,13 +222,14 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
                       soundFx.playSelect();
                       setMode('SQUAD');
                     }}
-                    className={`p-3 border-2 border-black font-bold text-xs ${
+                    className={`p-3 border-2 border-black font-bold text-xs flex items-center justify-center gap-1.5 ${
                       mode === 'SQUAD' 
                         ? 'bg-cyan-600 text-black shadow-[2px_2px_0_#000]' 
                         : 'bg-slate-800 text-slate-400'
                     }`}
                   >
-                    🤝 Squad Co-op (ทีม)
+                    <PixelTeam size={14} color={mode === 'SQUAD' ? '#000000' : '#94a3b8'} />
+                    <span>Squad Co-op (ทีม)</span>
                   </button>
                   <button
                     type="button"
@@ -220,13 +237,14 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
                       soundFx.playSelect();
                       setMode('FFA');
                     }}
-                    className={`p-3 border-2 border-black font-bold text-xs ${
+                    className={`p-3 border-2 border-black font-bold text-xs flex items-center justify-center gap-1.5 ${
                       mode === 'FFA' 
                         ? 'bg-amber-500 text-black shadow-[2px_2px_0_#000]' 
                         : 'bg-slate-800 text-slate-400'
                     }`}
                   >
-                    ⚔️ Free-for-All (เดี่ยว)
+                    <PixelSwords size={14} color={mode === 'FFA' ? '#000000' : '#94a3b8'} />
+                    <span>Free-for-All (เดี่ยว)</span>
                   </button>
                 </div>
               </div>

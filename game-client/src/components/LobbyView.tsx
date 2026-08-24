@@ -4,10 +4,8 @@ import {
   Shield, 
   Zap, 
   Crosshair, 
-  Gauge, 
   Bot, 
   Play, 
-  Plus, 
   Check, 
   Users, 
   Sparkles, 
@@ -17,6 +15,23 @@ import {
   Music
 } from 'lucide-react';
 import { soundFx } from '../audio/soundFx.js';
+import { 
+  PixelTank, 
+  PixelGamepad, 
+  PixelBrain, 
+  PixelShield, 
+  PixelZap, 
+  PixelCrosshair, 
+  PixelFlame, 
+  PixelLeaf, 
+  PixelCrown, 
+  PixelScale, 
+  PixelStar, 
+  PixelCrate, 
+  PixelAmmo,
+  PixelSpeaker,
+  PixelMusic
+} from './PixelIcons.js';
 
 interface LobbyViewProps {
   roomConfig: RoomConfig | null;
@@ -41,7 +56,7 @@ const TANK_PRESETS: {
   speedBlocks: string;
   damage: number;
   damageBlocks: string;
-  icon: string;
+  icon: React.ReactNode;
 }[] = [
   {
     type: 'STANDARD',
@@ -53,7 +68,7 @@ const TANK_PRESETS: {
     speedBlocks: '■■■□',
     damage: 1,
     damageBlocks: '■□□□',
-    icon: '🛡️'
+    icon: <PixelShield size={28} color="#3b82f6" />
   },
   {
     type: 'SCOUT',
@@ -65,7 +80,7 @@ const TANK_PRESETS: {
     speedBlocks: '■■■■',
     damage: 1,
     damageBlocks: '■□□□',
-    icon: '⚡'
+    icon: <PixelZap size={28} color="#facc15" />
   },
   {
     type: 'HEAVY',
@@ -77,7 +92,7 @@ const TANK_PRESETS: {
     speedBlocks: '■■□□',
     damage: 2,
     damageBlocks: '■■□□',
-    icon: '🦾'
+    icon: <PixelTank size={28} color="#a855f7" />
   },
   {
     type: 'SNIPER',
@@ -89,7 +104,7 @@ const TANK_PRESETS: {
     speedBlocks: '■■■□',
     damage: 2,
     damageBlocks: '■■□□',
-    icon: '🎯'
+    icon: <PixelCrosshair size={28} color="#ef4444" />
   }
 ];
 
@@ -102,7 +117,17 @@ const COLORS = [
   { name: 'CYAN', value: '#06b6d4' }
 ];
 
-export const TEAM_PRESETS = [
+export const TEAM_PRESETS: {
+  id: string;
+  name: string;
+  nameTh: string;
+  color: string;
+  bg: string;
+  border: string;
+  badgeBg: string;
+  textColor: string;
+  icon: React.ReactNode;
+}[] = [
   {
     id: 'team-1',
     name: 'RED SQUAD',
@@ -112,7 +137,7 @@ export const TEAM_PRESETS = [
     border: 'border-rose-500',
     badgeBg: 'bg-rose-600 text-white',
     textColor: 'text-rose-400',
-    icon: '🔥'
+    icon: <PixelFlame size={20} color="#ef4444" />
   },
   {
     id: 'team-2',
@@ -123,7 +148,7 @@ export const TEAM_PRESETS = [
     border: 'border-blue-500',
     badgeBg: 'bg-blue-600 text-white',
     textColor: 'text-blue-400',
-    icon: '⚡'
+    icon: <PixelZap size={20} color="#3b82f6" />
   },
   {
     id: 'team-3',
@@ -134,7 +159,7 @@ export const TEAM_PRESETS = [
     border: 'border-emerald-500',
     badgeBg: 'bg-emerald-600 text-white',
     textColor: 'text-emerald-400',
-    icon: '🌿'
+    icon: <PixelLeaf size={20} color="#22c55e" />
   },
   {
     id: 'team-4',
@@ -145,7 +170,7 @@ export const TEAM_PRESETS = [
     border: 'border-amber-500',
     badgeBg: 'bg-amber-500 text-black',
     textColor: 'text-amber-400',
-    icon: '👑'
+    icon: <PixelCrown size={20} color="#fbbf24" />
   }
 ];
 
@@ -196,8 +221,8 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
       {/* Top Arcade Status Bar */}
       <div className="pixel-box bg-[#121624] p-4 mb-6 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-amber-500 border-2 border-black flex items-center justify-center text-2xl shadow-[2px_2px_0_#000]">
-            🎮
+          <div className="w-12 h-12 bg-amber-500 border-2 border-black flex items-center justify-center shadow-[2px_2px_0_#000]">
+            <PixelGamepad size={28} color="#000000" />
           </div>
           <div>
             <h1 className="font-arcade text-xs sm:text-sm text-amber-400">
@@ -222,7 +247,7 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
             className={`p-2.5 arcade-btn ${isBgmMuted ? 'arcade-btn-slate' : 'arcade-btn-cyan'}`}
             title="เปิด/ปิดเพลงประกอบ 8-bit"
           >
-            <Music className="w-4 h-4" />
+            <PixelMusic size={16} color={isBgmMuted ? '#94a3b8' : '#000000'} />
           </button>
           
           <button
@@ -230,7 +255,7 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
             className={`p-2.5 arcade-btn ${isMuted ? 'arcade-btn-rose' : 'arcade-btn-emerald'}`}
             title="เปิด/ปิดเสียงเอฟเฟกต์"
           >
-            {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            <PixelSpeaker size={16} color={isMuted ? '#ffffff' : '#000000'} isMuted={isMuted} />
           </button>
           
           <button
@@ -250,11 +275,16 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
         <div className="mb-6 pixel-box bg-[#151a2d] p-4 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b-2 border-slate-800">
             <div>
-              <h2 className="font-arcade text-xs text-cyan-400 flex items-center gap-2">
-                <span>★</span> SQUAD FORMATION (จัดทีมและบทบาท) <span>★</span>
+              <h2 className="font-arcade text-xs text-cyan-400 flex items-center gap-1.5">
+                <PixelStar size={10} color="#22d3ee" />
+                <span>SQUAD FORMATION (จัดทีมและบทบาท)</span>
+                <PixelStar size={10} color="#22d3ee" />
               </h2>
-              <p className="text-xs text-slate-400 mt-1">
-                รถถัง 1 คันต่อทีม 🎯 • ผู้ช่วยตอบคำถามโหวตเสียงข้างมากไม่จำกัด 🧠
+              <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
+                <span>รถถัง 1 คันต่อทีม</span>
+                <PixelCrosshair size={12} color="#f59e0b" />
+                <span>• ผู้ช่วยตอบคำถามโหวตเสียงข้างมากไม่จำกัด</span>
+                <PixelBrain size={12} color="#22d3ee" />
               </p>
             </div>
 
@@ -266,7 +296,8 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                 }}
                 className="px-4 py-2.5 arcade-btn arcade-btn-cyan font-arcade text-[10px] flex items-center gap-1.5 cursor-pointer"
               >
-                <span>⚖️</span> <span>AUTO-BALANCE (จัดทีมสมดุล)</span>
+                <PixelScale size={14} color="#000000" />
+                <span>AUTO-BALANCE (จัดทีมสมดุล)</span>
               </button>
             )}
           </div>
@@ -289,7 +320,7 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xl">{team.icon}</span>
+                        {team.icon}
                         <span className={`font-arcade text-[11px] ${team.textColor}`}>{team.name}</span>
                       </div>
                       {isMyTeam && (
@@ -302,7 +333,9 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                     {/* Driver Slot */}
                     <div className="mb-2 bg-black/70 border-2 border-slate-700 p-2">
                       <div className="font-arcade text-[9px] text-amber-400 mb-1 flex items-center justify-between">
-                        <span>🎮 DRIVER</span>
+                        <span className="flex items-center gap-1">
+                          <PixelGamepad size={12} color="#fbbf24" /> DRIVER
+                        </span>
                         {driver && <span className="text-[8px] text-slate-400">{driver.tankArchetype}</span>}
                       </div>
                       {driver ? (
@@ -325,7 +358,9 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                     {/* Supporters Slot */}
                     <div className="bg-black/70 border-2 border-slate-700 p-2">
                       <div className="font-arcade text-[9px] text-cyan-400 mb-1 flex items-center justify-between">
-                        <span>🧠 SQUAD ({supporters.length})</span>
+                        <span className="flex items-center gap-1">
+                          <PixelBrain size={12} color="#22d3ee" /> SQUAD ({supporters.length})
+                        </span>
                       </div>
                       {supporters.length > 0 ? (
                         <div className="space-y-1 max-h-20 overflow-y-auto pr-1">
@@ -383,8 +418,8 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
           {isSquadMode && selectedRole === 'SUPPORT' ? (
             <div className="pixel-box bg-[#151a2d] p-5">
               <div className="flex items-center gap-3 mb-4 border-b-2 border-slate-800 pb-3">
-                <div className="w-12 h-12 bg-cyan-600 border-2 border-black flex items-center justify-center text-2xl shadow-[2px_2px_0_#000]">
-                  🧠
+                <div className="w-12 h-12 bg-cyan-600 border-2 border-black flex items-center justify-center shadow-[2px_2px_0_#000]">
+                  <PixelBrain size={28} color="#000000" />
                 </div>
                 <div>
                   <h2 className="font-arcade text-xs sm:text-sm text-cyan-400">
@@ -398,8 +433,9 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
 
               <div className="space-y-3 text-xs text-slate-300 leading-relaxed font-thai">
                 <div className="p-3 bg-black/60 border-2 border-slate-800">
-                  <div className="font-arcade text-[10px] text-amber-400 mb-1">
-                    ★ TANK SELECTION RESTRICTION:
+                  <div className="font-arcade text-[10px] text-amber-400 mb-1 flex items-center gap-1.5">
+                    <PixelStar size={10} color="#fbbf24" />
+                    <span>TANK SELECTION RESTRICTION:</span>
                   </div>
                   <div>
                     ในโหมดทีมเวิร์ก <strong className="text-amber-300">ประเภทและสีของรถถังจะถูกเลือกโดย พลขับ (Driver)</strong> ของทีมเท่านั้น
@@ -407,13 +443,14 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                 </div>
 
                 <div className="p-3 bg-black/60 border-2 border-slate-800">
-                  <div className="font-arcade text-[10px] text-cyan-400 mb-1">
-                    ★ YOUR MISSION (ภารกิจของคุณ):
+                  <div className="font-arcade text-[10px] text-cyan-400 mb-1 flex items-center gap-1.5">
+                    <PixelStar size={10} color="#22d3ee" />
+                    <span>YOUR MISSION (ภารกิจของคุณ):</span>
                   </div>
-                  <div>
-                    • ประจำที่หน้าจอคอนโซลรอคำถามเมื่อคนขับวิ่งชนกล่องคำถาม <strong className="text-yellow-300">[?]</strong><br/>
-                    • ช่วยกันวิเคราะห์และโหวตเลือกคำตอบที่ถูกต้องที่สุดภายใน 3-5 วินาที<br/>
-                    • เมื่อหมดเวลา ระบบจะรวมเสียงโหวตส่วนใหญ่เพื่อเติมกระสุนให้คนขับทันที! 🚀
+                  <div className="space-y-1">
+                    <div>• ประจำที่หน้าจอคอนโซลรอคำถามเมื่อคนขับวิ่งชนกล่องคำถาม <strong className="text-yellow-300">[?]</strong></div>
+                    <div>• ช่วยกันวิเคราะห์และโหวตเลือกคำตอบที่ถูกต้องที่สุดภายใน 3-5 วินาที</div>
+                    <div>• เมื่อหมดเวลา ระบบจะรวมเสียงโหวตส่วนใหญ่เพื่อเติมกระสุนให้คนขับทันที!</div>
                   </div>
                 </div>
               </div>
@@ -424,7 +461,8 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                   onClick={() => handleUpdateTank(selectedArchetype, selectedColor, 'DRIVER', selectedTeam)}
                   className="px-4 py-2 arcade-btn arcade-btn-amber font-arcade text-[9px] cursor-pointer flex items-center gap-1.5"
                 >
-                  <span>🎮</span> <span>SWITCH TO DRIVER (สลับเป็นคนขับ)</span>
+                  <PixelGamepad size={14} color="#000000" />
+                  <span>SWITCH TO DRIVER (สลับเป็นคนขับ)</span>
                 </button>
               </div>
             </div>
@@ -448,7 +486,7 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1.5">
-                        <div className="text-2xl">{t.icon}</div>
+                        <div>{t.icon}</div>
                         {isSelected && (
                           <span className="font-arcade text-[9px] bg-amber-400 text-black px-1.5 py-0.5">
                             ACTIVE
@@ -551,7 +589,7 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                       <div>
                         <div className="font-bold text-xs text-white flex items-center gap-1.5">
                           {p.name}
-                          {p.isHost && <Crown className="w-3 h-3 text-amber-400 fill-amber-400" />}
+                          {p.isHost && <PixelCrown size={12} color="#fbbf24" />}
                           {isMe && <span className="font-arcade text-[8px] text-amber-400">(YOU)</span>}
                         </div>
                         <div className="text-[11px] text-slate-400">
@@ -607,8 +645,10 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                 </button>
               )}
 
-              <p className="text-center font-arcade text-[9px] text-slate-500">
-                {isHost ? '★ HOST: PRESS START WHEN READY ★' : '★ WAITING FOR HOST TO START ★'}
+              <p className="text-center font-arcade text-[9px] text-slate-500 flex items-center justify-center gap-1.5">
+                <PixelStar size={10} color="#64748b" />
+                <span>{isHost ? 'HOST: PRESS START WHEN READY' : 'WAITING FOR HOST TO START'}</span>
+                <PixelStar size={10} color="#64748b" />
               </p>
             </div>
 
@@ -616,10 +656,32 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
 
           {/* Quick Rules */}
           <div className="pixel-box bg-[#151a2d] p-3 text-xs text-slate-400 space-y-1 font-thai leading-relaxed">
-            <div className="font-bold text-amber-400 font-arcade text-[10px]">★ MISSION INTEL:</div>
-            <div>• <strong className="text-amber-300">คนขับ 🎮</strong> วิ่งชนกล่อง <strong className="text-yellow-300">[?]</strong> ในสนาม</div>
-            <div>• คำถามจะ <strong className="text-cyan-300">เด้งเฉพาะหน้าจอผู้ช่วยตอบ 🧠</strong> เพื่อโหวตเสียงส่วนมาก (3-5 วิ)</div>
-            <div>• เมื่อทีมโหวตถูก กระสุนจะส่งให้คนขับทันที! 🚀</div>
+            <div className="font-bold text-amber-400 font-arcade text-[10px] flex items-center gap-1.5">
+              <PixelStar size={10} color="#fbbf24" />
+              <span>MISSION INTEL:</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span>•</span>
+              <strong className="text-amber-300 flex items-center gap-1">
+                คนขับ <PixelGamepad size={12} color="#fbbf24" />
+              </strong>
+              <span>วิ่งชนกล่อง</span>
+              <PixelCrate size={12} color="#f59e0b" />
+              <span>ในสนาม</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span>•</span>
+              <span>คำถามจะเด้งเฉพาะหน้าจอ</span>
+              <strong className="text-cyan-300 flex items-center gap-1">
+                ผู้ช่วยตอบ <PixelBrain size={12} color="#22d3ee" />
+              </strong>
+              <span>เพื่อโหวตเสียงส่วนมาก (3-5 วิ)</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span>•</span>
+              <span>เมื่อทีมโหวตถูก กระสุนจะส่งให้คนขับทันที!</span>
+              <PixelAmmo size={12} color="#fbbf24" />
+            </div>
           </div>
 
         </div>

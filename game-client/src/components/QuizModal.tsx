@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { QuizQuestion } from '../types.js';
 import { soundFx } from '../audio/soundFx.js';
-import { Sparkles, Clock, CheckCircle2, XCircle, Zap } from 'lucide-react';
+import { PixelClock, PixelCheck, PixelCross, PixelStar, PixelAmmo } from './PixelIcons.js';
 
 interface QuizModalProps {
   question: QuizQuestion;
@@ -76,15 +76,17 @@ export const QuizModal: React.FC<QuizModalProps> = ({
               {question.categoryTh || question.category}
             </span>
             <div className="flex items-center gap-1 text-amber-300 font-arcade text-[9px] px-2 py-0.5 bg-black border border-amber-500">
-              <span>★ +{question.rewardAmmo} AMMO</span>
+              <PixelAmmo size={10} color="#fbbf24" />
+              <span>+{question.rewardAmmo} AMMO</span>
             </div>
           </div>
 
           {/* 8-bit Timer */}
-          <div className={`flex items-center gap-1 font-arcade text-xs ${
+          <div className={`flex items-center gap-1.5 font-arcade text-xs ${
             timeLeft <= 3 ? 'text-rose-400 animate-blink' : 'text-amber-300'
           }`}>
-            <span>⏱ {timeLeft}s</span>
+            <PixelClock size={12} color={timeLeft <= 3 ? '#f43f5e' : '#fbbf24'} />
+            <span>{timeLeft}s</span>
           </div>
         </div>
 
@@ -140,10 +142,18 @@ export const QuizModal: React.FC<QuizModalProps> = ({
           <div className={`p-3 border-2 flex items-center gap-2.5 animate-fade-in ${
             isCorrect ? 'bg-emerald-950 border-emerald-500 text-emerald-200' : 'bg-rose-950 border-rose-500 text-rose-200'
           }`}>
-            <span className="text-2xl">{isCorrect ? '🎉' : '❌'}</span>
+            <div className="shrink-0">
+              {isCorrect ? (
+                <PixelCheck size={28} color="#34d399" />
+              ) : (
+                <PixelCross size={28} color="#f87171" />
+              )}
+            </div>
             <div className="text-xs">
-              <div className="font-arcade text-[10px] text-white">
-                {isCorrect ? `★ CORRECT! (+${question.rewardAmmo} AMMO) ★` : '★ WRONG ANSWER! ★'}
+              <div className="font-arcade text-[10px] text-white flex items-center gap-1.5">
+                <PixelStar size={10} color={isCorrect ? '#34d399' : '#f87171'} />
+                <span>{isCorrect ? `CORRECT! (+${question.rewardAmmo} AMMO)` : 'WRONG ANSWER!'}</span>
+                <PixelStar size={10} color={isCorrect ? '#34d399' : '#f87171'} />
               </div>
               <div className="text-slate-300 text-xs mt-0.5 font-thai">
                 {question.explanationTh}

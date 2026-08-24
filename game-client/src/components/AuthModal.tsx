@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Shield, Sparkles, User, LogIn, Gamepad2, GraduationCap, Trophy, Volume2 } from 'lucide-react';
+import { Shield, Sparkles, User, LogIn, GraduationCap, Trophy } from 'lucide-react';
 import { soundFx } from '../audio/soundFx.js';
+import { PixelTank, PixelGamepad, PixelStar } from './PixelIcons.js';
 
 interface AuthModalProps {
   onLogin: (token: string, userName: string) => void;
@@ -60,8 +61,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin }) => {
         <div className="absolute bottom-2 right-2 w-2.5 h-2.5 bg-amber-400 border border-black" />
 
         {/* 8-bit Pixel Tank Header */}
-        <div className="inline-flex items-center justify-center w-20 h-20 bg-amber-500 border-4 border-black shadow-[4px_4px_0_#000] text-4xl mb-4 animate-bounce-short">
-          🎮
+        <div className="inline-flex items-center justify-center w-20 h-20 bg-amber-500 border-4 border-black shadow-[4px_4px_0_#000] mb-4 animate-bounce-short">
+          <PixelTank size={48} color="#000000" />
         </div>
 
         {/* Arcade Title */}
@@ -69,8 +70,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin }) => {
           TANK QUIZ<br/>BATTLE 1990
         </h1>
         
-        <div className="inline-block bg-slate-900 border-2 border-slate-700 px-3 py-1 font-arcade text-[10px] text-cyan-300 mb-6 shadow-[2px_2px_0_#000]">
-          ★ 60P SQUAD MULTIPLAYER ★
+        <div className="inline-flex items-center gap-1.5 bg-slate-900 border-2 border-slate-700 px-3 py-1 font-arcade text-[10px] text-cyan-300 mb-6 shadow-[2px_2px_0_#000]">
+          <PixelStar color="#22d3ee" size={12} />
+          <span>60P SQUAD MULTIPLAYER</span>
+          <PixelStar color="#22d3ee" size={12} />
         </div>
 
         {/* Arcade Name Entry */}
@@ -100,7 +103,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin }) => {
               disabled={loading}
               className="w-full py-4 arcade-btn arcade-btn-amber text-xs font-arcade tracking-wider mt-2 flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>🕹️</span> 
+              <PixelGamepad size={16} color="#000000" />
               <span>{loading ? 'LOADING...' : 'START GAME (เข้าเล่น)'}</span>
             </button>
           </form>
@@ -129,8 +132,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin }) => {
         </div>
 
         {/* Retro Arcade Insert Coin Footer */}
-        <div className="mt-6 pt-4 border-t-2 border-slate-800/80 font-arcade text-[10px] text-amber-500/80 animate-blink">
-          ★ INSERT COIN / PRESS START TO PLAY ★
+        <div className="mt-6 pt-4 border-t-2 border-slate-800/80 font-arcade text-[10px] text-amber-500/80 animate-blink flex items-center justify-center gap-1.5">
+          <PixelStar size={10} color="#f59e0b" />
+          <span>INSERT COIN / PRESS START TO PLAY</span>
+          <PixelStar size={10} color="#f59e0b" />
         </div>
 
       </div>
