@@ -25,6 +25,7 @@ import { QuizModal } from './components/QuizModal.js';
 import { SquadSupportView } from './components/SquadSupportView.js';
 import { GameOverModal } from './components/GameOverModal.js';
 import { TouchControls } from './components/TouchControls.js';
+import { TeacherPortalView } from './components/TeacherPortalView.js';
 import { 
   PixelClock, 
   PixelMusic, 
@@ -49,6 +50,29 @@ const SOCKET_SERVER_URL = window.location.hostname === 'localhost'
   : window.location.origin;
 
 export const App: React.FC = () => {
+  // Dedicated Teacher Route State (/teacher)
+  const [isTeacherRoute, setIsTeacherRoute] = useState<boolean>(() => {
+    return window.location.pathname === '/teacher' || 
+           window.location.hash === '#/teacher' || 
+           window.location.search.includes('route=teacher');
+  });
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setIsTeacherRoute(
+        window.location.pathname === '/teacher' || 
+        window.location.hash === '#/teacher' || 
+        window.location.search.includes('route=teacher')
+      );
+    };
+    window.addEventListener('popstate', handlePopState);
+    window.addEventListener('hashchange', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('hashchange', handlePopState);
+    };
+  }, []);
+
   // Auth state
   const [token, setToken] = useState<string | null>(() => {
     // Check URL fragment or query params or localStorage
@@ -370,6 +394,19 @@ export const App: React.FC = () => {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
+  // If navigating to /teacher: Render PIN-protected Teacher Portal
+  if (isTeacherRoute) {
+    return (
+      <TeacherPortalView
+        onBackToGame={() => {
+          window.history.pushState(null, '', '/');
+          window.location.hash = '';
+          setIsTeacherRoute(false);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#080b14] text-slate-100 flex flex-col justify-between overflow-x-hidden">
       
@@ -387,6 +424,10 @@ export const App: React.FC = () => {
             onJoinRoom={handleJoinRoom}
             onCreateRoom={handleCreateRoom}
             onLogout={handleLogout}
+            onOpenTeacherRoute={() => {
+              window.history.pushState(null, '', '/teacher');
+              setIsTeacherRoute(true);
+            }}
           />
         </div>
       )}

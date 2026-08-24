@@ -26,6 +26,7 @@ interface RoomSelectViewProps {
   onJoinRoom: (roomId: string) => void;
   onCreateRoom: (config: Partial<RoomConfig>) => void;
   onLogout: () => void;
+  onOpenTeacherRoute?: () => void;
 }
 
 export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
@@ -33,10 +34,10 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
   userName,
   onJoinRoom,
   onCreateRoom,
-  onLogout
+  onLogout,
+  onOpenTeacherRoute
 }) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showTeacherModal, setShowTeacherModal] = useState(false);
   const [roomName, setRoomName] = useState('');
   const [mode, setMode] = useState<GameMode>('SQUAD');
   const [maxTanks, setMaxTanks] = useState<number>(4);
@@ -87,20 +88,7 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Teacher Quiz Bank & API Button */}
-          <button
-            onClick={() => {
-              soundFx.playSelect();
-              setShowTeacherModal(true);
-            }}
-            className="px-3 py-2.5 arcade-btn arcade-btn-cyan font-arcade text-[9px] flex items-center gap-1.5 cursor-pointer"
-            title="จัดการคลังข้อสอบและดู REST API สำหรับอาจารย์"
-          >
-            <PixelBrain size={14} color="#000000" />
-            <span>QUIZ BANK & API (คลังข้อสอบ)</span>
-          </button>
-
+        <div className="flex items-center gap-2">
           <button
             onClick={() => {
               soundFx.playSelect();
@@ -344,10 +332,23 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
         </div>
       )}
 
-      {/* Teacher Quiz Bank & REST API Modal */}
-      {showTeacherModal && (
-        <TeacherQuizModal onClose={() => setShowTeacherModal(false)} />
-      )}
+      {/* Subtle Teacher Portal Route Link (PIN-Protected) */}
+      <div className="mt-8 pt-4 border-t border-slate-800 text-center">
+        <button
+          onClick={() => {
+            soundFx.playSelect();
+            if (onOpenTeacherRoute) {
+              onOpenTeacherRoute();
+            } else {
+              window.history.pushState(null, '', '/teacher');
+              window.dispatchEvent(new PopStateEvent('popstate'));
+            }
+          }}
+          className="font-arcade text-[8px] sm:text-[9px] text-slate-600 hover:text-cyan-400 transition-colors cursor-pointer"
+        >
+          [ 🔐 อาจารย์เข้าจัดการคลังข้อสอบ (TEACHER PORTAL / ROUTE: /teacher) ]
+        </button>
+      </div>
 
     </div>
   );
