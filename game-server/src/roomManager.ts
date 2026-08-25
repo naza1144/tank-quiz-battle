@@ -170,7 +170,9 @@ export class RoomManager {
       'team-1': '#ef4444',
       'team-2': '#3b82f6',
       'team-3': '#22c55e',
-      'team-4': '#eab308'
+      'team-4': '#eab308',
+      'team-5': '#a855f7',
+      'team-6': '#06b6d4'
     };
 
     const isSquad = room.config.mode === 'SQUAD';
@@ -265,7 +267,10 @@ export class RoomManager {
 
       // 2. Check team balance (prevent extreme skew, max delta 3)
       if (targetTeamId !== player.teamId) {
-        const teamCounts: Record<string, number> = { 'team-1': 0, 'team-2': 0, 'team-3': 0, 'team-4': 0 };
+        const numTeams = Math.min(6, Math.max(2, room.config.maxTanks || 4));
+        const allTeams = ['team-1', 'team-2', 'team-3', 'team-4', 'team-5', 'team-6'].slice(0, numTeams);
+        const teamCounts: Record<string, number> = {};
+        allTeams.forEach(t => { teamCounts[t] = 0; });
         for (const p of room.players.values()) {
           if (p.socketId !== socket.id && teamCounts[p.teamId] !== undefined) {
             teamCounts[p.teamId]++;

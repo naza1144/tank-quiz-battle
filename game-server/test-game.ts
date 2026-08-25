@@ -4,7 +4,7 @@ import { generateClassicMap, TILE_SIZE } from './src/mapTemplates.js';
 
 console.log('🧪 [TEST 1] Testing Map Generation...');
 const map = generateClassicMap();
-console.assert(map.length === 24, 'Map should be 24x24 grid');
+console.assert(map.length === 28, 'Map should be 28x28 grid');
 console.assert(map[0][0] === 'STEEL', 'Outer border should be STEEL');
 console.log('✅ Map Generation Test Passed!\n');
 
@@ -91,6 +91,7 @@ console.log('✅ Physics Loop Simulation Passed!\n');
   const combatTankB = combatEngine.addTank('s-b', 'p-b', 'ScoutTank', '#3b82f6', 'SCOUT', 'team-b');
   combatTankA.shieldEndTime = 0;
   combatTankB.shieldEndTime = 0;
+  combatTankB.hp = 1;
   combatTankA.ammo = 5;
 
   // Position combatTankB directly above combatTankA

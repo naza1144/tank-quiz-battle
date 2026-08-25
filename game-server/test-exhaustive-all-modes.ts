@@ -37,7 +37,7 @@ async function runExhaustiveTestSuite() {
     socket.on('disconnect', () => roomManager.leaveRoom(socket));
   });
 
-  const TEST_PORT = 40099;
+  const TEST_PORT = 40095;
   await new Promise<void>((resolve) => httpServer.listen(TEST_PORT, resolve));
   const serverUrl = `http://localhost:${TEST_PORT}`;
 
@@ -342,6 +342,7 @@ async function runExhaustiveTestSuite() {
   // 4. Test Final Combat & Leaderboard in SQUAD Mode
   team2Tank.hp = 1;
   team2Tank.shieldEndTime = 0;
+  team2Tank.hasUsedRevival = true;
   const killBullet = {
     id: 'fatal-shot',
     tankId: team1Tank.id,

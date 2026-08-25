@@ -17,19 +17,43 @@ async function runMultiplayerTest() {
   const quizManager = new QuizManager();
   const roomManager = new RoomManager(ioServer, quizManager);
 
+  ioServer.on('connection', (socket) => {
+    const user = {
+      id: `user-${socket.id.slice(0, 6)}`,
+      name: `Player_${socket.id.slice(0, 4)}`,
+      isGuest: true
+    };
+    socket.on('create_room', (config) => {
+      const roomId = roomManager.createRoom(config);
+      roomManager.joinRoom(socket, roomId, user);
+    });
+    socket.on('join_room', (data) => {
+      roomManager.joinRoom(socket, data.roomId, user);
+    });
+    socket.on('select_tank', (data) => {
+      roomManager.selectTank(socket, data.archetype, data.color, data.role, data.teamId);
+    });
+    socket.on('start_game', () => {
+      roomManager.startGame(socket);
+    });
+    socket.on('tank_shoot', () => {
+      roomManager.handleTankShoot(socket);
+    });
+  });
+
   await new Promise<void>((resolve) => {
-    httpServer.listen(40099, () => {
-      console.log('   ✓ Test HTTP & Socket.IO server running on port 40099');
+    httpServer.listen(40094, () => {
+      console.log('   ✓ Test HTTP & Socket.IO server running on port 40094');
       resolve();
     });
   });
 
-  const client1 = ClientIO('http://localhost:40099', {
+  const client1 = ClientIO('http://localhost:40094', {
     auth: { token: 'mock-token-p1' },
     transports: ['websocket']
   });
 
-  const client2 = ClientIO('http://localhost:40099', {
+  const client2 = ClientIO('http://localhost:40094', {
     auth: { token: 'mock-token-p2' },
     transports: ['websocket']
   });
@@ -92,7 +116,7 @@ async function runMultiplayerTest() {
   client1.emit('start_game');
   await new Promise((r) => setTimeout(r, 500));
 
-  const room = roomManager.getRoom(testRoomId);
+  const room = (roomManager as any).rooms.get(testRoomId);
   if (!room || !room.engine) {
     throw new Error('Game engine was not created in room!');
   }
@@ -133,6 +157,7 @@ async function runMultiplayerTest() {
 
   client1.disconnect();
   client2.disconnect();
+  if (room && room.intervalId) clearInterval(room.intervalId);
   httpServer.close();
 
   if (!client1GameOver || !client2GameOver) {
@@ -142,6 +167,7 @@ async function runMultiplayerTest() {
   console.log('   ✅ WINNER VERIFIED:', client1GameOver.winnerName);
   console.log('   ✅ LEADERBOARD VERIFIED:', client1GameOver.leaderboard.length, 'entries');
   console.log('\n🎉 FULL END-TO-END MULTIPLAYER TEST PASSED 100%!\n');
+  process.exit(0);
 }
 
 runMultiplayerTest().catch((err) => {

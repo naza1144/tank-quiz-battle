@@ -43,14 +43,14 @@ async function runMultiplayerTest() {
   });
 
   await new Promise<void>((resolve) => {
-    httpServer.listen(40097, () => {
-      console.log('   ✓ Test HTTP & Socket.IO server running on port 40097');
+    httpServer.listen(40096, () => {
+      console.log('   ✓ Test HTTP & Socket.IO server running on port 40096');
       resolve();
     });
   });
 
-  const client1 = ClientIO('http://localhost:40097', { transports: ['websocket'] });
-  const client2 = ClientIO('http://localhost:40097', { transports: ['websocket'] });
+  const client1 = ClientIO('http://localhost:40096', { transports: ['websocket'] });
+  const client2 = ClientIO('http://localhost:40096', { transports: ['websocket'] });
 
   let client1GameOver: any = null;
   let client2GameOver: any = null;
@@ -150,8 +150,8 @@ async function runMultiplayerTest() {
   // TEST SQUAD MODE (2 Teams)
   // ═══════════════════════════════════════════════
   console.log('🚀 [E2E TEST 2] Starting Squad Mode Multiplayer Test...');
-  const clientA = ClientIO('http://localhost:40097', { transports: ['websocket'] });
-  const clientB = ClientIO('http://localhost:40097', { transports: ['websocket'] });
+  const clientA = ClientIO('http://localhost:40096', { transports: ['websocket'] });
+  const clientB = ClientIO('http://localhost:40096', { transports: ['websocket'] });
 
   let squadWinner: string | null = null;
   clientA.on('game_over', (data) => {
@@ -187,6 +187,7 @@ async function runMultiplayerTest() {
   tB.shieldEndTime = 0;
   tB.hp = 1;
   tB.maxHp = 1;
+  tB.hasUsedRevival = true;
 
   tA.x = 100;
   tA.y = 200;
@@ -215,9 +216,11 @@ async function runMultiplayerTest() {
     throw new Error('FAILED: Squad game did NOT trigger game_over event!');
   }
 
+  if (squadRoom && squadRoom.intervalId) clearInterval(squadRoom.intervalId);
   httpServer.close();
   console.log('   ✅ SQUAD WINNER VERIFIED:', squadWinner);
   console.log('\n🎉 ALL FFA & SQUAD E2E MULTIPLAYER TESTS PASSED 100%!\n');
+  process.exit(0);
 }
 
 runMultiplayerTest().catch((err) => {

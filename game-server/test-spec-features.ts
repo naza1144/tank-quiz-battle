@@ -31,10 +31,10 @@ async function runSpecFeaturesTest() {
     socket.on('tactical_ping', (data) => roomManager.handleTacticalPing(socket, data));
   });
 
-  await new Promise<void>((resolve) => httpServer.listen(40096, resolve));
+  await new Promise<void>((resolve) => httpServer.listen(40093, resolve));
 
-  const clientDriver = ClientIO('http://localhost:40096', { transports: ['websocket'] });
-  const clientSupport = ClientIO('http://localhost:40096', { transports: ['websocket'] });
+  const clientDriver = ClientIO('http://localhost:40093', { transports: ['websocket'] });
+  const clientSupport = ClientIO('http://localhost:40093', { transports: ['websocket'] });
 
   await new Promise<void>((resolve) => {
     let count = 0;
@@ -126,10 +126,13 @@ async function runSpecFeaturesTest() {
 
   clientDriver.disconnect();
   clientSupport.disconnect();
+  const rObj = (roomManager as any).rooms.get('squad-1');
+  if (rObj && rObj.intervalId) clearInterval(rObj.intervalId);
   httpServer.close();
 
   console.log('   ✅ [TEST 3: COMBAT EVENTS RECORDED]:', eventMessages.slice(0, 3));
   console.log('\n🎉 ALL SPEC ENHANCEMENT TESTS PASSED 100%!\n');
+  process.exit(0);
 }
 
 runSpecFeaturesTest().catch((err) => {
