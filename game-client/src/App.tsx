@@ -128,8 +128,19 @@ export const App: React.FC = () => {
   const [isMuted, setIsMuted] = useState<boolean>(soundFx.getIsMuted());
   const [isCrtMode, setIsCrtMode] = useState<boolean>(() => localStorage.getItem('tank_crt_mode') !== 'false');
 
+  const [airdropCooldownSeconds, setAirdropCooldownSeconds] = useState<number>(0);
+  const [ghostRevivalData, setGhostRevivalData] = useState<any>(null);
+
   const [myTankHud, setMyTankHud] = useState<{ hp: number; maxHp: number; ammo: number }>({ hp: 3, maxHp: 3, ammo: 0 });
   const [hasTouch, setHasTouch] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (airdropCooldownSeconds <= 0) return;
+    const interval = setInterval(() => {
+      setAirdropCooldownSeconds(prev => Math.max(0, prev - 1));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [airdropCooldownSeconds]);
 
   useEffect(() => {
     const checkTouch = () => {
@@ -325,6 +336,20 @@ export const App: React.FC = () => {
       soundFx.playSelect();
     });
 
+    socket.on('airdrop_cooldown_started', (data: { cooldownSeconds: number }) => {
+      setAirdropCooldownSeconds(data.cooldownSeconds);
+      soundFx.playAirdropChime();
+    });
+
+    socket.on('ghost_revival_popup', (data: any) => {
+      setGhostRevivalData(data);
+    });
+
+    socket.on('ghost_revival_success', () => {
+      setGhostRevivalData(null);
+      soundFx.playRevivalFanfare();
+    });
+
     socket.on('quiz_result', () => {
       setTimeout(() => setActiveQuiz(null), 1800);
     });
@@ -339,6 +364,9 @@ export const App: React.FC = () => {
       else if (event.sound === 'NO_AMMO') soundFx.playNoAmmo();
       else if (event.sound === 'QUIZ_CORRECT') soundFx.playQuizCorrect();
       else if (event.sound === 'QUIZ_WRONG') soundFx.playQuizWrong();
+      else if (event.sound === 'MEGA_LASER') soundFx.playMegaLaser();
+      else if (event.sound === 'HEAL_PICKUP' || event.sound === 'AMMO_REFILL' || event.sound === 'SHIELD_UP') soundFx.playAirdropChime();
+      else if (event.sound === 'REVIVAL') soundFx.playRevivalFanfare();
     });
 
     socket.on('game_over', (data: { winnerName?: string; leaderboard: LeaderboardEntry[] }) => {
@@ -346,6 +374,7 @@ export const App: React.FC = () => {
       setActiveQuiz(null);
       setSquadQuiz(null);
       setSquadQuizSession(null);
+      setGhostRevivalData(null);
       soundFx.stopBgm();
       soundFx.playVictory();
     });
@@ -367,7 +396,7 @@ export const App: React.FC = () => {
     let currentDir: Direction | null = null;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'e', 'E'].includes(e.key)) {
         e.preventDefault();
       }
 
@@ -387,6 +416,8 @@ export const App: React.FC = () => {
         socketRef.current?.emit('tank_input', { direction: 'RIGHT', isMoving: true });
       } else if (e.key === ' ' || e.key === 'Enter') {
         socketRef.current?.emit('tank_shoot');
+      } else if (e.key === 'e' || e.key === 'E') {
+        socketRef.current?.emit('use_ultimate_beam');
       }
     };
 
@@ -681,7 +712,11 @@ export const App: React.FC = () => {
                 voteUpdate={squadVoteUpdate}
                 finalResult={squadFinalResult}
                 isGhost={myPlayer?.role === 'GHOST'}
+                airdropCooldownSeconds={airdropCooldownSeconds}
+                ghostRevivalData={ghostRevivalData}
                 onVote={handleSquadVote}
+                onAirdropSupply={(type) => socketRef.current?.emit('supporter_airdrop', { supplyType: type })}
+                onGhostRevivalAnswer={(choiceIdx) => socketRef.current?.emit('ghost_revival_answer', { choiceIndex: choiceIdx })}
               />
             ) : (
               // 2D Battle City Canvas
@@ -693,6 +728,8 @@ export const App: React.FC = () => {
                   <TouchControls
                     onMove={handleTankMove}
                     onShoot={handleTankShoot}
+                    isUltimateReady={!!(tanks.find(t => t.id === socketRef.current?.id || t.playerId === myPlayerIdRef.current)?.isUltimateReady || teamTankState?.isUltimateReady)}
+                    onUltimateBeam={() => socketRef.current?.emit('use_ultimate_beam')}
                   />
                 </div>
               </div>

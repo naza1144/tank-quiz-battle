@@ -8,7 +8,9 @@ import {
   ARCHETYPE_CONFIGS,
   QuizQuestion,
   SpecialAmmoKind,
-  AmmoKind
+  AmmoKind,
+  LaserBeamEffect,
+  AirdropSupplyType
 } from './types.js';
 import { 
   MAP_GRID_SIZE, 
@@ -33,6 +35,7 @@ export class GameEngine {
   public tanks: Map<string, Tank> = new Map();
   public bullets: Bullet[] = [];
   public crates: QuizCrate[] = [];
+  public laserBeams: LaserBeamEffect[] = [];
   public events: GameEvent[] = [];
   public isRunning: boolean = true;
   public roundTimeRemaining: number;
@@ -961,7 +964,11 @@ export class GameEngine {
           isGameOver = true;
         }
       } else if (aliveTeams.size <= 1) {
-        isGameOver = true;
+        // If a defeated team still has unused Ghost Revival, don't instantly end match
+        const hasUnusedRevival = allTanks.some(t => t.isDead && !t.hasUsedRevival);
+        if (!hasUnusedRevival) {
+          isGameOver = true;
+        }
       }
     } else {
       if (allTanks.length === 1) {
@@ -1005,12 +1012,220 @@ export class GameEngine {
     }
   }
 
+  public fireMegaLaser(tankId: string): boolean {
+    const tank = this.tanks.get(tankId);
+    if (!tank || tank.isDead || !tank.isUltimateReady) return false;
+
+    tank.isUltimateReady = false;
+    tank.synergyStreak = 0;
+
+    const cx = tank.x + tank.width / 2;
+    const cy = tank.y + tank.height / 2;
+    let x1 = cx;
+    let y1 = cy;
+    let x2 = cx;
+    let y2 = cy;
+
+    const BEAM_WIDTH = 32;
+    const BEAM_COLOR = '#06b6d4'; // Electric Cyan Plasma
+    const now = Date.now();
+
+    // Determine beam line endpoints across the whole map
+    if (tank.direction === 'UP') {
+      y1 = cy;
+      y2 = 0;
+      x1 = cx;
+      x2 = cx;
+    } else if (tank.direction === 'DOWN') {
+      y1 = cy;
+      y2 = MAP_HEIGHT;
+      x1 = cx;
+      x2 = cx;
+    } else if (tank.direction === 'LEFT') {
+      x1 = cx;
+      x2 = 0;
+      y1 = cy;
+      y2 = cy;
+    } else if (tank.direction === 'RIGHT') {
+      x1 = cx;
+      x2 = MAP_WIDTH;
+      y1 = cy;
+      y2 = cy;
+    }
+
+    // 1. Raycast & Destroy all BRICK tiles along the beam path
+    const minX = Math.min(x1, x2) - BEAM_WIDTH / 2;
+    const maxX = Math.max(x1, x2) + BEAM_WIDTH / 2;
+    const minY = Math.min(y1, y2) - BEAM_WIDTH / 2;
+    const maxY = Math.max(y1, y2) + BEAM_WIDTH / 2;
+
+    const minC = Math.max(0, Math.floor(minX / TILE_SIZE));
+    const maxC = Math.min(MAP_GRID_SIZE - 1, Math.floor(maxX / TILE_SIZE));
+    const minR = Math.max(0, Math.floor(minY / TILE_SIZE));
+    const maxR = Math.min(MAP_GRID_SIZE - 1, Math.floor(maxY / TILE_SIZE));
+
+    for (let r = minR; r <= maxR; r++) {
+      for (let c = minC; c <= maxC; c++) {
+        if (this.map[r][c] === 'BRICK') {
+          this.map[r][c] = 'EMPTY';
+        }
+      }
+    }
+
+    // 2. Raycast & Damage all Enemy Tanks in the beam path (3 DMG)
+    for (const target of this.tanks.values()) {
+      if (target.id === tank.id || target.isDead) continue;
+      if (this.mode === 'SQUAD' && target.teamId && target.teamId === tank.teamId) continue;
+
+      const tMinX = target.x;
+      const tMaxX = target.x + target.width;
+      const tMinY = target.y;
+      const tMaxY = target.y + target.height;
+
+      const intersects = (minX < tMaxX && maxX > tMinX && minY < tMaxY && maxY > tMinY);
+      if (intersects) {
+        if (now < target.shieldEndTime) {
+          continue;
+        }
+
+        const LASER_DAMAGE = 3;
+        target.hp = Math.max(0, target.hp - LASER_DAMAGE);
+
+        if (target.hp <= 0) {
+          target.isDead = true;
+          target.deaths++;
+          tank.kills++;
+          tank.score += 500;
+
+          this.listeners.onGameEvent({
+            type: 'TANK_DESTROYED',
+            message: `💥 ${tank.playerName} ใช้ MEGA LASER ถล่ม ${target.playerName} แหลกสลาย! (+500 คะแนน)`,
+            sound: 'TANK_EXPLODE',
+            tankId: target.id,
+            teamId: target.teamId,
+            timestamp: now
+          });
+        } else {
+          this.listeners.onGameEvent({
+            type: 'TANK_HIT',
+            message: `⚡ ${target.playerName} โดน MEGA LASER เต็มๆ! (-${LASER_DAMAGE} HP)`,
+            sound: 'TANK_HIT',
+            tankId: target.id,
+            teamId: target.teamId,
+            timestamp: now
+          });
+        }
+      }
+    }
+
+    // 3. Record LaserBeam visual effect
+    const beamEffect: LaserBeamEffect = {
+      id: `laser-${now}-${Math.random().toString(36).slice(2, 6)}`,
+      tankId: tank.id,
+      teamId: tank.teamId,
+      x1,
+      y1,
+      x2,
+      y2,
+      direction: tank.direction,
+      width: BEAM_WIDTH,
+      color: BEAM_COLOR,
+      createdAt: now,
+      expiresAt: now + 500
+    };
+    this.laserBeams.push(beamEffect);
+
+    this.listeners.onGameEvent({
+      type: 'ULTIMATE_BEAM',
+      message: `⚡ ${tank.playerName} ยิงลำแสงทำลายล้าง MEGA LASER BEAM ทะลวงทั้งสนามรบ!`,
+      sound: 'MEGA_LASER',
+      tankId: tank.id,
+      teamId: tank.teamId,
+      timestamp: now
+    });
+
+    return true;
+  }
+
+  public applyAirdropSupply(teamId: string, supplyType: AirdropSupplyType): boolean {
+    const tank = Array.from(this.tanks.values()).find(t => t.teamId === teamId && !t.isDead);
+    if (!tank) return false;
+
+    const now = Date.now();
+    if (supplyType === 'SHIELD') {
+      tank.shieldEndTime = now + 4500;
+      this.listeners.onGameEvent({
+        type: 'AIRDROP_SUPPLY',
+        message: `🛸 หน่วยสนับสนุนหย่อนโดรนเกราะป้องกัน (Barrier Shield 4.5s) ให้ ${tank.playerName}!`,
+        sound: 'SHIELD_UP',
+        tankId: tank.id,
+        teamId,
+        timestamp: now
+      });
+    } else if (supplyType === 'REPAIR') {
+      tank.hp = Math.min(tank.maxHp, tank.hp + 1);
+      this.listeners.onGameEvent({
+        type: 'AIRDROP_SUPPLY',
+        message: `💚 หน่วยสนับสนุนหย่อนโดรนซ่อมแซม (+1 HP Repair) ให้ ${tank.playerName}!`,
+        sound: 'HEAL_PICKUP',
+        tankId: tank.id,
+        teamId,
+        timestamp: now
+      });
+    } else if (supplyType === 'AMMO') {
+      tank.ammo = Math.min(tank.maxAmmo, tank.ammo + 4);
+      this.listeners.onGameEvent({
+        type: 'AIRDROP_SUPPLY',
+        message: `📦 หน่วยสนับสนุนหย่อนโดรนเสบียงกระสุน (+4 AMMO) ให้ ${tank.playerName}!`,
+        sound: 'AMMO_REFILL',
+        tankId: tank.id,
+        teamId,
+        timestamp: now
+      });
+    }
+    return true;
+  }
+
+  public reviveTeamTank(teamId: string): boolean {
+    const tank = Array.from(this.tanks.values()).find(t => t.teamId === teamId);
+    if (!tank || !tank.isDead) return false;
+
+    const now = Date.now();
+    tank.isDead = false;
+    tank.hasUsedRevival = true;
+    tank.hp = 2;
+    tank.ammo = Math.max(3, tank.maxAmmo - 2);
+    tank.shieldEndTime = now + 4000;
+    tank.stunEndTime = 0;
+    tank.jammedUntil = 0;
+
+    const spawnIndex = Array.from(this.tanks.values()).indexOf(tank);
+    const spawn = TANK_SPAWN_POINTS[spawnIndex % TANK_SPAWN_POINTS.length] || { x: 64, y: 64 };
+    tank.x = spawn.x;
+    tank.y = spawn.y;
+
+    this.listeners.onGameEvent({
+      type: 'GHOST_REVIVAL',
+      message: `👻 ปาฏิหาริย์! ${tank.playerName} ฟื้นคืนชีพกลับสู่สนามรบ (2 HP + โล่คุ้มกัน 4s)!`,
+      sound: 'REVIVAL',
+      tankId: tank.id,
+      teamId,
+      timestamp: now
+    });
+
+    return true;
+  }
+
   public getSnapshot() {
+    const now = Date.now();
+    this.laserBeams = this.laserBeams.filter(l => now < l.expiresAt);
+
     return {
       roundTimeRemaining: Math.ceil(this.roundTimeRemaining),
       tanks: Array.from(this.tanks.values()),
       bullets: this.bullets,
       crates: this.crates,
+      laserBeams: this.laserBeams,
       map: this.map
     };
   }

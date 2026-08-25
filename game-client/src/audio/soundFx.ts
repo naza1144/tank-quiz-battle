@@ -624,6 +624,76 @@ class RetroSoundEngine {
     osc.start();
     osc.stop(this.ctx.currentTime + 0.18);
   }
+
+  // 15. Mega Laser Beam Blast (High-Energy Searing Laser)
+  public playMegaLaser() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(2200, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(120, this.ctx.currentTime + 0.45);
+
+    gain.gain.setValueAtTime(0.5, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.45);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.45);
+  }
+
+  // 16. Supporter Airdrop Supply Arrival Chime
+  public playAirdropChime() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+    let time = this.ctx.currentTime;
+    notes.forEach((freq) => {
+      const osc = this.ctx!.createOscillator();
+      const gain = this.ctx!.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, time);
+      gain.gain.setValueAtTime(0.2, time);
+      gain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+      osc.connect(gain);
+      gain.connect(this.ctx!.destination);
+      osc.start(time);
+      osc.stop(time + 0.1);
+      time += 0.07;
+    });
+  }
+
+  // 17. Ghost Revival Resurrection Fanfare
+  public playRevivalFanfare() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const notes = [392.00, 523.25, 659.25, 783.99, 1046.50]; // G4, C5, E5, G5, C6
+    let time = this.ctx.currentTime;
+    notes.forEach((freq, idx) => {
+      const osc = this.ctx!.createOscillator();
+      const gain = this.ctx!.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, time);
+      const dur = idx === notes.length - 1 ? 0.35 : 0.08;
+      gain.gain.setValueAtTime(0.25, time);
+      gain.gain.exponentialRampToValueAtTime(0.01, time + dur);
+      osc.connect(gain);
+      gain.connect(this.ctx!.destination);
+      osc.start(time);
+      osc.stop(time + dur);
+      time += 0.09;
+    });
+  }
 }
 
 export const soundFx = new RetroSoundEngine();

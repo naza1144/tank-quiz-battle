@@ -349,6 +349,18 @@ io.on('connection', (socket: Socket) => {
     roomManager.autoBalanceTeams(socket);
   });
 
+  socket.on('use_ultimate_beam', () => {
+    roomManager.useUltimateBeam(socket);
+  });
+
+  socket.on('supporter_airdrop', (data: { supplyType: any }) => {
+    roomManager.handleSupporterAirdrop(socket, data);
+  });
+
+  socket.on('ghost_revival_answer', (data: { choiceIndex: number }) => {
+    roomManager.handleGhostRevivalAnswer(socket, data);
+  });
+
   socket.on('disconnect', () => {
     console.log(`[Socket Disconnected] ID: ${socket.id}`);
     roomManager.leaveRoom(socket);

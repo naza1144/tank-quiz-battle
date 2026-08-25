@@ -122,7 +122,27 @@ export interface Tank {
   botDifficulty?: 'EASY' | 'MEDIUM' | 'HARD';
   lastShootTime: number;
   answeringQuizId?: string;
+  synergyStreak?: number; // 0 to 3
+  isUltimateReady?: boolean;
+  hasUsedRevival?: boolean;
 }
+
+export interface LaserBeamEffect {
+  id: string;
+  tankId: string;
+  teamId?: string;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  direction: Direction;
+  width: number;
+  color: string;
+  createdAt: number;
+  expiresAt: number;
+}
+
+export type AirdropSupplyType = 'SHIELD' | 'REPAIR' | 'AMMO';
 
 export interface Bullet {
   id: string;
@@ -190,6 +210,8 @@ export interface TeamQuizFinalResult {
   ammoKind?: AmmoKind;
   ownerName?: string;
   isJammed?: boolean;
+  synergyStreak?: number;
+  isUltimateReady?: boolean;
 }
 
 export type GameMode = 'FFA' | 'SQUAD';
@@ -212,6 +234,8 @@ export interface Player {
   score: number;
   kills: number;
   correctAnswers: number;
+  hasUsedRevival?: boolean;
+  ghostRevivalStreak?: number;
 }
 
 export interface TeamState {
@@ -224,10 +248,13 @@ export interface TeamState {
   totalScore: number;
   quizStreak: number;
   isAlive: boolean;
+  hasUsedRevival?: boolean;
+  ghostRevivalStreak?: number;
+  lastAirdropTime?: number;
 }
 
 export interface GameEvent {
-  type: 'TANK_HIT' | 'TANK_DESTROYED' | 'CRATE_PICKUP' | 'QUIZ_SUCCESS' | 'QUIZ_FAIL' | 'AMMO_DELIVERED' | 'VICTORY' | 'SHIELD_UP';
+  type: 'TANK_HIT' | 'TANK_DESTROYED' | 'CRATE_PICKUP' | 'QUIZ_SUCCESS' | 'QUIZ_FAIL' | 'AMMO_DELIVERED' | 'VICTORY' | 'SHIELD_UP' | 'ULTIMATE_BEAM' | 'AIRDROP_SUPPLY' | 'GHOST_REVIVAL';
   message: string;
   sound?: string;
   tankId?: string;

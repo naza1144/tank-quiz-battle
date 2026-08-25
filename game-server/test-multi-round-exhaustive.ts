@@ -64,6 +64,9 @@ async function runMultiRoundExhaustiveTest() {
     socket.on('tank_shoot', () => roomManager.handleTankShoot(socket));
     socket.on('quiz_answer', (data) => roomManager.handleQuizAnswer(socket, data));
     socket.on('vote_team_quiz', (data) => roomManager.handleVoteTeamQuiz(socket, data));
+    socket.on('use_ultimate_beam', () => roomManager.useUltimateBeam(socket));
+    socket.on('supporter_airdrop', (data) => roomManager.handleSupporterAirdrop(socket, data));
+    socket.on('ghost_revival_answer', (data) => roomManager.handleGhostRevivalAnswer(socket, data));
     socket.on('leave_room', () => roomManager.leaveRoom(socket));
     socket.on('disconnect', () => roomManager.leaveRoom(socket));
   });
@@ -307,7 +310,76 @@ async function runMultiRoundExhaustiveTest() {
       throw new Error(`❌ SQUAD Round ${round}: Q1 Consensus failed to award AP tier!`);
     }
 
-    // 2. Test Friendly HEAL Bullet
+    // 2. Test Synergy Streak & Mega Laser Beam
+    squadRoom.teamStreaks.set('team-1', 2); // 2 in a row
+    redTank.isUltimateReady = false;
+    // 3rd correct answer triggers ultimate!
+    (roomManager as any).finalizeTeamQuiz('squad-1', 'team-1');
+    if (!redTank.isUltimateReady) {
+      throw new Error(`❌ SQUAD Round ${round}: Streak 3 did not activate isUltimateReady!`);
+    }
+
+    // Place enemy tank in direct line of fire inside map
+    redTank.x = 96;
+    redTank.y = 384;
+    redTank.direction = 'UP';
+
+    blueTank.x = 96;
+    blueTank.y = 128;
+    blueTank.hp = 4;
+    blueTank.maxHp = 4;
+    blueTank.shieldEndTime = 0;
+
+    // Place a brick tile in between
+    const brickGridR = 8;
+    const brickGridC = 3;
+    squadEngine.map[brickGridR][brickGridC] = 'BRICK';
+
+    // Driver fires Mega Laser Beam
+    cRedDriver.emit('use_ultimate_beam');
+    await new Promise((r) => setTimeout(r, 150));
+
+    // Verify brick was demolished and blueTank took 3 DMG!
+    if (squadEngine.map[brickGridR][brickGridC] !== 'EMPTY') {
+      throw new Error(`❌ SQUAD Round ${round}: Mega Laser failed to pierce/demolish brick tile!`);
+    }
+    if (blueTank.hp !== 1) {
+      throw new Error(`❌ SQUAD Round ${round}: Mega Laser failed to deal 3 DMG to blue tank! Expected HP=1, found HP=${blueTank.hp}`);
+    }
+    console.log(`     ✓ Mega Laser Beam Verified: Brick obliterated & 3 DMG pierced target`);
+
+    // 3. Test Supporter Airdrop Supply Drone
+    redTank.hp = 1;
+    cRedSupport.emit('supporter_airdrop', { supplyType: 'REPAIR' });
+    await new Promise((r) => setTimeout(r, 150));
+    if (redTank.hp !== 2) {
+      throw new Error(`❌ SQUAD Round ${round}: Airdrop Repair supply failed to restore +1 HP! HP=${redTank.hp}`);
+    }
+    console.log(`     ✓ Supporter Airdrop Supply Verified: Repaired +1 HP (Cooldown active)`);
+
+    // 4. Test Ghost Revival Protocol
+    blueTank.isDead = true;
+    blueTank.hp = 0;
+    (roomManager as any).triggerGhostRevivalChallenge('squad-1', 'team-2');
+    const revival = squadRoom.teamRevivalState.get('team-2');
+    if (!revival || !revival.currentQ) {
+      throw new Error(`❌ SQUAD Round ${round}: Ghost Revival challenge failed to trigger!`);
+    }
+    // Answer Q1 correctly
+    cBlueSupport.emit('ghost_revival_answer', { choiceIndex: revival.currentQ.correctIndex });
+    await new Promise((r) => setTimeout(r, 100));
+    if (revival.streak !== 1) {
+      throw new Error(`❌ SQUAD Round ${round}: Ghost Revival Q1 answer failed! Streak=${revival.streak}`);
+    }
+    // Answer Q2 correctly -> Respawn!
+    cBlueSupport.emit('ghost_revival_answer', { choiceIndex: revival.currentQ.correctIndex });
+    await new Promise((r) => setTimeout(r, 150));
+    if (blueTank.isDead || blueTank.hp !== 2) {
+      throw new Error(`❌ SQUAD Round ${round}: Ghost Revival failed to respawn tank! isDead=${blueTank.isDead}, HP=${blueTank.hp}`);
+    }
+    console.log(`     ✓ Ghost Revival Protocol Verified: Answered 2/2 -> Respawned with 2 HP & Shield!`);
+
+    // 5. Test Friendly HEAL Bullet
     redTank.hp = 2; // Damaged
     (squadEngine as any).bullets.push({
       id: `heal-shot-${round}`,
@@ -322,7 +394,7 @@ async function runMultiRoundExhaustiveTest() {
       throw new Error(`❌ SQUAD Round ${round}: HEAL bullet failed to restore +1 HP! HP=${redTank.hp}`);
     }
 
-    // 3. Test Combat & Win Condition
+    // 6. Test Combat & Win Condition
     blueTank.hp = 1; blueTank.shieldEndTime = 0;
     let squadGameOver: any = null;
     cRedDriver.on('game_over', (data) => { squadGameOver = data; });

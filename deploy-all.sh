@@ -15,8 +15,10 @@ PURPLE='\033[0;35m'
 NC='\033[0m'
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$HOME/.cache/sudhood-ansible/bin:$PATH"
 export ANSIBLE_CONFIG="$ROOT_DIR/ansible/ansible.cfg"
+export ANSIBLE_LOCAL_TEMP="$ROOT_DIR/ansible/.ansible_tmp"
+mkdir -p "$ROOT_DIR/ansible/.ansible_tmp"
 
 echo -e "${CYAN}===================================================================${NC}"
 echo -e "${YELLOW}  🕹️ TANK QUIZ BATTLE 1990 — AUTOMATED K8S DEPLOYMENT PIPELINE  ${NC}"

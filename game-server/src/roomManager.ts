@@ -8,7 +8,8 @@ import {
   GameEvent,
   RoomConfig,
   TacticalPing,
-  AmmoKind
+  AmmoKind,
+  AirdropSupplyType
 } from './types.js';
 import { GameEngine } from './gameEngine.js';
 import { QuizManager, getTimeLimitForDifficulty } from './quizBank.js';
@@ -32,6 +33,13 @@ interface SquadQuizSession {
   timer?: NodeJS.Timeout;
 }
 
+interface GhostRevivalSession {
+  teamId: string;
+  hasUsed: boolean;
+  streak: number;
+  currentQ?: QuizQuestion;
+}
+
 export class RoomManager {
   private io: Server;
   private quizManager: QuizManager;
@@ -40,6 +48,9 @@ export class RoomManager {
     players: Map<string, Player>;
     activeSquadQuizzes: Map<string, SquadQuizSession>;
     squadQuizQueues: Map<string, { question: QuizQuestion; crateId: string; tankId: string; timeLimitSeconds: number }[]>;
+    teamStreaks: Map<string, number>;
+    teamAirdropCooldowns: Map<string, number>;
+    teamRevivalState: Map<string, GhostRevivalSession>;
     engine?: GameEngine;
     intervalId?: NodeJS.Timeout;
     state: 'LOBBY' | 'STARTING' | 'IN_GAME' | 'GAME_OVER';
@@ -78,6 +89,9 @@ export class RoomManager {
       players: new Map(),
       activeSquadQuizzes: new Map(),
       squadQuizQueues: new Map(),
+      teamStreaks: new Map(),
+      teamAirdropCooldowns: new Map(),
+      teamRevivalState: new Map(),
       state: 'LOBBY'
     });
     return roomId;
@@ -357,6 +371,9 @@ export class RoomManager {
     room.state = 'IN_GAME';
     room.activeSquadQuizzes.clear();
     room.squadQuizQueues.clear();
+    room.teamStreaks.clear();
+    room.teamAirdropCooldowns.clear();
+    room.teamRevivalState.clear();
     const engine = new GameEngine(
       this.quizManager,
       {
@@ -752,6 +769,36 @@ export class RoomManager {
       isJammed
     );
 
+    // Update Synergy Streak for Ultimate Mega Laser Beam
+    let curStreak = 0;
+    const teamTank = Array.from(room.engine.tanks.values()).find(t => t.teamId === teamId);
+
+    if (result.isCorrect) {
+      curStreak = (room.teamStreaks.get(teamId) || 0) + 1;
+      room.teamStreaks.set(teamId, curStreak);
+      if (teamTank) {
+        teamTank.synergyStreak = curStreak;
+        if (curStreak >= 3) {
+          teamTank.isUltimateReady = true;
+          this.io.to(roomId).emit('game_event', {
+            type: 'ULTIMATE_BEAM',
+            message: `⚡ พลังความร่วมมือเต็ม 100%! รถถังทีม ${teamId} พร้อมยิง MEGA LASER BEAM (กด [E] หรือแตะปุ่ม)!`,
+            sound: 'MEGA_LASER',
+            tankId: teamTank.id,
+            teamId,
+            timestamp: Date.now()
+          });
+        }
+      }
+    } else {
+      curStreak = 0;
+      room.teamStreaks.set(teamId, 0);
+      if (teamTank) {
+        teamTank.synergyStreak = 0;
+        teamTank.isUltimateReady = false;
+      }
+    }
+
     // Award individual score strictly to supporters of THIS team who voted correctly!
     for (const [voterSocketId, v] of session.votes.entries()) {
       if (v.choice === session.question.correctIndex) {
@@ -779,7 +826,9 @@ export class RoomManager {
         explanationTh: result.explanationTh,
         ammoKind: tier,
         ownerName,
-        isJammed
+        isJammed,
+        synergyStreak: curStreak,
+        isUltimateReady: teamTank?.isUltimateReady || false
       });
     });
 
@@ -804,12 +853,145 @@ export class RoomManager {
     }, 2800);
   }
 
+  public useUltimateBeam(socket: Socket) {
+    const roomId = this.playerRooms.get(socket.id);
+    if (!roomId) return;
+    const room = this.rooms.get(roomId);
+    if (!room || !room.engine || room.state !== 'IN_GAME') return;
+
+    const player = room.players.get(socket.id);
+    if (!player) return;
+
+    const tank = Array.from(room.engine.tanks.values()).find(t => t.id === socket.id || t.playerId === player.id || (player.role === 'DRIVER' && t.teamId === player.teamId));
+    if (!tank || !tank.isUltimateReady) return;
+
+    room.engine.fireMegaLaser(tank.id);
+  }
+
+  public handleSupporterAirdrop(socket: Socket, data: { supplyType: AirdropSupplyType }) {
+    const roomId = this.playerRooms.get(socket.id);
+    if (!roomId) return;
+    const room = this.rooms.get(roomId);
+    if (!room || !room.engine || room.state !== 'IN_GAME') return;
+
+    const player = room.players.get(socket.id);
+    if (!player || !player.teamId || (player.role !== 'SUPPORT' && player.role !== 'GHOST')) return;
+
+    const teamId = player.teamId;
+    const now = Date.now();
+    const lastAirdrop = room.teamAirdropCooldowns.get(teamId) || 0;
+    const COOLDOWN_MS = 25000;
+
+    if (now - lastAirdrop < COOLDOWN_MS) {
+      const remainingSec = Math.ceil((COOLDOWN_MS - (now - lastAirdrop)) / 1000);
+      socket.emit('error_message', `🛸 โดรนส่งเสบียงกำลังเติมพลังงาน (คูลดาวน์ ${remainingSec} วินาที)`);
+      return;
+    }
+
+    const applied = room.engine.applyAirdropSupply(teamId, data.supplyType);
+    if (applied) {
+      room.teamAirdropCooldowns.set(teamId, now);
+      // Notify all team supporters of active cooldown
+      const teamSupporters = Array.from(room.players.values()).filter(p => p.teamId === teamId && (p.role === 'SUPPORT' || p.role === 'GHOST'));
+      teamSupporters.forEach(s => {
+        this.io.to(s.socketId).emit('airdrop_cooldown_started', {
+          teamId,
+          cooldownSeconds: 25,
+          expiresAt: now + COOLDOWN_MS
+        });
+      });
+    }
+  }
+
+  public triggerGhostRevivalChallenge(roomId: string, teamId: string) {
+    const room = this.rooms.get(roomId);
+    if (!room || !room.engine || room.state !== 'IN_GAME') return;
+
+    let revival = room.teamRevivalState.get(teamId);
+    if (!revival) {
+      revival = { teamId, hasUsed: false, streak: 0 };
+      room.teamRevivalState.set(teamId, revival);
+    }
+    if (revival.hasUsed) return;
+
+    const q = this.quizManager.getRandomQuestion('GENERAL');
+    revival.currentQ = q;
+
+    const teamGhosts = Array.from(room.players.values()).filter(p => p.teamId === teamId);
+    teamGhosts.forEach(g => {
+      this.io.to(g.socketId).emit('ghost_revival_popup', {
+        teamId,
+        question: q,
+        streak: revival.streak,
+        targetStreak: 2,
+        timeLimitSeconds: 15
+      });
+    });
+  }
+
+  public handleGhostRevivalAnswer(socket: Socket, data: { choiceIndex: number }) {
+    const roomId = this.playerRooms.get(socket.id);
+    if (!roomId) return;
+    const room = this.rooms.get(roomId);
+    if (!room || !room.engine || room.state !== 'IN_GAME') return;
+
+    const player = room.players.get(socket.id);
+    if (!player || !player.teamId) return;
+
+    const teamId = player.teamId;
+    const revival = room.teamRevivalState.get(teamId);
+    if (!revival || revival.hasUsed || !revival.currentQ) return;
+
+    const isCorrect = data.choiceIndex === revival.currentQ.correctIndex;
+    if (isCorrect) {
+      revival.streak++;
+      if (revival.streak >= 2) {
+        revival.hasUsed = true;
+        room.engine.reviveTeamTank(teamId);
+
+        const teamGhosts = Array.from(room.players.values()).filter(p => p.teamId === teamId);
+        teamGhosts.forEach(g => {
+          this.io.to(g.socketId).emit('ghost_revival_success', { teamId });
+        });
+      } else {
+        // Issue question 2
+        const q2 = this.quizManager.getRandomQuestion('SCIENCE');
+        revival.currentQ = q2;
+        const teamGhosts = Array.from(room.players.values()).filter(p => p.teamId === teamId);
+        teamGhosts.forEach(g => {
+          this.io.to(g.socketId).emit('ghost_revival_popup', {
+            teamId,
+            question: q2,
+            streak: revival.streak,
+            targetStreak: 2,
+            timeLimitSeconds: 15
+          });
+        });
+      }
+    } else {
+      // Wrong answer -> reset streak and provide fresh question to keep trying
+      revival.streak = 0;
+      const newQ = this.quizManager.getRandomQuestion('MATH');
+      revival.currentQ = newQ;
+      const teamGhosts = Array.from(room.players.values()).filter(p => p.teamId === teamId);
+      teamGhosts.forEach(g => {
+        this.io.to(g.socketId).emit('ghost_revival_popup', {
+          teamId,
+          question: newQ,
+          streak: 0,
+          targetStreak: 2,
+          timeLimitSeconds: 15,
+          isRetry: true
+        });
+      });
+    }
+  }
+
   public handleTeamSupportAnswer(socket: Socket, data: {
     questionId: string;
     selectedIndex: number;
     confident?: boolean;
   }) {
-    // Forward single answers directly as a vote
     this.handleVoteTeamQuiz(socket, { choiceIndex: data.selectedIndex, confident: data.confident });
   }
 

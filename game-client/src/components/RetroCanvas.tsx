@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Tank, Bullet, QuizCrate, TileType, Direction } from '../types.js';
+import { Tank, Bullet, QuizCrate, TileType, Direction, LaserBeamEffect } from '../types.js';
 import { soundFx } from '../audio/soundFx.js';
 
 export interface GameStateSnapshot {
@@ -7,6 +7,7 @@ export interface GameStateSnapshot {
   tanks: Tank[];
   bullets: Bullet[];
   crates: QuizCrate[];
+  laserBeams?: LaserBeamEffect[];
   pings?: { id: string; x: number; y: number; senderName: string; timestamp: number }[];
   myTankId: string;
 }
@@ -100,6 +101,7 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = React.memo(({ stateRef, i
         tanks: curTanks, 
         bullets: curBullets, 
         crates: curCrates, 
+        laserBeams: curLaserBeams,
         pings: curPings,
         myTankId: curMyTankId 
       } = curState;
@@ -113,7 +115,17 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = React.memo(({ stateRef, i
       if (canvas.height !== mapH) canvas.height = mapH;
 
       // ── DETECT COMBAT EVENTS FOR PARTICLES, AUDIO & SCREEN SHAKE ──
-      // 1. Tank HP change / Destruction
+      // 1. Mega Laser Beam Trigger Detection
+      curLaserBeams?.forEach(beam => {
+        const now = Date.now();
+        if (now - beam.createdAt < 70) {
+          triggerShake(16);
+          soundFx.playMegaLaser();
+          spawnParticles((beam.x1 + beam.x2) / 2, (beam.y1 + beam.y2) / 2, 20, ['#06b6d4', '#38bdf8', '#fef08a', '#ffffff'], 'SPARK', 5, 4);
+        }
+      });
+
+      // 2. Tank HP change / Destruction
       curTanks?.forEach(tank => {
         const prevHp = prevTanksHpRef.current.get(tank.id);
         if (prevHp !== undefined && tank.hp < prevHp) {
@@ -221,6 +233,14 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = React.memo(({ stateRef, i
       curTanks?.forEach((tank) => {
         if (!tank.isDead) {
           drawTank(ctx, tank, tank.id === curMyTankId, tick);
+        }
+      });
+
+      // 5.5. Render Mega Laser Beams (Above tanks, below high bushes)
+      curLaserBeams?.forEach((beam) => {
+        const now = Date.now();
+        if (now < beam.expiresAt) {
+          drawMegaLaserBeam(ctx, beam, tick);
         }
       });
 
@@ -419,6 +439,64 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = React.memo(({ stateRef, i
       ctx.fillStyle = '#ffffff';
       ctx.beginPath(); ctx.arc(x, y, 2, 0, Math.PI * 2); ctx.fill();
     }
+  };
+
+  const drawMegaLaserBeam = (
+    ctx: CanvasRenderingContext2D,
+    beam: LaserBeamEffect,
+    tick: number
+  ) => {
+    const { x1, y1, x2, y2, width } = beam;
+    const pulse = Math.sin(tick * 0.4) * 3;
+    const bWidth = Math.max(12, width + pulse);
+
+    ctx.save();
+
+    // 1. Outer Cyan Plasma Glow
+    ctx.strokeStyle = 'rgba(6, 182, 212, 0.45)';
+    ctx.lineWidth = bWidth + 16;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+
+    // 2. Mid Electric Blue Energy Beam
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = bWidth;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+
+    // 3. Inner White-Hot Laser Core
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = Math.max(4, bWidth * 0.45);
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+
+    // 4. Electric Discharges along the beam
+    ctx.strokeStyle = '#fef08a';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 6; i++) {
+      const t = (i / 5);
+      const bx = x1 + (x2 - x1) * t;
+      const by = y1 + (y2 - y1) * t;
+      const offset = (Math.sin(tick * 0.5 + i) * (bWidth / 2));
+      ctx.beginPath();
+      if (beam.direction === 'UP' || beam.direction === 'DOWN') {
+        ctx.moveTo(bx - offset, by);
+        ctx.lineTo(bx + offset, by);
+      } else {
+        ctx.moveTo(bx, by - offset);
+        ctx.lineTo(bx, by + offset);
+      }
+      ctx.stroke();
+    }
+
+    ctx.restore();
   };
 
   const drawTank = (

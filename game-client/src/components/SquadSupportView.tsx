@@ -37,8 +37,17 @@ interface SquadSupportViewProps {
   voteUpdate?: TeamQuizVoteUpdate | null;
   finalResult?: TeamQuizFinalResult | null;
   isGhost?: boolean;
+  airdropCooldownSeconds?: number;
+  ghostRevivalData?: {
+    question: QuizQuestion;
+    streak: number;
+    targetStreak: number;
+    timeLimitSeconds: number;
+  } | null;
   onVote?: (choiceIndex: number, confident?: boolean) => void;
   onVoteQuestion?: (choiceIndex: number, confident?: boolean) => void;
+  onAirdropSupply?: (supplyType: 'SHIELD' | 'REPAIR' | 'AMMO') => void;
+  onGhostRevivalAnswer?: (choiceIndex: number) => void;
 }
 
 export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
@@ -51,13 +60,18 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
   voteUpdate,
   finalResult,
   isGhost = false,
+  airdropCooldownSeconds = 0,
+  ghostRevivalData,
   onVote,
-  onVoteQuestion
+  onVoteQuestion,
+  onAirdropSupply,
+  onGhostRevivalAnswer
 }) => {
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
   const [isConfident, setIsConfident] = useState<boolean>(false);
   const [timeLeft, setTimeLeft] = useState<number>(12);
   const [duration, setDuration] = useState<number>(12);
+  const [airdropCd, setAirdropCd] = useState<number>(0);
 
   const endTimeRef = React.useRef<number>(0);
   const durationRef = React.useRef<number>(12);
@@ -198,6 +212,137 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
           </span>
         </div>
       </div>
+
+      {/* Synergy Streak & Mega Laser Gauge */}
+      <div className="mb-3 bg-black border-2 border-cyan-500/80 p-2 sm:p-2.5 flex flex-wrap items-center justify-between gap-2 font-arcade text-[9px] shadow-[0_0_12px_rgba(6,182,212,0.2)]">
+        <div className="flex items-center gap-2">
+          <span className="text-cyan-400 font-extrabold flex items-center gap-1">
+            <span>⚡ SYNERGY:</span>
+            <span>
+              {teamTank?.isUltimateReady || (teamTank?.synergyStreak ?? 0) >= 3 ? (
+                <span className="text-amber-300 animate-pulse font-extrabold">■■■ [100% READY!]</span>
+              ) : (teamTank?.synergyStreak ?? 0) === 2 ? (
+                <span className="text-cyan-300">■■□ [66%]</span>
+              ) : (teamTank?.synergyStreak ?? 0) === 1 ? (
+                <span className="text-cyan-400">■□□ [33%]</span>
+              ) : (
+                <span className="text-slate-500">□□□ [0%]</span>
+              )}
+            </span>
+          </span>
+        </div>
+        <div className="text-[8px] sm:text-[9px]">
+          {teamTank?.isUltimateReady ? (
+            <span className="text-amber-300 font-bold animate-pulse">
+              💥 MEGA LASER พร้อมยิง! พลขับกด [E] หรือแตะปุ่มทะลวงฉาก!
+            </span>
+          ) : (
+            <span className="text-slate-400">
+              ตอบถูกติดกัน 3 ข้อเพื่อปลดล็อก Mega Laser Beam (ทะลวงทุกสิ่ง)
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Tactical Airdrop Supply Dock */}
+      <div className="mb-4 bg-[#101424] border-2 border-slate-700 p-2.5 sm:p-3 pixel-box">
+        <div className="flex items-center justify-between mb-2">
+          <div className="font-arcade text-[9px] sm:text-[10px] text-cyan-400 flex items-center gap-1.5 font-bold">
+            <span>🛸</span>
+            <span>TACTICAL AIRDROP DRONE (โดรนส่งเสบียงยุทธวิธี)</span>
+          </div>
+          {airdropCooldownSeconds > 0 && (
+            <span className="font-arcade text-[9px] text-rose-400 animate-pulse">
+              ⏳ COOLDOWN: {airdropCooldownSeconds}s
+            </span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-3 gap-2">
+          <button
+            onClick={() => {
+              if (airdropCooldownSeconds <= 0 && onAirdropSupply) {
+                soundFx.playSelect();
+                onAirdropSupply('SHIELD');
+              }
+            }}
+            disabled={airdropCooldownSeconds > 0}
+            className={`p-2 arcade-btn text-center text-xs flex flex-col items-center justify-center gap-1 ${
+              airdropCooldownSeconds > 0 ? 'arcade-btn-slate opacity-50 cursor-not-allowed' : 'arcade-btn-cyan'
+            }`}
+            title="หย่อนโล่คุ้มกัน 4.5 วินาทีให้พลขับ"
+          >
+            <span className="text-sm">🛡️</span>
+            <span className="font-arcade text-[8px] sm:text-[9px] font-bold">BARRIER (4.5s)</span>
+          </button>
+
+          <button
+            onClick={() => {
+              if (airdropCooldownSeconds <= 0 && onAirdropSupply) {
+                soundFx.playSelect();
+                onAirdropSupply('REPAIR');
+              }
+            }}
+            disabled={airdropCooldownSeconds > 0}
+            className={`p-2 arcade-btn text-center text-xs flex flex-col items-center justify-center gap-1 ${
+              airdropCooldownSeconds > 0 ? 'arcade-btn-slate opacity-50 cursor-not-allowed' : 'arcade-btn-emerald'
+            }`}
+            title="หย่อนชุดซ่อมแซม +1 HP ให้พลขับ"
+          >
+            <span className="text-sm">💚</span>
+            <span className="font-arcade text-[8px] sm:text-[9px] font-bold">REPAIR (+1 HP)</span>
+          </button>
+
+          <button
+            onClick={() => {
+              if (airdropCooldownSeconds <= 0 && onAirdropSupply) {
+                soundFx.playSelect();
+                onAirdropSupply('AMMO');
+              }
+            }}
+            disabled={airdropCooldownSeconds > 0}
+            className={`p-2 arcade-btn text-center text-xs flex flex-col items-center justify-center gap-1 ${
+              airdropCooldownSeconds > 0 ? 'arcade-btn-slate opacity-50 cursor-not-allowed' : 'arcade-btn-amber'
+            }`}
+            title="หย่อนเสบียงกระสุน +4 นัดให้พลขับ"
+          >
+            <span className="text-sm">📦</span>
+            <span className="font-arcade text-[8px] sm:text-[9px] font-bold">AMMO (+4)</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Ghost Revival Challenge Protocol */}
+      {ghostRevivalData && (
+        <div className="pixel-box bg-purple-950/90 border-4 border-purple-400 p-4 mb-4 shadow-[0_0_20px_rgba(168,85,247,0.4)]">
+          <div className="flex items-center justify-between mb-3 font-arcade text-xs">
+            <div className="text-purple-300 flex items-center gap-2 font-extrabold">
+              <span>👻 GHOST REVIVAL PROTOCOL</span>
+              <span className="text-amber-300">[{ghostRevivalData.streak}/{ghostRevivalData.targetStreak} ข้อ]</span>
+            </div>
+            <span className="text-purple-200 text-[9px]">ตอบถูก 2 ข้อเพื่อชุบชีวิตรถถัง!</span>
+          </div>
+
+          <div className="text-sm sm:text-base font-bold text-white mb-3">
+            {ghostRevivalData.question.questionTh}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {ghostRevivalData.question.options.map((opt, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  soundFx.playVote();
+                  if (onGhostRevivalAnswer) onGhostRevivalAnswer(idx);
+                }}
+                className="p-2.5 arcade-btn arcade-btn-slate text-left text-xs font-bold text-white hover:border-purple-400"
+              >
+                {idx + 1}. {opt}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Main Quiz & Voting Area */}
       {currentQuestion ? (

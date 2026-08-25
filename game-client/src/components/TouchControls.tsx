@@ -6,9 +6,16 @@ import { PixelCrosshair } from './PixelIcons.js';
 interface TouchControlsProps {
   onMove: (dir: Direction | null, isMoving: boolean) => void;
   onShoot: () => void;
+  isUltimateReady?: boolean;
+  onUltimateBeam?: () => void;
 }
 
-export const TouchControls: React.FC<TouchControlsProps> = ({ onMove, onShoot }) => {
+export const TouchControls: React.FC<TouchControlsProps> = ({ 
+  onMove, 
+  onShoot,
+  isUltimateReady = false,
+  onUltimateBeam
+}) => {
   const [activeDir, setActiveDir] = useState<Direction | null>(null);
   const padRef = useRef<HTMLDivElement | null>(null);
   const activeDirRef = useRef<Direction | null>(null);
@@ -85,6 +92,18 @@ export const TouchControls: React.FC<TouchControlsProps> = ({ onMove, onShoot })
     }
   };
 
+  const handleUltimateTouch = (e: React.TouchEvent | React.MouseEvent) => {
+    e.preventDefault();
+    if (onUltimateBeam) {
+      onUltimateBeam();
+      try {
+        navigator.vibrate?.(100);
+      } catch (e) {
+        // ignore
+      }
+    }
+  };
+
   return (
     <div className="w-full flex items-center justify-between px-3 sm:px-6 py-1 sm:py-2 select-none touch-none bg-black/80 border-t-2 border-slate-800 backdrop-blur-md rounded-t-xl">
       
@@ -153,20 +172,37 @@ export const TouchControls: React.FC<TouchControlsProps> = ({ onMove, onShoot })
         </span>
       </div>
 
-      {/* 2. Tactical FIRE Arcade Button */}
-      <div className="flex flex-col items-center gap-1">
-        <button
-          onTouchStart={handleShootTouch}
-          onClick={handleShootTouch}
-          className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-rose-500 via-rose-600 to-amber-600 active:scale-90 border-4 border-white shadow-[0_0_25px_rgba(239,68,68,0.6)] flex flex-col items-center justify-center text-white font-arcade text-xs transition-transform active:bg-rose-700 cursor-pointer"
-        >
-          <Crosshair className="w-7 h-7 sm:w-8 sm:h-8 mb-0.5 drop-shadow stroke-[2.5]" />
-          <span className="tracking-widest font-black text-xs sm:text-sm">FIRE!</span>
-        </button>
+      {/* 2. Tactical FIRE and Ultimate Laser Buttons */}
+      <div className="flex items-center gap-3">
+        {/* Mega Laser Ultimate Button (Activated on Streak x3) */}
+        {isUltimateReady && (
+          <div className="flex flex-col items-center gap-1">
+            <button
+              onTouchStart={handleUltimateTouch}
+              onClick={handleUltimateTouch}
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-cyan-400 via-cyan-500 to-blue-600 active:scale-90 border-4 border-yellow-300 shadow-[0_0_30px_rgba(6,182,212,0.9)] flex flex-col items-center justify-center text-white font-arcade text-[10px] animate-pulse cursor-pointer"
+            >
+              <span className="text-xl">⚡</span>
+              <span className="font-extrabold text-[8px] sm:text-[9px] text-yellow-200">LASER [E]</span>
+            </button>
+            <span className="text-[8px] font-arcade text-cyan-300 font-bold">ท่าไม้ตาย</span>
+          </div>
+        )}
 
-        <span className="text-[8px] sm:text-[9px] font-arcade text-amber-300">
-          💥 ปุ่มยิง
-        </span>
+        <div className="flex flex-col items-center gap-1">
+          <button
+            onTouchStart={handleShootTouch}
+            onClick={handleShootTouch}
+            className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-rose-500 via-rose-600 to-amber-600 active:scale-90 border-4 border-white shadow-[0_0_25px_rgba(239,68,68,0.6)] flex flex-col items-center justify-center text-white font-arcade text-xs transition-transform active:bg-rose-700 cursor-pointer"
+          >
+            <Crosshair className="w-7 h-7 sm:w-8 sm:h-8 mb-0.5 drop-shadow stroke-[2.5]" />
+            <span className="tracking-widest font-black text-xs sm:text-sm">FIRE!</span>
+          </button>
+
+          <span className="text-[8px] sm:text-[9px] font-arcade text-amber-300">
+            💥 ปุ่มยิง [Space]
+          </span>
+        </div>
       </div>
 
     </div>
