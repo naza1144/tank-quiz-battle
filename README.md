@@ -12,14 +12,44 @@
 
 ---
 
+## 📸 ภาพตัวอย่างภายในเกม (Gameplay Screenshots)
+
+| 🕹️ สมรภูมิรบ Battle City 1990 เรโทรเต็มจอ | 📺 โหมดจอแก้ว CRT Scanlines & Visual Polish |
+|:---:|:---:|
+| ![Battle City Arena](docs/images/battlefield-gameplay.png) | ![CRT Scanline Mode](docs/images/crt-retro-mode.png) |
+| *สมรภูมิ 28x28 พร้อมบล็อกอิฐ, เหล็ก, คลองน้ำ, น้ำแข็ง และพุ่มไม้* | *ฟิลเตอร์จอแก้ว CRT 1990 พร้อมหมุดตู้เกมและเอฟเฟกต์ Screen Shake* |
+
+| 🧠 แผงควบคุมผู้ช่วยรบ (Squad Support Console) | 🛡️ ห้องล็อบบี้ & เลือกสายรถถัง (Lobby & Archetypes) |
+|:---:|:---:|
+| ![Squad Support Console](docs/images/squad-support-console.png) | ![Lobby & Tank Selection](docs/images/lobby-preview.png) |
+| *ระบบโหวตเสียงส่วนมาก มั่นใจคูณคะแนน และโดรนเสบียงยุทธวิธี* | *4 สายรถถังเฉพาะทาง (Standard, Scout, Heavy, Sniper) 6 สีทีม* |
+
+---
+
 ## 🌟 จุดเด่นและระบบสำคัญ (Key Features)
 
-### 1. 🎨 8-Bit Retro Arcade Aesthetic & Crisp Pixel Art Icons
-- **Pure Pixel Art & CRT Bezel**: ดีไซน์ UI สไตล์ตู้เกมยุค 90 พร้อมกรอบ CRT หมุดตู้เกม 4 มุม และปุ่มกด 3D Arcade
-- **26+ Crisp 8-Bit Vector SVG Icons**: ดีไซน์ไอคอนเวกเตอร์แบบพิกเซล (`shape-rendering="crispEdges"`)
+### 1. ⚡ ท่าไม้ตายร่วมมือ (Ultimate Synergy Beam)
+- **เกจสะสมพลัง (Synergy Streak)**: ผู้ช่วยตอบถูกต่อเนื่อง **3 ข้อติด (Streak x3)** ชาร์จเกจไม้ตายเต็ม 100% ทันที
+- **วิธียิง**: พลขับกดปุ่ม **`[E]`** บนคีย์บอร์ด หรือแตะปุ่ม **`[⚡ LASER]`** บนหน้าจอสัมผัส
+- **อานุภาพ**: ยิงลำแสงพลาสมา **ระเบิดทำลายบล็อกอิฐ (`BRICK`) ทุกก้อน** ในแนวเส้นตรง และ **สร้างความเสียหายทะลวงเกราะ 3 DMG (Piercing Damage)** แก่รถถังศัตรูทุกคันที่ขวางทาง พร้อมเอฟเฟกต์หน้าจอสั่น 16px และเสียงเลเซอร์ 8-Bit
+
+### 2. 🛸 โดรนหย่อนเสบียงยุทธวิธี (Supporter Airdrop Supply Drone)
+- **แผงควบคุมโดรน (Tactical Airdrop Dock)**: ติดตั้งในหน้าจอ `SquadSupportView` ของผู้ช่วยรบ ให้เลือกส่งเสบียงสนับสนุนพลขับ (คูลดาวน์ทีม 25s):
+  1. 🛡️ **BARRIER (4.5s)**: สร้างม่านพลังงานอมตะ 4.5 วินาทีรอบตัวรถถังพลขับ
+  2. 💚 **REPAIR (+1 HP)**: ซ่อมแซมฟื้นฟูพลังชีวิตรถถังทันที +1 HP
+- **กระสุนมาจากการทำ Quiz เท่านั้น**: ตัดการแจกกระสุนฟรี เพื่อบังคับให้พลขับต้องเก็บกล่องและพึ่งพาพลังปัญญาของผู้ช่วยรบ 100%
+
+### 3. 👻 ระบบวิญญาณผู้ช่วยหลังตาย & ชุบชีวิต (Ghost Revival Protocol)
+- **สถานะวิญญาณรบ (Ghost State)**: ถ้ารถถังของทีมถูกยิงทำลาย ผู้เล่นทุกคนในทีมจะเข้าสู่โหมด Ghost พร้อมหน้าต่างท้าทายพิเศษ **`GHOST REVIVAL PROTOCOL`**
+- **เงื่อนไขการคืนชีพ**: ผู้ช่วยต้องตอบคำถามท้าทายให้ **ถูก 2 ข้อติด (Streak 2/2)** เพื่อ **ชุบชีวิตรถถังกลับมาสู้ใหม่ได้ทันที (2 HP + โล่คุ้มกัน 4s)** (จำกัด 1 ครั้งต่อทีมต่อแมตช์)
+
+### 4. 🎨 8-Bit Retro Arcade Aesthetic & Visual Polish
+- **Pure Pixel Art & CRT Bezel**: ดีไซน์ UI สไตล์ตู้เกมยุค 90 พร้อมฟิลเตอร์เส้นสแกนไลน์ CRT 1990 หมุดตู้เกม 4 มุม (เปิด/ปิดได้ด้วยปุ่ม `[📺 CRT]`)
+- **Dynamic Screen Shake**: ระบบสั่นไหวของ Canvas ตามความรุนแรงของแรงระเบิดและแรงกระแทก
+- **8-Bit Pixel Particle Pool**: ละอองฝุ่นตีนตะขาบ (Tread Dust), สะเก็ดไฟกระสุนสะท้อน (Sparks), ควันลูกไฟระเบิด (Smoke), ผลึกน้ำแข็ง CRYO
 - **8-Bit Chiptune Synthesizer**: เพลงประกอบ BGM และเสียง Sound Effects สังเคราะห์ขึ้นแบบ Real-time ผ่าน Web Audio API (ไม่พึ่งพาไฟล์เสียงภายนอก)
 
-### 2. 🤝 ระบบทีมเวิร์ก 6 ทีม Squad Co-op (คนขับ 1 คน + ผู้ช่วยโหวตคำถามไม่จำกัด)
+### 5. 🤝 ระบบทีมเวิร์ก 6 ทีม Squad Co-op (คนขับ 1 คน + ผู้ช่วยโหวตคำถามไม่จำกัด)
 - **6 ทีมสมดุล**: รองรับการแข่งขันสูงสุด 6 ทีม (`RED`, `BLUE`, `GREEN`, `YELLOW`, `PURPLE`, `CYAN`)
 - **Driver (พลขับ 1 คนต่อทีม)**: ทำหน้าที่ขับรถถัง หลบกระสุน และวิ่งชนกล่องคำถาม `[?]`
 - **Squad Support Console (ผู้ช่วยตอบคำถาม 🧠)**: เมื่อคนขับเก็บกล่อง คำถามจะเด้งขึ้นหน้าจอผู้ช่วยตอบเท่านั้น คนขับสามารถมีสมาธิกับการขับต่อ
@@ -27,30 +57,21 @@
 - **Anti-Skip Consensus Voting**: ระบบจะรอจนหมดเวลานับถอยหลัง แสดงผลเฉลยและคะแนนเสียงส่วนใหญ่ ~2.8 วินาที แล้วจึงปล่อยข้อถัดไป
 - **Auto-Balance System**: ระบบกระจายนักเรียนเข้า 6 ทีมและจัดสรรพลขับให้สมดุลเท่ากันอัตโนมัติ
 
-### 3. ⏱️ ปรับเวลาทำโจทย์ตามระดับความยาก (Difficulty Time Limits)
+### 6. ⏱️ ปรับเวลาทำโจทย์ตามระดับความยาก (Difficulty Time Limits)
 - **🔥 คำถามยาก (HARD)**: ให้เวลา **7 วินาที**
 - **⚡ คำถามปานกลาง (MEDIUM)**: ให้เวลา **5 วินาที**
 - **🟢 คำถามง่าย (EASY)**: ให้เวลา **2 วินาที** (ประลองความไว Speed Quiz)
 
-### 4. 🗺️ ระบบสุ่มแมพไม่ซ้ำกันทุกรอบ & หน้าจอขยายใหญ่ (Procedural 20x20 Arena)
-- **สมรภูมิกระชับ 20x20 Grid (640x640px)**: พื้นที่การต่อสู้กระชับ ปะทะกันรวดเร็ว ไม่เวิ้งว้าง
+### 7. 🗺️ ระบบสุ่มแมพไม่ซ้ำกันทุกรอบ & หน้าจอขยายใหญ่ (Procedural 28x28 Arena)
+- **สมรภูมิ 28x28 Grid (896x896px)**: พื้นที่การต่อสู้กว้างขวาง ปะทะกันรวดเร็ว ไม่เวิ้งว้าง
 - **5 ธีมกลยุทธ์สุ่มทุกรอบการเล่น**:
   1. *Classic Citadel*: ป้อมปราการกลาง คลองน้ำ ทางน้ำแข็ง
   2. *Jungle Outpost*: ดงพุ่มไม้ขนาดใหญ่สำหรับการซุ่มยิง
   3. *Frozen River Crossing*: ลำน้ำคู่ขนานพร้อมสะพานน้ำแข็งสไลด์ตัว
   4. *Desert Labyrinth*: เขาวงกตอิฐและลานประลองกลาง
   5. *Procedural Symmetric Warzone*: ระบบสุ่มสิ่งกีดขวางแบบ 4-Way Mirroring สดใหม่ทุกรอบ
-- **Enlarged Canvas UI**: ขยายการแสดงผลบนหน้าจอสูงสุดถึง 700px / 68vh (96vw) ชัดเจนเต็มตา
 
-### 5. 📦 ระบบสุ่มเกิดกล่องคำถามไดนามิก (Dynamic Quiz Crates & Airdrop)
-- **สุ่มเกิดใหม่ทั่วแมพ**: เมื่อรถถังเก็บกล่อง กล่องจะสุ่มย้ายไปเกิดยังพิกัดว่างใหม่ในแมพภายใน 8-12 วินาที
-- **Airdrop Replenishment**: หากกล่องในสนามเหลือน้อยกว่า 6 กล่อง ระบบจะทิ้งกล่องสนับสนุนใหม่ลงมาทันที
-
-### 6. 🏆 หน้าจอสรุปผลผู้ชนะทันทีเมื่อจบเกม (Instant Game Over Podium)
-- เมื่อเหลือผู้รอดชีวิตเพียงทีมเดียว หรือเวลาหมดลง หน้าจอ **Victory Podium Modal** จะเด้งขึ้นทันที
-- ฉลองชัยด้วยเสียง Fanfare, เอฟเฟกต์ **Confetti Animation**, และตารางสรุปคะแนน MVP ทั้งพลขับและทีมช่วยเหลือ
-
-### 7. 🔒 หน้าจอจัดการห้องและคลังข้อสอบสำหรับอาจารย์ (Teacher Portal Route: `/teacher`)
+### 8. 🔒 หน้าจอจัดการห้องและคลังข้อสอบสำหรับอาจารย์ (Teacher Portal: `/teacher`)
 - เข้าใช้งานได้ผ่าน URL `/teacher` หรือคลิกปุ่ม "ระบบอาจารย์" (ป้องกันด้วย PIN: `1990`)
 - **Dashboard จัดการห้องแข่งขัน**: ตรวจสอบสถานะห้อง ลบห้องที่ไม่ได้ใช้งาน และดูจำนวนผู้เล่นแบบสด
 - **คลังข้อสอบครบวงจร**: ค้นหา, กรองหมวดหมู่วิชา, เพิ่ม, แก้ไข, ลบข้อสอบ, และนำเข้าไฟล์ JSON Bulk Import
@@ -64,8 +85,9 @@
   - `POST /api/quiz/import`: นำเข้าข้อสอบแบบชุด (JSON Array)
   - `POST /api/quiz/reset`: รีเซ็ตกลับเป็นข้อสอบเริ่มต้น
 
-### 8. 📱 รองรับสมาร์ตโฟน 100% ป้องกันภาพกระพริบ (Mobile-Optimized & Anti-Flicker)
+### 9. 📱 รองรับสมาร์ตโฟน 100% ป้องกันภาพกระพริบ (Mobile-Optimized & Anti-Flicker)
 - **Touch-Slide Virtual D-Pad**: บังคับลากนิ้วต่อเนื่อง 8 ทิศทาง
+- **Large Action Buttons**: ปุ่มยิง FIRE และปุ่มไม้ตาย `[⚡ LASER]` ชัดเจน
 - **GPU Anti-Flicker Fix**: กำจัดอาการกระพริบของ Canvas บนเบราว์เซอร์มือถือ (iOS Safari / Android Chrome)
 - **High-Precision useRef Countdown**: ตัวนับเวลาแม่นยำสูง ไม่แกว่งหรือค้างจากการ Re-render
 
@@ -75,14 +97,21 @@
 
 ```text
 tank-quiz-battle/
+├── docs/
+│   └── images/                      # Screenshot Gallery Assets for README & Documentation
+│       ├── battlefield-gameplay.png # 28x28 Battle City Arena Gameplay
+│       ├── crt-retro-mode.png       # CRT Scanlines & Visual Polish Screen
+│       ├── squad-support-console.png# Squad Consensus Voting & Airdrop Dock
+│       └── lobby-preview.png        # Lobby & Tank Archetype Selection
+│
 ├── game-client/                     # Frontend Application (React + Vite + Tailwind)
 │   ├── src/
 │   │   ├── audio/soundFx.ts         # 8-Bit Multi-channel Chiptune Synthesizer
 │   │   ├── components/
 │   │   │   ├── PixelIcons.tsx       # 26+ Crisp 8-Bit Vector SVG Pixel Icons
-│   │   │   ├── RetroCanvas.tsx      # 2D Battle City Canvas Renderer (Auto-scale)
-│   │   │   ├── TouchControls.tsx    # Mobile Virtual Slide D-Pad & Large Fire Button
-│   │   │   ├── SquadSupportView.tsx # Mobile-friendly Squad Voting Console
+│   │   │   ├── RetroCanvas.tsx      # 2D Battle City Canvas Renderer with CRT & Particles
+│   │   │   ├── TouchControls.tsx    # Mobile Virtual Slide D-Pad & Ultimate Laser Button
+│   │   │   ├── SquadSupportView.tsx # Mobile-friendly Squad Voting Console & Airdrop Dock
 │   │   │   ├── LobbyView.tsx        # 6-Team Arcade Squad Formation & Role Picker
 │   │   │   ├── RoomSelectView.tsx   # Mission Select & Subject Selection
 │   │   │   ├── TeacherPortalView.tsx# PIN-Protected Teacher Dashboard & Room Manager
@@ -98,13 +127,13 @@ tank-quiz-battle/
 ├── game-server/                     # Backend Server (Node.js + Express + Socket.io)
 │   ├── src/
 │   │   ├── auth.ts                  # Authentication & Guest Token Handler
-│   │   ├── gameEngine.ts            # Authoritative 2D Physics, Collisions & Map Logic
-│   │   ├── mapTemplates.ts          # 20x20 Procedural & Thematic Map Generators
+│   │   ├── gameEngine.ts            # Authoritative 2D Physics, Mega Laser & Ghost Revival Logic
+│   │   ├── mapTemplates.ts          # 28x28 Procedural & Thematic Map Generators
 │   │   ├── quizBank.ts              # Quiz CRUD Manager, Category Counter & Bulk Importer
 │   │   ├── roomManager.ts           # 6-Team Lifecycle, Sequential Queues & Auto-balance
 │   │   ├── server.ts                # HTTP Server, Open Quiz REST APIs & WebSockets
 │   │   └── types.ts                 # Shared Server Types & Protocols
-│   ├── test-game.ts                 # Automated Physics, Combat & Quiz Engine Unit Tests
+│   ├── test-multi-round-exhaustive.ts # Master 4-Phase Exhaustive Stress Test Suite
 │   ├── Dockerfile
 │   └── package.json
 │
