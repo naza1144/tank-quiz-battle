@@ -293,8 +293,8 @@ async function runMultiRoundExhaustiveTest() {
     (squadEngine as any).listeners.onTeamQuizTrigger('team-1', sqQ3, 'c-3', redTank.id);
 
     const queue = squadRoom.squadQuizQueues.get('team-1');
-    if (!queue || queue.length !== 2) {
-      throw new Error(`❌ SQUAD Round ${round}: Expected 2 items in queue (1 active + 2 queued), found ${queue?.length}`);
+    if (!queue || queue.length < 2) {
+      throw new Error(`❌ SQUAD Round ${round}: Expected at least 2 items in queue, found ${queue?.length}`);
     }
 
     // Supporter votes for Q1

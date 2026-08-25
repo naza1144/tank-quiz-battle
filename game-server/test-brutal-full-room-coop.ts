@@ -374,6 +374,7 @@ async function runBrutalFullRoomStressTest() {
     {
       onGameEvent: () => {},
       onQuizTrigger: () => {},
+      onTeamQuizTrigger: () => {},
       onGameOver: () => {}
     },
     240,
