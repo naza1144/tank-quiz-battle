@@ -193,10 +193,10 @@ export class GameEngine {
       case 'LOGIC':
         return { kind: 'AP', nameTh: 'กระสุนเจาะเกราะ (AP ⚡)' };
       case 'ENGLISH':
-      case 'GENERAL':
         return { kind: 'RAPID', nameTh: 'กระสุนรัว 3 ทิศทาง (RAPID 💥)' };
       case 'HEAL':
         return { kind: 'HEAL', nameTh: 'กระสุนซ่อมแซม (HEAL 💚)' };
+      case 'GENERAL':
       default:
         return { kind: 'EXPLOSIVE', nameTh: 'กระสุนระเบิดกัมปนาท (HE 💣)' };
     }
