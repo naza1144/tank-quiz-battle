@@ -18,43 +18,43 @@ export interface TankArchetypeConfig {
 export const ARCHETYPE_CONFIGS: Record<TankArchetype, TankArchetypeConfig> = {
   STANDARD: {
     name: 'Standard',
-    nameTh: 'รถถังมาตรฐาน',
-    hp: 2,
-    speed: 130,
-    bulletSpeed: 280,
+    nameTh: 'รถถังมาตรฐาน (Tactical All-Rounder)',
+    hp: 3,
+    speed: 140,
+    bulletSpeed: 300,
     bulletDamage: 1,
     maxAmmo: 6,
-    descriptionTh: 'สมดุลทั้งความเร็วและพลังชีวิต'
+    descriptionTh: 'สมดุลรอบด้าน ยิงกระสุนพิเศษได้ทุกชนิดอย่างมีประสิทธิภาพ ไม่โดน One-Shot Kill'
   },
   SCOUT: {
     name: 'Scout Speed',
-    nameTh: 'รถถังสายความเร็ว',
-    hp: 1,
-    speed: 180,
-    bulletSpeed: 320,
+    nameTh: 'รถถังสายสปีด (Flanker & Fast Crate)',
+    hp: 2,
+    speed: 190,
+    bulletSpeed: 340,
     bulletDamage: 1,
     maxAmmo: 8,
-    descriptionTh: 'เคลื่อนที่ไว หลบหลีกง่าย แต่เกราะบาง'
+    descriptionTh: 'เคลื่อนที่เร็วสุด บรรจุกระสุนได้เยอะ (8 นัด) คอมโบยอดเยี่ยมกับ RAPID 💥 และ CRYO ❄️'
   },
   HEAVY: {
     name: 'Heavy Panzer',
-    nameTh: 'รถถังเกราะหนัก',
-    hp: 4,
-    speed: 95,
-    bulletSpeed: 250,
-    bulletDamage: 2,
+    nameTh: 'รถถังเกราะหนัก (Iron Panzer)',
+    hp: 5,
+    speed: 105,
+    bulletSpeed: 260,
+    bulletDamage: 1.5,
     maxAmmo: 5,
-    descriptionTh: 'เกราะหนา ทนทาน ยิงรุนแรง แต่เคลื่อนที่ช้า'
+    descriptionTh: 'เกราะหนาพิเศษ 5 HP ทนทาน ยืนชนได้นาน เหมาะกับ EXPLOSIVE 💣 และ HEAL 💚'
   },
   SNIPER: {
     name: 'Long Sniper',
-    nameTh: 'รถถังสไนเปอร์',
-    hp: 1,
-    speed: 120,
-    bulletSpeed: 420,
-    bulletDamage: 2,
+    nameTh: 'รถถังสไนเปอร์ (Supersonic Sharpshooter)',
+    hp: 2,
+    speed: 130,
+    bulletSpeed: 440,
+    bulletDamage: 1.5,
     maxAmmo: 4,
-    descriptionTh: 'กระสุนความเร็วสูง ยิงได้ไกลและแม่นยำ'
+    descriptionTh: 'กระสุนความเร็วสูง ยิงไกลแม่นยำ เหมาะกับ AP ⚡ เจาะเกราะชิ่งกำแพง และ CRYO ❄️ สตั๊นระยะไกล'
   }
 };
 
