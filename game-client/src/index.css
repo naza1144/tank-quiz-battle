@@ -117,23 +117,59 @@
   box-shadow: 0 0 0 #1e293b, 0 3px 0 #000000;
 }
 
-/* CRT Screen Scanline Overlay Effect */
-.crt-overlay {
+/* CRT Screen Scanline & Retro Arcade Visuals */
+.crt-mode {
   position: relative;
   overflow: hidden;
 }
-@media (hover: hover) and (pointer: fine) {
-  .crt-overlay::after {
-    content: " ";
-    display: block;
-    position: absolute;
-    top: 0; left: 0; bottom: 0; right: 0;
-    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
-    background-size: 100% 4px;
-    z-index: 20;
-    pointer-events: none;
-    opacity: 0.4;
-  }
+
+.crt-mode::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: radial-gradient(circle at center, rgba(18, 16, 16, 0) 60%, rgba(0, 0, 0, 0.7) 100%);
+  z-index: 25;
+  pointer-events: none;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.85);
+}
+
+.crt-mode::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.3) 0px,
+    rgba(0, 0, 0, 0.3) 1.5px,
+    transparent 1.5px,
+    transparent 3px
+  );
+  z-index: 26;
+  pointer-events: none;
+  opacity: 0.65;
+  animation: crtFlicker 0.15s infinite;
+}
+
+@keyframes crtFlicker {
+  0% { opacity: 0.65; }
+  50% { opacity: 0.62; }
+  100% { opacity: 0.67; }
+}
+
+/* Screen Shake Animations */
+@keyframes screenShakeHeavy {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  20% { transform: translate(-4px, 3px) rotate(-0.5deg); }
+  40% { transform: translate(4px, -3px) rotate(0.5deg); }
+  60% { transform: translate(-3px, -2px) rotate(-0.3deg); }
+  80% { transform: translate(2px, 3px) rotate(0.3deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+.animate-screen-shake {
+  animation: screenShakeHeavy 0.25s ease-out;
 }
 
 /* Retro Animations */

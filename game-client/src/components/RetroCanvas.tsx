@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Tank, Bullet, QuizCrate, TileType, Direction } from '../types.js';
+import { soundFx } from '../audio/soundFx.js';
 
 export interface GameStateSnapshot {
   map: TileType[][];
@@ -12,14 +13,66 @@ export interface GameStateSnapshot {
 
 interface RetroCanvasProps {
   stateRef: React.RefObject<GameStateSnapshot>;
+  isCrtMode?: boolean;
+}
+
+interface PixelParticle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  color: string;
+  size: number;
+  life: number;
+  maxLife: number;
+  type?: 'DUST' | 'SPARK' | 'SMOKE' | 'ICE' | 'BRICK' | 'HEAL';
 }
 
 const TILE_SIZE = 32;
 
-export const RetroCanvas: React.FC<RetroCanvasProps> = React.memo(({ stateRef }) => {
+export const RetroCanvas: React.FC<RetroCanvasProps> = React.memo(({ stateRef, isCrtMode = true }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const tickRef = useRef<number>(0);
+  const shakeRef = useRef<number>(0);
+  const particlesRef = useRef<PixelParticle[]>([]);
+
+  const prevTanksHpRef = useRef<Map<string, number>>(new Map());
+  const prevBulletsRef = useRef<Map<string, Bullet>>(new Map());
+
+  // Trigger screen shake
+  const triggerShake = (intensity: number) => {
+    shakeRef.current = Math.max(shakeRef.current, intensity);
+  };
+
+  // Spawn pixel particles
+  const spawnParticles = (
+    x: number, 
+    y: number, 
+    count: number, 
+    colors: string[], 
+    type: PixelParticle['type'] = 'SPARK',
+    speedMax: number = 3,
+    size: number = 3
+  ) => {
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * speedMax + 0.5;
+      const col = colors[Math.floor(Math.random() * colors.length)];
+      const maxL = Math.floor(Math.random() * 14) + 8;
+      particlesRef.current.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        color: col,
+        size: Math.floor(Math.random() * size) + 2,
+        life: maxL,
+        maxLife: maxL,
+        type
+      });
+    }
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -51,17 +104,83 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = React.memo(({ stateRef })
         myTankId: curMyTankId 
       } = curState;
 
-      const gridRows = curMap && curMap.length > 0 ? curMap.length : 20;
-      const gridCols = curMap && curMap[0]?.length > 0 ? curMap[0].length : 20;
+      const gridRows = curMap && curMap.length > 0 ? curMap.length : 28;
+      const gridCols = curMap && curMap[0]?.length > 0 ? curMap[0].length : 28;
       const mapW = gridCols * TILE_SIZE;
       const mapH = gridRows * TILE_SIZE;
 
       if (canvas.width !== mapW) canvas.width = mapW;
       if (canvas.height !== mapH) canvas.height = mapH;
 
+      // ── DETECT COMBAT EVENTS FOR PARTICLES, AUDIO & SCREEN SHAKE ──
+      // 1. Tank HP change / Destruction
+      curTanks?.forEach(tank => {
+        const prevHp = prevTanksHpRef.current.get(tank.id);
+        if (prevHp !== undefined && tank.hp < prevHp) {
+          // Tank took damage!
+          const cx = tank.x + tank.width / 2;
+          const cy = tank.y + tank.height / 2;
+          if (tank.hp <= 0) {
+            // Tank Destroyed Mega Explosion!
+            triggerShake(14);
+            soundFx.playExplosionDeep();
+            spawnParticles(cx, cy, 28, ['#ef4444', '#f97316', '#fde047', '#ffffff', '#78716c'], 'SMOKE', 5, 5);
+          } else {
+            // Hit spark
+            triggerShake(5);
+            spawnParticles(cx, cy, 10, ['#fde047', '#ef4444', '#ffffff'], 'SPARK', 3, 3);
+          }
+        }
+        prevTanksHpRef.current.set(tank.id, tank.hp);
+
+        // Tread Dust when moving
+        if (tank.isMoving && !tank.isDead && tick % 4 === 0) {
+          const tx = tank.x + tank.width / 2;
+          const ty = tank.y + tank.height / 2;
+          let dustX = tx;
+          let dustY = ty;
+          if (tank.direction === 'UP') dustY = tank.y + tank.height;
+          if (tank.direction === 'DOWN') dustY = tank.y;
+          if (tank.direction === 'LEFT') dustX = tank.x + tank.width;
+          if (tank.direction === 'RIGHT') dustX = tank.x;
+          spawnParticles(dustX + (Math.random() * 8 - 4), dustY + (Math.random() * 8 - 4), 2, ['#475569', '#64748b', '#334155'], 'DUST', 0.8, 2);
+        }
+      });
+
+      // 2. Bullets Ricochet & Explosions
+      curBullets?.forEach(b => {
+        const prevB = prevBulletsRef.current.get(b.id);
+        if (prevB) {
+          // AP Bullet bounced off steel
+          if (b.bouncesLeft !== undefined && prevB.bouncesLeft !== undefined && b.bouncesLeft < prevB.bouncesLeft) {
+            triggerShake(3);
+            soundFx.playRicochet();
+            spawnParticles(b.x, b.y, 8, ['#38bdf8', '#0284c7', '#ffffff'], 'SPARK', 4, 3);
+          }
+        }
+        prevBulletsRef.current.set(b.id, { ...b });
+      });
+
+      // ── SCREEN SHAKE OFFSET ──
+      const curShake = shakeRef.current;
+      let shakeX = 0;
+      let shakeY = 0;
+      if (curShake > 0.1) {
+        shakeX = (Math.random() - 0.5) * curShake;
+        shakeY = (Math.random() - 0.5) * curShake;
+        shakeRef.current *= 0.86;
+      } else {
+        shakeRef.current = 0;
+      }
+
+      ctx.save();
+      if (shakeX !== 0 || shakeY !== 0) {
+        ctx.translate(shakeX, shakeY);
+      }
+
       // 1. Clear background (Classic black battlefield)
       ctx.fillStyle = '#0a0a0c';
-      ctx.fillRect(0, 0, mapW, mapH);
+      ctx.fillRect(-20, -20, mapW + 40, mapH + 40);
 
       // 2. Render Ground & Low Tiles (Ice, Water, Brick, Steel)
       if (curMap && curMap.length > 0) {
@@ -115,6 +234,27 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = React.memo(({ stateRef })
           }
         }
       }
+
+      // 7. Render 8-Bit Retro Particles
+      for (let pIdx = particlesRef.current.length - 1; pIdx >= 0; pIdx--) {
+        const p = particlesRef.current[pIdx];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= 1;
+
+        if (p.life <= 0) {
+          particlesRef.current.splice(pIdx, 1);
+          continue;
+        }
+
+        const alpha = p.life / p.maxLife;
+        ctx.globalAlpha = Math.max(0.1, alpha);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+      }
+      ctx.globalAlpha = 1.0;
+
+      ctx.restore();
 
       animationFrameRef.current = requestAnimationFrame(render);
     };
@@ -489,7 +629,13 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = React.memo(({ stateRef })
   };
 
   return (
-    <div className="relative flex justify-center items-center p-1 sm:p-2 pixel-box bg-black shadow-2xl w-full max-w-[min(96vw,680px,calc(100vh-220px))] mx-auto aspect-square">
+    <div className={`relative flex justify-center items-center p-1 sm:p-2 pixel-box bg-[#050508] shadow-2xl w-full max-w-[min(96vw,680px,calc(100vh-220px))] mx-auto aspect-square ${isCrtMode ? 'crt-mode' : ''}`}>
+      {/* 8-Bit Arcade Cabinet Corner Rivets */}
+      <div className="absolute top-1.5 left-1.5 w-2 h-2 bg-amber-400 border border-black z-30 pointer-events-none opacity-80" />
+      <div className="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-400 border border-black z-30 pointer-events-none opacity-80" />
+      <div className="absolute bottom-1.5 left-1.5 w-2 h-2 bg-amber-400 border border-black z-30 pointer-events-none opacity-80" />
+      <div className="absolute bottom-1.5 right-1.5 w-2 h-2 bg-amber-400 border border-black z-30 pointer-events-none opacity-80" />
+
       <canvas
         ref={canvasRef}
         className="w-full h-full aspect-square bg-black object-contain cursor-crosshair rounded-sm"

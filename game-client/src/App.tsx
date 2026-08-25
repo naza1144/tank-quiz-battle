@@ -126,6 +126,7 @@ export const App: React.FC = () => {
   } | null>(null);
 
   const [isMuted, setIsMuted] = useState<boolean>(soundFx.getIsMuted());
+  const [isCrtMode, setIsCrtMode] = useState<boolean>(() => localStorage.getItem('tank_crt_mode') !== 'false');
 
   const [myTankHud, setMyTankHud] = useState<{ hp: number; maxHp: number; ammo: number }>({ hp: 3, maxHp: 3, ammo: 0 });
   const [hasTouch, setHasTouch] = useState<boolean>(false);
@@ -621,12 +622,31 @@ export const App: React.FC = () => {
               </div>
             )}
 
-            {/* Right: Round Timer & Audio Controls */}
+            {/* Right: Round Timer & Audio & CRT Controls */}
             <div className="flex items-center gap-1.5">
               <div className="flex items-center gap-1 px-2 sm:px-3 py-1 bg-black border-2 border-amber-500 text-amber-300 font-arcade text-[10px] sm:text-xs">
                 <PixelClock size={10} color="#fbbf24" />
                 <span>{formatTimer(roundTimer)}</span>
               </div>
+
+              {/* CRT Scanline FX Toggle Button */}
+              <button
+                onClick={() => {
+                  soundFx.playSelect();
+                  setIsCrtMode(prev => {
+                    const next = !prev;
+                    localStorage.setItem('tank_crt_mode', String(next));
+                    return next;
+                  });
+                }}
+                className={`p-1.5 sm:p-2 arcade-btn ${isCrtMode ? 'arcade-btn-amber' : 'arcade-btn-slate'}`}
+                title="เปิด/ปิดโหมดจอแก้วเรโทร CRT Scanlines"
+              >
+                <span className="font-arcade text-[8px] font-extrabold flex items-center gap-0.5">
+                  <span>📺</span>
+                  <span className="hidden md:inline">CRT</span>
+                </span>
+              </button>
               
               <button
                 onClick={handleToggleBgm}
@@ -666,7 +686,7 @@ export const App: React.FC = () => {
             ) : (
               // 2D Battle City Canvas
               <div className="w-full flex flex-col items-center">
-                <RetroCanvas stateRef={gameStateRef} />
+                <RetroCanvas stateRef={gameStateRef} isCrtMode={isCrtMode} />
 
                 {/* Touch Controls (Tablets & Mobile) */}
                 <div className={`w-full max-w-xl mt-1.5 ${hasTouch ? 'block' : 'lg:hidden'}`}>
