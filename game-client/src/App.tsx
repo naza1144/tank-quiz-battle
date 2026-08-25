@@ -143,6 +143,12 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('resize', checkTouch);
   }, []);
 
+  const [teamTankState, setTeamTankState] = useState<Tank | null>(null);
+  const playersRef = useRef<Player[]>([]);
+  useEffect(() => {
+    playersRef.current = players;
+  }, [players]);
+
   const socketRef = useRef<Socket | null>(null);
   const myPlayerIdRef = useRef<string>('');
 
@@ -180,6 +186,7 @@ export const App: React.FC = () => {
     socket.on('room_state', (data: { config: RoomConfig; state: string; players: Player[] }) => {
       setCurrentRoomConfig(data.config);
       setPlayers(data.players);
+      playersRef.current = data.players;
       if (data.state === 'LOBBY') {
         // Only set lobby if not actively playing or viewing game over
         setView((prev) => (prev === 'GAME' ? prev : 'LOBBY'));
@@ -199,6 +206,13 @@ export const App: React.FC = () => {
       if (myT) {
         setMyTankHud({ hp: myT.hp, maxHp: myT.maxHp, ammo: myT.ammo });
       }
+
+      const myPlayer = playersRef.current.find(p => p.socketId === socketRef.current?.id || p.id === myPlayerIdRef.current);
+      if (myPlayer?.teamId) {
+        const teamT = data.initialState.tanks?.find((t: Tank) => t.teamId === myPlayer.teamId);
+        if (teamT) setTeamTankState(teamT);
+      }
+
       setRoundTimer(data.initialState.roundTimeRemaining || 240);
       setView('GAME');
       setGameOverData(null);
@@ -221,6 +235,29 @@ export const App: React.FC = () => {
           }
           return prev;
         });
+      }
+
+      // Synchronize Squad Team Tank in Real-Time for Support & Ghost players
+      const myPlayer = playersRef.current.find(p => p.socketId === socketRef.current?.id || p.id === myPlayerIdRef.current);
+      if (myPlayer?.teamId) {
+        const teamT = snapshot.tanks?.find((t: Tank) => t.teamId === myPlayer.teamId);
+        if (teamT) {
+          setTeamTankState((prev) => {
+            if (
+              !prev ||
+              prev.hp !== teamT.hp ||
+              prev.ammo !== teamT.ammo ||
+              prev.maxHp !== teamT.maxHp ||
+              prev.score !== teamT.score ||
+              prev.jammedUntil !== teamT.jammedUntil ||
+              prev.shieldEndTime !== teamT.shieldEndTime ||
+              (prev.shells?.length || 0) !== (teamT.shells?.length || 0)
+            ) {
+              return teamT;
+            }
+            return prev;
+          });
+        }
       }
 
       const newTimer = snapshot.roundTimeRemaining || 0;
@@ -594,7 +631,7 @@ export const App: React.FC = () => {
               <SquadSupportView
                 teamId={myPlayer?.teamId || ''}
                 myTeamId={myPlayer?.teamId || ''}
-                teamTank={tanks.find(t => t.teamId === myPlayer?.teamId)}
+                teamTank={teamTankState || tanks.find(t => t.teamId === myPlayer?.teamId)}
                 currentQuestion={squadQuiz}
                 quizSession={squadQuizSession}
                 voteUpdate={squadVoteUpdate}

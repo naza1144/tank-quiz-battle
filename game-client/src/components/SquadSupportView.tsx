@@ -154,28 +154,47 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
           </div>
         </div>
 
-        {/* Live Driver Tank Status */}
-        <div className="flex items-center gap-3 bg-black/80 border-2 border-slate-700 px-3 py-1.5 font-arcade text-xs">
-          <div className="text-rose-400 flex items-center gap-1">
+        {/* Live Driver Tank Status (Synchronized Real-Time) */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 bg-black/90 border-2 border-slate-700 px-3 py-1.5 font-arcade text-xs">
+          <div className="text-rose-400 flex items-center gap-1.5">
             <PixelHeart size={14} color="#ef4444" />
-            <span>HP: {teamTank?.hp || 0}/{teamTank?.maxHp || 2}</span>
+            <span>HP: {teamTank?.hp ?? 0}/{teamTank?.maxHp ?? 2}</span>
           </div>
-          <div className="text-amber-300 flex items-center gap-1">
-            <PixelAmmo size={14} color="#fbbf24" />
-            <span>AMMO: {teamTank?.ammo || 0}</span>
+          <div className={`flex items-center gap-1.5 ${(teamTank?.ammo ?? 0) > 0 ? 'text-amber-300' : 'text-rose-400 animate-blink'}`}>
+            <PixelAmmo size={14} color={(teamTank?.ammo ?? 0) > 0 ? '#fbbf24' : '#f43f5e'} />
+            <span>AMMO: {teamTank?.ammo ?? 0}/{teamTank?.maxAmmo ?? 5}</span>
           </div>
+
+          {/* Active Status Badges */}
+          {teamTank?.jammedUntil && Date.now() < teamTank.jammedUntil && (
+            <span className="px-1.5 py-0.5 bg-rose-950 text-rose-300 border border-rose-500 text-[8px] animate-pulse">
+              ⚠️ JAMMED
+            </span>
+          )}
+          {teamTank?.shieldEndTime && Date.now() < teamTank.shieldEndTime && (
+            <span className="px-1.5 py-0.5 bg-cyan-950 text-cyan-300 border border-cyan-500 text-[8px]">
+              🛡️ SHIELD
+            </span>
+          )}
         </div>
       </div>
 
       {/* Driver Tank Vital Bar */}
-      <div className="mb-4 bg-[#151a2d] border-2 border-black p-2.5 flex items-center justify-between font-arcade text-[9px] text-slate-300">
+      <div className="mb-4 bg-[#151a2d] border-2 border-black p-2.5 flex flex-wrap items-center justify-between gap-2 font-arcade text-[9px] text-slate-300">
         <span className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 border border-black shadow shrink-0" style={{ backgroundColor: teamTank?.color || '#3b82f6' }} />
           <span>DRIVER: {teamTank?.playerName || playerName || 'กำลังรอพลขับ...'} ({teamTank?.archetype || 'STANDARD'})</span>
         </span>
-        <span className="text-amber-400">
-          SCORE: {teamTank?.score || 0}
-        </span>
+        <div className="flex items-center gap-3">
+          {teamTank?.shells && teamTank.shells.some(s => s.kind === 'AP') && (
+            <span className="text-cyan-400 font-bold">
+              ⚡ AP SHELLS READY
+            </span>
+          )}
+          <span className="text-amber-400">
+            SCORE: {teamTank?.score ?? 0}
+          </span>
+        </div>
       </div>
 
       {/* Main Quiz & Voting Area */}
