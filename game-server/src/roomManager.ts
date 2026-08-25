@@ -156,11 +156,10 @@ export class RoomManager {
       'team-1': '#ef4444',
       'team-2': '#3b82f6',
       'team-3': '#22c55e',
-      'team-4': '#eab308',
-      'team-5': '#a855f7',
-      'team-6': '#06b6d4'
+      'team-4': '#eab308'
     };
 
+    const isSquad = room.config.mode === 'SQUAD';
     const player: Player = {
       id: playerInfo.id,
       socketId: socket.id,
@@ -168,11 +167,14 @@ export class RoomManager {
       email: playerInfo.email,
       avatar: playerInfo.avatar,
       role: assignedRole,
-      teamId: assignedTeam || `team-${(room.players.size % numTeams) + 1}`,
+      teamId: isSquad ? (assignedTeam || `team-${(room.players.size % numTeams) + 1}`) : '',
       tankArchetype: playerInfo.tankArchetype || 'STANDARD',
       tankColor: playerInfo.tankColor || (assignedTeam ? teamColorMap[assignedTeam] : this.getRandomColor(room.players.size)),
       isHost: isFirst,
-      isReady: isFirst // Host is automatically ready
+      isReady: isFirst, // Host is automatically ready
+      score: 0,
+      kills: 0,
+      correctAnswers: 0
     };
 
     room.players.set(socket.id, player);
@@ -416,29 +418,45 @@ export class RoomManager {
         onGameOver: (winnerTankId, winnerTeamId, winnerName) => {
           room.state = 'GAME_OVER';
 
-          // Build full leaderboard including Drivers and Support crew
+          // Build accurate leaderboard separating Driver vs Supporters and Teams!
           const leaderboard = Array.from(room.players.values()).map(p => {
-            const tank = engine.tanks.get(p.socketId) || Array.from(engine.tanks.values()).find(t => t.playerId === p.id || (p.teamId && t.teamId === p.teamId));
-            return {
-              name: p.name + (p.role === 'SUPPORT' ? ' [ผู้ช่วย]' : ''),
-              kills: tank ? tank.kills : 0,
-              score: tank ? tank.score : 0,
-              correctAnswers: tank ? tank.correctAnswers : 0,
-              isDead: tank ? tank.hp <= 0 : false
-            };
+            if (room.config.mode === 'FFA') {
+              const tank = engine.tanks.get(p.socketId) || Array.from(engine.tanks.values()).find(t => t.playerId === p.id);
+              return {
+                name: p.name,
+                kills: tank ? tank.kills : p.kills,
+                score: tank ? tank.score : p.score,
+                correctAnswers: tank ? tank.correctAnswers : p.correctAnswers,
+                isDead: tank ? tank.hp <= 0 : false
+              };
+            } else {
+              // SQUAD Mode: Driver gets team tank stats, Supporters get their own individual quiz score
+              const teamTank = Array.from(engine.tanks.values()).find(t => t.teamId === p.teamId);
+              if (p.role === 'DRIVER') {
+                return {
+                  name: `${p.name} [พลขับ]`,
+                  kills: teamTank ? teamTank.kills : 0,
+                  score: teamTank ? teamTank.score : 0,
+                  correctAnswers: teamTank ? teamTank.correctAnswers : 0,
+                  isDead: teamTank ? teamTank.hp <= 0 : false
+                };
+              } else {
+                return {
+                  name: `${p.name} [ผู้ช่วย]`,
+                  kills: 0,
+                  score: p.score || 0,
+                  correctAnswers: p.correctAnswers || 0,
+                  isDead: teamTank ? teamTank.hp <= 0 : false
+                };
+              }
+            }
           }).sort((a, b) => b.score - a.score);
 
           this.io.to(roomId).emit('game_over', {
             winnerTankId,
             winnerTeamId,
             winnerName,
-            leaderboard: leaderboard.length > 0 ? leaderboard : Array.from(engine.tanks.values()).map(t => ({
-              name: t.playerName,
-              kills: t.kills,
-              score: t.score,
-              correctAnswers: t.correctAnswers,
-              isDead: t.hp <= 0
-            })).sort((a, b) => b.score - a.score)
+            leaderboard
           });
 
           if (room.intervalId) {
@@ -454,6 +472,9 @@ export class RoomManager {
 
     // Add Tanks for DRIVER players
     for (const p of room.players.values()) {
+      p.score = 0;
+      p.kills = 0;
+      p.correctAnswers = 0;
       if (p.role === 'DRIVER' || room.config.mode === 'FFA') {
         const tank = engine.addTank(
           p.socketId,
@@ -461,7 +482,7 @@ export class RoomManager {
           p.name,
           p.tankColor,
           p.tankArchetype,
-          p.teamId
+          room.config.mode === 'SQUAD' ? p.teamId : undefined
         );
         p.tankId = tank.id;
       }
@@ -728,6 +749,18 @@ export class RoomManager {
       ownerName,
       isJammed
     );
+
+    // Award individual score strictly to supporters of THIS team who voted correctly!
+    for (const [voterSocketId, v] of session.votes.entries()) {
+      if (v.choice === session.question.correctIndex) {
+        const voter = room.players.get(voterSocketId);
+        if (voter && voter.teamId === teamId) {
+          const pts = (session.question.bonusPoints || 100) * (v.confident ? 1.5 : 1);
+          voter.score = (voter.score || 0) + pts;
+          voter.correctAnswers = (voter.correctAnswers || 0) + 1;
+        }
+      }
+    }
 
     // Emit final result with majority decision to all players in this team
     const teamMembers = Array.from(room.players.values()).filter(p => p.teamId === teamId);

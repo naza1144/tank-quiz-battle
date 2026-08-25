@@ -148,6 +148,9 @@ export interface Player {
   isHost: boolean;
   isReady: boolean;
   tankId?: string;
+  score?: number;
+  kills?: number;
+  correctAnswers?: number;
 }
 
 export interface RoomConfig {

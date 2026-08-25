@@ -143,6 +143,21 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('resize', checkTouch);
   }, []);
 
+  // Global Audio Unlock Listener (Browsers require user gesture to play Web Audio BGM)
+  useEffect(() => {
+    const unlockAudio = () => {
+      soundFx.startBgm();
+    };
+    window.addEventListener('click', unlockAudio, { once: true });
+    window.addEventListener('touchstart', unlockAudio, { once: true });
+    window.addEventListener('keydown', unlockAudio, { once: true });
+    return () => {
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('touchstart', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+    };
+  }, []);
+
   const [teamTankState, setTeamTankState] = useState<Tank | null>(null);
   const playersRef = useRef<Player[]>([]);
   useEffect(() => {
@@ -216,6 +231,7 @@ export const App: React.FC = () => {
       setRoundTimer(data.initialState.roundTimeRemaining || 240);
       setView('GAME');
       setGameOverData(null);
+      soundFx.startBgm();
     });
 
     socket.on('game_tick', (snapshot: any) => {
@@ -329,7 +345,8 @@ export const App: React.FC = () => {
       setActiveQuiz(null);
       setSquadQuiz(null);
       setSquadQuizSession(null);
-      soundFx.updateGameStateAudio(2, 2, 240);
+      soundFx.stopBgm();
+      soundFx.playVictory();
     });
 
     return () => {

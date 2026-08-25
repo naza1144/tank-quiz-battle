@@ -68,6 +68,10 @@ class RetroSoundEngine {
         this.startBgm();
       }
     }
+
+    if (!this.bgmTimer && !this.isMuted && !this.isBgmMuted && roundTimeRemaining > 0) {
+      this.startBgm();
+    }
   }
 
   public startBgm() {
