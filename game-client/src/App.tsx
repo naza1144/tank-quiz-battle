@@ -600,9 +600,7 @@ export const App: React.FC = () => {
                 voteUpdate={squadVoteUpdate}
                 finalResult={squadFinalResult}
                 isGhost={myPlayer?.role === 'GHOST'}
-                stateRef={gameStateRef}
                 onVote={handleSquadVote}
-                onPing={handleTacticalPing}
                 onSendCheer={(msg) => {
                   socketRef.current?.emit('send_cheer', { message: msg });
                 }}

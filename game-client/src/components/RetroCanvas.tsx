@@ -98,51 +98,14 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = React.memo(({ stateRef })
         }
       });
 
-      // 5. Render Tactical Pings (Pulsing radar rings from teammates)
-      if (curPings && curPings.length > 0) {
-        const now = Date.now();
-        curPings.forEach(ping => {
-          const age = now - ping.timestamp;
-          if (age < 4000) {
-            const ringRadius = (age / 4000) * 36;
-            const alpha = Math.max(0, 1 - age / 4000);
-            ctx.save();
-            ctx.strokeStyle = `rgba(6, 182, 212, ${alpha})`;
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(ping.x, ping.y, ringRadius, 0, Math.PI * 2);
-            ctx.stroke();
-
-            ctx.fillStyle = `rgba(251, 191, 36, ${alpha})`;
-            ctx.font = 'bold 8px "Prompt", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText(`📍 ${ping.senderName}`, ping.x, ping.y - ringRadius - 4);
-            ctx.restore();
-          }
-        });
-      }
-
-      // Find my tank for Fog of War vision radius
-      const myTank = curTanks?.find((t) => t.id === curMyTankId && !t.isDead);
-      const myCx = myTank ? myTank.x + myTank.width / 2 : mapW / 2;
-      const myCy = myTank ? myTank.y + myTank.height / 2 : mapH / 2;
-      const VISION_RADIUS = 230; // ~7.2 tiles radius
-
-      // 6. Render Tanks (Only render enemies if inside vision circle or if no myTank)
+      // 5. Render Tanks (All visible across the entire 28x28 battlefield)
       curTanks?.forEach((tank) => {
         if (!tank.isDead) {
-          const isMe = tank.id === curMyTankId;
-          const isSameTeam = myTank?.teamId && tank.teamId === myTank.teamId;
-          const distToMe = Math.hypot(tank.x + tank.width / 2 - myCx, tank.y + tank.height / 2 - myCy);
-          const isVisible = !myTank || isMe || isSameTeam || distToMe <= VISION_RADIUS;
-
-          if (isVisible) {
-            drawTank(ctx, tank, isMe, tick);
-          }
+          drawTank(ctx, tank, tank.id === curMyTankId, tick);
         }
       });
 
-      // 7. Render High Obstacles / Bush over tanks
+      // 6. Render High Obstacles / Bush over tanks
       if (curMap && curMap.length > 0) {
         for (let r = 0; r < curMap.length; r++) {
           for (let c = 0; c < curMap[r].length; c++) {
@@ -151,75 +114,6 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = React.memo(({ stateRef })
             }
           }
         }
-      }
-
-      // 8. Render Fog of War Shroud (INV-2: Driver Blindness outside circular vision)
-      if (myTank) {
-        ctx.save();
-        // A. Soft gradient transition
-        const grad = ctx.createRadialGradient(myCx, myCy, VISION_RADIUS * 0.55, myCx, myCy, VISION_RADIUS);
-        grad.addColorStop(0, 'rgba(6, 8, 15, 0)');
-        grad.addColorStop(0.7, 'rgba(6, 8, 15, 0.45)');
-        grad.addColorStop(1, 'rgba(6, 8, 15, 0.94)');
-
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(myCx, myCy, VISION_RADIUS, 0, Math.PI * 2);
-        ctx.fill();
-
-        // B. Deep solid dark fog covering everything outside vision circle
-        ctx.fillStyle = 'rgba(6, 8, 15, 0.94)';
-        ctx.beginPath();
-        ctx.rect(0, 0, mapW, mapH);
-        ctx.arc(myCx, myCy, VISION_RADIUS, 0, Math.PI * 2, true);
-        ctx.fill();
-
-        // C. Tactical Vision Perimeter Ring (Retro CRT radar style)
-        ctx.strokeStyle = 'rgba(6, 182, 212, 0.4)';
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([4, 4]);
-        ctx.beginPath();
-        ctx.arc(myCx, myCy, VISION_RADIUS, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // D. Tactical Pointer Arrows to Out-of-Sight Pings
-        if (curPings && curPings.length > 0) {
-          const now = Date.now();
-          curPings.forEach((ping) => {
-            const age = now - ping.timestamp;
-            if (age < 4000) {
-              const dx = ping.x - myCx;
-              const dy = ping.y - myCy;
-              const dist = Math.hypot(dx, dy);
-              if (dist > VISION_RADIUS) {
-                const angle = Math.atan2(dy, dx);
-                const pointerR = VISION_RADIUS - 16;
-                const px = myCx + Math.cos(angle) * pointerR;
-                const py = myCy + Math.sin(angle) * pointerR;
-
-                ctx.save();
-                ctx.translate(px, py);
-                ctx.rotate(angle);
-                ctx.fillStyle = '#fbbf24';
-                ctx.beginPath();
-                ctx.moveTo(10, 0);
-                ctx.lineTo(-6, -6);
-                ctx.lineTo(-6, 6);
-                ctx.closePath();
-                ctx.fill();
-                ctx.restore();
-
-                ctx.fillStyle = '#fde047';
-                ctx.font = 'bold 8px "Prompt", sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText(`📍 ${ping.senderName}`, px, py - 10);
-              }
-            }
-          });
-        }
-
-        ctx.restore();
       }
 
       animationFrameRef.current = requestAnimationFrame(render);

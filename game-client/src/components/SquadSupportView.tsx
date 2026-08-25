@@ -37,217 +37,10 @@ interface SquadSupportViewProps {
   voteUpdate?: TeamQuizVoteUpdate | null;
   finalResult?: TeamQuizFinalResult | null;
   isGhost?: boolean;
-  stateRef?: React.RefObject<any>;
   onVote?: (choiceIndex: number, confident?: boolean) => void;
   onVoteQuestion?: (choiceIndex: number, confident?: boolean) => void;
   onSendCheer: (msg: string) => void;
-  onPing?: (x: number, y: number) => void;
 }
-
-const LiveRadarMiniMap: React.FC<{
-  stateRef?: React.RefObject<any>;
-  myTeamId?: string;
-  onPing?: (x: number, y: number) => void;
-}> = ({ stateRef, myTeamId, onPing }) => {
-  const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
-  const animRef = React.useRef<number | null>(null);
-  const tickRef = React.useRef<number>(0);
-
-  React.useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    canvas.width = 280;
-    canvas.height = 280;
-
-    const render = () => {
-      tickRef.current++;
-      const tick = tickRef.current;
-      const snapshot = stateRef?.current;
-      const map = snapshot?.map || [];
-      const tanks = snapshot?.tanks || [];
-      const crates = snapshot?.crates || [];
-      const pings = snapshot?.pings || [];
-
-      const rows = map.length || 28;
-      const cols = map[0]?.length || 28;
-      const worldW = cols * 32;
-      const worldH = rows * 32;
-      const scaleX = canvas.width / worldW;
-      const scaleY = canvas.height / worldH;
-
-      // 1. Dark CRT Radar Background
-      ctx.fillStyle = '#060913';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // 2. Terrain Obstacles
-      if (map.length > 0) {
-        for (let r = 0; r < rows; r++) {
-          for (let c = 0; c < cols; c++) {
-            const tile = map[r][c];
-            if (tile === 'EMPTY') continue;
-            const rx = c * 32 * scaleX;
-            const ry = r * 32 * scaleY;
-            const rw = Math.max(1, 32 * scaleX);
-            const rh = Math.max(1, 32 * scaleY);
-
-            if (tile === 'BRICK') {
-              ctx.fillStyle = 'rgba(185, 28, 28, 0.45)';
-              ctx.fillRect(rx, ry, rw, rh);
-            } else if (tile === 'STEEL') {
-              ctx.fillStyle = 'rgba(148, 163, 184, 0.7)';
-              ctx.fillRect(rx, ry, rw, rh);
-            } else if (tile === 'WATER') {
-              ctx.fillStyle = 'rgba(2, 132, 199, 0.4)';
-              ctx.fillRect(rx, ry, rw, rh);
-            } else if (tile === 'BUSH') {
-              ctx.fillStyle = 'rgba(21, 128, 61, 0.4)';
-              ctx.fillRect(rx, ry, rw, rh);
-            }
-          }
-        }
-      }
-
-      // 3. Circular Radar Grid
-      ctx.strokeStyle = 'rgba(6, 182, 212, 0.15)';
-      ctx.lineWidth = 1;
-      for (let i = 1; i <= 3; i++) {
-        ctx.beginPath();
-        ctx.arc(canvas.width / 2, canvas.height / 2, (canvas.width / 2) * (i / 3), 0, Math.PI * 2);
-        ctx.stroke();
-      }
-      ctx.beginPath();
-      ctx.moveTo(canvas.width / 2, 0); ctx.lineTo(canvas.width / 2, canvas.height);
-      ctx.moveTo(0, canvas.height / 2); ctx.lineTo(canvas.width, canvas.height / 2);
-      ctx.stroke();
-
-      // 4. Crates [?]
-      crates.forEach((crate: any) => {
-        if (crate.isActive) {
-          const cx = (crate.x + 12) * scaleX;
-          const cy = (crate.y + 12) * scaleY;
-          ctx.fillStyle = '#facc15';
-          ctx.fillRect(cx - 3, cy - 3, 6, 6);
-        }
-      });
-
-      // 5. Enemy Tanks (Pulsing Blips) & Friendly Tanks (Solid Green)
-      tanks.forEach((t: any) => {
-        if (t.isDead) return;
-        const tx = (t.x + t.width / 2) * scaleX;
-        const ty = (t.y + t.height / 2) * scaleY;
-        const isFriendly = myTeamId && t.teamId === myTeamId;
-
-        if (isFriendly) {
-          // Friendly tank: bright green circle
-          ctx.fillStyle = '#22c55e';
-          ctx.beginPath();
-          ctx.arc(tx, ty, 5, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.strokeStyle = '#86efac';
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
-        } else {
-          // Enemy tank: Pulsing Radar Blip!
-          const pulse = (Math.sin(tick * 0.1) + 1) / 2; // 0 to 1
-          const alpha = 0.35 + pulse * 0.65;
-          
-          ctx.fillStyle = `rgba(239, 68, 68, ${alpha})`;
-          ctx.beginPath();
-          ctx.arc(tx, ty, 3 + pulse * 3, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.strokeStyle = `rgba(254, 202, 202, ${alpha})`;
-          ctx.lineWidth = 1;
-          ctx.stroke();
-        }
-      });
-
-      // 6. Tactical Pings
-      if (pings && pings.length > 0) {
-        const now = Date.now();
-        pings.forEach((ping: any) => {
-          const age = now - ping.timestamp;
-          if (age < 4000) {
-            const px = ping.x * scaleX;
-            const py = ping.y * scaleY;
-            const ringR = (age / 4000) * 22;
-            const a = Math.max(0, 1 - age / 4000);
-            ctx.strokeStyle = `rgba(6, 182, 212, ${a})`;
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(px, py, ringR, 0, Math.PI * 2);
-            ctx.stroke();
-          }
-        });
-      }
-
-      // 7. Sweeping Radar Line
-      const sweepAngle = (tick * 0.04) % (Math.PI * 2);
-      ctx.save();
-      ctx.translate(canvas.width / 2, canvas.height / 2);
-      ctx.rotate(sweepAngle);
-      ctx.strokeStyle = 'rgba(6, 182, 212, 0.4)';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(canvas.width, 0);
-      ctx.stroke();
-      ctx.restore();
-
-      animRef.current = requestAnimationFrame(render);
-    };
-
-    animRef.current = requestAnimationFrame(render);
-    return () => {
-      if (animRef.current) cancelAnimationFrame(animRef.current);
-    };
-  }, [stateRef, myTeamId]);
-
-  const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const clickY = e.clientY - rect.top;
-
-    const snapshot = stateRef?.current;
-    const rows = snapshot?.map?.length || 28;
-    const cols = snapshot?.map?.[0]?.length || 28;
-    const worldW = cols * 32;
-    const worldH = rows * 32;
-
-    const worldX = (clickX / rect.width) * worldW;
-    const worldY = (clickY / rect.height) * worldH;
-
-    soundFx.playSelect();
-    if (onPing) onPing(worldX, worldY);
-  };
-
-  return (
-    <div className="relative flex flex-col items-center">
-      <canvas
-        ref={canvasRef}
-        onClick={handleClick}
-        className="w-full max-w-[280px] aspect-square bg-[#060913] border-2 border-cyan-500/50 cursor-crosshair active:scale-98 transition-transform shadow-[0_0_15px_rgba(6,182,212,0.25)] rounded-sm"
-      />
-      <div className="flex items-center justify-between w-full max-w-[280px] mt-1.5 text-[8px] font-arcade text-cyan-400">
-        <span className="flex items-center gap-1">
-          <span className="inline-block w-2 h-2 rounded-full bg-green-500" /> รถเรา
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="inline-block w-2 h-2 rounded-full bg-red-500 animate-ping" /> ศัตรู (เรดาร์)
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="inline-block w-2 h-2 bg-yellow-400" /> กล่อง [?]
-        </span>
-      </div>
-    </div>
-  );
-};
 
 export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
   myTeamId,
@@ -259,11 +52,9 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
   voteUpdate,
   finalResult,
   isGhost = false,
-  stateRef,
   onVote,
   onVoteQuestion,
-  onSendCheer,
-  onPing
+  onSendCheer
 }) => {
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
   const [isConfident, setIsConfident] = useState<boolean>(false);
@@ -596,21 +387,6 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
           </div>
         </div>
       )}
-
-      {/* Live Tactical Radar for Pinging Co-ordinates (INV-2) */}
-      <div className="mb-4 p-3 bg-black/80 border-2 border-cyan-900 pixel-box">
-        <div className="flex items-center justify-between text-[9px] font-arcade text-cyan-400 mb-2">
-          <span className="flex items-center gap-1.5">
-            <PixelRadar size={12} color="#06b6d4" />
-            <span>LIVE TACTICAL RADAR (แตะเพื่อส่ง PING 📍 นำทางให้พลขับ)</span>
-          </span>
-        </div>
-        <LiveRadarMiniMap
-          stateRef={stateRef}
-          myTeamId={myTeamId}
-          onPing={onPing}
-        />
-      </div>
 
       {/* Quick 8-bit Tactical Radio Cheering */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
