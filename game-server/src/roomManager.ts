@@ -355,6 +355,8 @@ export class RoomManager {
 
     // Initialize Game Engine
     room.state = 'IN_GAME';
+    room.activeSquadQuizzes.clear();
+    room.squadQuizQueues.clear();
     const engine = new GameEngine(
       this.quizManager,
       {
