@@ -2,8 +2,26 @@ export type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 export type TileType = 'EMPTY' | 'BRICK' | 'STEEL' | 'BUSH' | 'WATER' | 'ICE' | 'BASE';
 export type TankArchetype = 'STANDARD' | 'SCOUT' | 'HEAVY' | 'SNIPER';
 export type GameMode = 'FFA' | 'SQUAD';
-export type PlayerRole = 'DRIVER' | 'SUPPORT';
+export type PlayerRole = 'DRIVER' | 'SUPPORT' | 'GHOST';
 export type RoomState = 'LOBBY' | 'STARTING' | 'IN_GAME' | 'GAME_OVER';
+export type AmmoKind = 'AP' | 'STD' | 'DUD';
+
+export interface Shell {
+  kind: AmmoKind;
+  damage: number;
+  ownerId?: string;
+  ownerName?: string;
+  questionId?: string;
+}
+
+export interface TacticalPing {
+  id: string;
+  teamId: string;
+  x: number;
+  y: number;
+  senderName: string;
+  timestamp: number;
+}
 
 export interface Tank {
   id: string;
@@ -21,6 +39,7 @@ export interface Tank {
   maxHp: number;
   ammo: number;
   maxAmmo: number;
+  shells?: Shell[];
   speed: number;
   bulletSpeed: number;
   bulletDamage: number;
@@ -32,6 +51,7 @@ export interface Tank {
   shieldEndTime: number;
   speedBoostEndTime: number;
   stunEndTime: number;
+  jammedUntil?: number;
   teamId?: string;
   isBot?: boolean;
 }
@@ -48,6 +68,8 @@ export interface Bullet {
   speed: number;
   radius: number;
   isDestroyed: boolean;
+  shell?: Shell;
+  bouncesLeft?: number;
 }
 
 export interface QuizCrate {
@@ -59,6 +81,8 @@ export interface QuizCrate {
   category: string;
   isActive: boolean;
   respawnTime: number;
+  icon?: string;
+  isGhostAirdrop?: boolean;
 }
 
 export interface QuizQuestion {
@@ -81,6 +105,7 @@ export interface TeamQuizVoteUpdate {
   teamId: string;
   voteCounts: number[]; // [v0, v1, v2, v3]
   totalVotes: number;
+  confidentVotes?: number;
 }
 
 export interface TeamQuizFinalResult {
@@ -93,6 +118,9 @@ export interface TeamQuizFinalResult {
   isCorrect: boolean;
   rewardAmmo: number;
   explanationTh: string;
+  ammoKind?: AmmoKind;
+  ownerName?: string;
+  isJammed?: boolean;
 }
 
 export interface Player {

@@ -259,6 +259,12 @@ export const App: React.FC = () => {
       setSquadFinalResult(null);
     });
 
+    socket.on('tactical_ping', (ping: any) => {
+      if (!gameStateRef.current.pings) gameStateRef.current.pings = [];
+      gameStateRef.current.pings.push(ping);
+      soundFx.playSelect();
+    });
+
     socket.on('quiz_result', () => {
       setTimeout(() => setActiveQuiz(null), 1800);
     });
@@ -396,25 +402,31 @@ export const App: React.FC = () => {
   };
 
   // Quiz actions
-  const handleAnswerQuiz = (selectedIndex: number) => {
+  const handleAnswerQuiz = (selectedIndex: number, confident?: boolean) => {
     if (!activeQuiz) return;
     socketRef.current?.emit('answer_quiz', {
       tankId: activeQuiz.tankId,
       crateId: activeQuiz.crateId,
       questionId: activeQuiz.question.id,
-      selectedIndex
+      selectedIndex,
+      confident
     });
   };
 
-  const handleSquadAnswerQuiz = (questionId: string, selectedIndex: number) => {
+  const handleSquadAnswerQuiz = (questionId: string, selectedIndex: number, confident?: boolean) => {
     socketRef.current?.emit('team_support_answer', {
       questionId,
-      selectedIndex
+      selectedIndex,
+      confident
     });
   };
 
-  const handleSquadVote = (choiceIndex: number) => {
-    socketRef.current?.emit('vote_team_quiz', { choiceIndex });
+  const handleSquadVote = (choiceIndex: number, confident?: boolean) => {
+    socketRef.current?.emit('vote_team_quiz', { choiceIndex, confident });
+  };
+
+  const handleTacticalPing = (x: number, y: number) => {
+    socketRef.current?.emit('tactical_ping', { x, y });
   };
 
   const handleAutoBalanceTeams = () => {
@@ -429,7 +441,7 @@ export const App: React.FC = () => {
 
   const myPlayer = players.find(p => socketRef.current?.id && p.socketId === socketRef.current.id);
   const isHost = myPlayer?.isHost || false;
-  const isSquadSupport = myPlayer?.role === 'SUPPORT' && currentRoomConfig?.mode === 'SQUAD';
+  const isSquadSupport = (myPlayer?.role === 'SUPPORT' || myPlayer?.role === 'GHOST') && currentRoomConfig?.mode === 'SQUAD';
   const [isBgmMuted, setIsBgmMuted] = useState<boolean>(!soundFx.isBgmActive());
 
   const handleTankMove = React.useCallback((dir: Direction | null, isMoving: boolean) => {
@@ -587,7 +599,9 @@ export const App: React.FC = () => {
                 quizSession={squadQuizSession}
                 voteUpdate={squadVoteUpdate}
                 finalResult={squadFinalResult}
+                isGhost={myPlayer?.role === 'GHOST'}
                 onVote={handleSquadVote}
+                onPing={handleTacticalPing}
                 onSendCheer={(msg) => {
                   socketRef.current?.emit('send_cheer', { message: msg });
                 }}

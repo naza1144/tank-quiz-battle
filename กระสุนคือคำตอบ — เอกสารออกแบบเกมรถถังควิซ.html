@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<!-- saved from url=(0167)file:///home/naza1144/Downloads/%E0%B8%81%E0%B8%A3%E0%B8%B0%E0%B8%AA%E0%B8%B8%E0%B8%99%E0%B8%84%E0%B8%B7%E0%B8%AD%E0%B8%84%E0%B8%B3%E0%B8%95%E0%B8%AD%E0%B8%9A-GDD.html -->
+<html lang="th"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>กระสุนคือคำตอบ — เอกสารออกแบบเกมรถถังควิซ</title>
+<meta name="description" content="Game Design Document สำหรับเกมรถถัง 2D pixel แนว Battle City ที่ทีมมีคนขับ 1 คนและคนตอบคำถามไม่จำกัด">
+<style>html,body{margin:0;padding:0}img{max-width:100%}</style>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+<link rel="stylesheet" href="./กระสุนคือคำตอบ — เอกสารออกแบบเกมรถถังควิซ_files/css2">
+
+<style>
+:root{
+  --bg:#E4E1D8;
+  --surface:#F1EFE9;
+  --surface-2:#DAD6CB;
+  --ink:#201E1A;
+  --ink-2:#4E4B44;
+  --ink-3:#77736A;
+  --rule:#C2BDB0;
+  --rule-2:#A9A395;
+  --steel:#5F6670;
+  --shell:#C98A10;
+  --shell-ink:#8A5D06;
+  --shell-wash:#F0E3C4;
+  --brick:#B04A22;
+  --brick-ink:#8F3A17;
+  --brick-wash:#EEDCD2;
+  --moss:#4C6B45;
+  --moss-ink:#3B5636;
+  --moss-wash:#DCE5D8;
+  --shadow:rgba(32,30,26,.10);
+
+  --f-display:"Anuphan","IBM Plex Sans Thai","Segoe UI",sans-serif;
+  --f-body:"IBM Plex Sans Thai","Anuphan","Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono","Courier New",monospace;
+  --f-pixel:"Silkscreen","IBM Plex Mono",monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#14161A;
+    --surface:#1E2127;
+    --surface-2:#272B32;
+    --ink:#E4E1DA;
+    --ink-2:#B3AFA6;
+    --ink-3:#87837B;
+    --rule:#333941;
+    --rule-2:#454C56;
+    --steel:#8A93A0;
+    --shell:#E6B23C;
+    --shell-ink:#EABE55;
+    --shell-wash:#2E2818;
+    --brick:#D0673A;
+    --brick-ink:#DE7E55;
+    --brick-wash:#2E1D16;
+    --moss:#86AE78;
+    --moss-ink:#96BC88;
+    --moss-wash:#1B2418;
+    --shadow:rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14161A;
+  --surface:#1E2127;
+  --surface-2:#272B32;
+  --ink:#E4E1DA;
+  --ink-2:#B3AFA6;
+  --ink-3:#87837B;
+  --rule:#333941;
+  --rule-2:#454C56;
+  --steel:#8A93A0;
+  --shell:#E6B23C;
+  --shell-ink:#EABE55;
+  --shell-wash:#2E2818;
+  --brick:#D0673A;
+  --brick-ink:#DE7E55;
+  --brick-wash:#2E1D16;
+  --moss:#86AE78;
+  --moss-ink:#96BC88;
+  --moss-wash:#1B2418;
+  --shadow:rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--f-body);
+  font-size:16.5px;
+  line-height:1.72;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px 96px}
+.col{max-width:68ch}
+
+/* ---------- type ---------- */
+h1,h2,h3,h4{font-family:var(--f-display);font-weight:700;text-wrap:balance;margin:0;line-height:1.25}
+h1{font-size:clamp(2.3rem,6vw,3.9rem);letter-spacing:-.015em}
+h2{font-size:clamp(1.5rem,3.2vw,2.05rem);letter-spacing:-.01em}
+h3{font-size:1.16rem;font-weight:600}
+h4{font-size:.98rem;font-weight:600}
+p{margin:0}
+a{color:var(--shell-ink)}
+strong{font-weight:600;color:var(--ink)}
+
+.pix{font-family:var(--f-pixel);font-size:.66rem;letter-spacing:.06em;line-height:1.6}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.lead{font-size:1.16rem;line-height:1.68;color:var(--ink-2)}
+.small{font-size:.9rem;line-height:1.62;color:var(--ink-2)}
+
+/* ---------- hero ---------- */
+header.hero{
+  border-bottom:2px solid var(--ink);
+  padding:56px 0 30px;
+  margin-bottom:8px;
+  position:relative;
+}
+.stripe{
+  display:flex;height:9px;margin-bottom:34px;
+}
+.stripe i{flex:1}
+.stripe i:nth-child(1){background:var(--brick)}
+.stripe i:nth-child(2){background:var(--shell)}
+.stripe i:nth-child(3){background:var(--steel)}
+.stripe i:nth-child(4){background:var(--moss)}
+.stripe i:nth-child(5){background:var(--ink)}
+
+.eyebrow{
+  display:inline-block;font-family:var(--f-pixel);font-size:.62rem;letter-spacing:.1em;
+  color:var(--bg);background:var(--ink);padding:5px 9px 4px;margin-bottom:20px;
+}
+.hero h1{margin-bottom:18px}
+.hero .lead{max-width:62ch}
+.hero .lead em{font-style:normal;background:var(--shell-wash);color:var(--ink);
+  box-shadow:0 -.35em 0 0 var(--shell-wash) inset;padding:0 2px;font-weight:600}
+
+.facts{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));
+  gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:36px;
+}
+.facts div{background:var(--bg);padding:13px 15px}
+.facts dt{font-family:var(--f-pixel);font-size:.6rem;letter-spacing:.08em;color:var(--ink-3);margin-bottom:5px}
+.facts dd{margin:0;font-family:var(--f-mono);font-size:.94rem;font-weight:500;color:var(--ink)}
+
+/* ---------- sections ---------- */
+section{padding-top:64px}
+.shead{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--rule-2);padding-bottom:11px;margin-bottom:26px}
+.snum{font-family:var(--f-pixel);font-size:.78rem;color:var(--shell-ink);flex:none}
+.shead h2{flex:1}
+.stag{font-family:var(--f-mono);font-size:.74rem;color:var(--ink-3);letter-spacing:.03em;flex:none}
+section > p + p{margin-top:15px}
+
+/* ---------- callout ---------- */
+.call{
+  border:1px solid var(--rule-2);border-left:5px solid var(--brick);
+  background:var(--surface);padding:18px 20px;margin-top:26px;
+}
+.call .pix{color:var(--brick-ink);display:block;margin-bottom:7px}
+.call.good{border-left-color:var(--moss)}
+.call.good .pix{color:var(--moss-ink)}
+
+/* ---------- pillar cards ---------- */
+.pillars{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.pillar{background:var(--surface);padding:20px 21px 22px;display:flex;flex-direction:column;gap:11px}
+.ptop{display:flex;align-items:center;gap:9px}
+.pkey{font-family:var(--f-pixel);font-size:.64rem;color:var(--bg);background:var(--steel);padding:4px 7px 3px}
+.pillar h3{flex:1}
+.pillar .role{font-family:var(--f-mono);font-size:.72rem;color:var(--ink-3)}
+.prow{display:flex;gap:9px;font-size:.92rem;line-height:1.6}
+.plab{font-family:var(--f-pixel);font-size:.58rem;color:var(--ink-3);flex:none;width:52px;padding-top:5px}
+.prow p{color:var(--ink-2)}
+.prow.rule p{color:var(--ink)}
+
+/* ---------- tiers ---------- */
+.tiers{display:grid;gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:22px}
+.tier{background:var(--surface);display:grid;grid-template-columns:112px 1fr;gap:16px;padding:13px 16px;align-items:center}
+.tier .pc{font-family:var(--f-mono);font-weight:600;font-size:1.02rem}
+.tier .out{font-size:.94rem;line-height:1.55}
+.tier .out b{font-weight:600;display:block}
+.tier .out span{color:var(--ink-2);font-size:.86rem}
+.t1{border-left:5px solid var(--moss)}
+.t2{border-left:5px solid var(--shell)}
+.t3{border-left:5px solid var(--steel)}
+.t4{border-left:5px solid var(--brick)}
+.t1 .pc{color:var(--moss-ink)} .t2 .pc{color:var(--shell-ink)}
+.t3 .pc{color:var(--steel)} .t4 .pc{color:var(--brick-ink)}
+
+/* ---------- diagram ---------- */
+.figure{border:1px solid var(--rule-2);background:var(--surface);margin-top:24px}
+.figscroll{overflow-x:auto}
+.figure svg{display:block;min-width:800px;width:100%;height:auto}
+.figcap{border-top:1px solid var(--rule);padding:11px 16px;font-size:.86rem;color:var(--ink-2)}
+.figcap b{color:var(--ink);font-weight:600}
+svg .lane{fill:var(--surface-2)}
+svg .laneb{fill:none;stroke:var(--rule-2);stroke-width:1}
+svg .lbl{font-family:"IBM Plex Sans Thai",sans-serif;font-size:13px;font-weight:600;fill:var(--ink)}
+svg .lblm{font-family:"IBM Plex Mono",monospace;font-size:10.5px;fill:var(--ink-3)}
+svg .step{font-family:"IBM Plex Sans Thai",sans-serif;font-size:12px;fill:var(--ink)}
+svg .boxA{fill:var(--shell-wash);stroke:var(--shell);stroke-width:1.5}
+svg .boxB{fill:var(--brick-wash);stroke:var(--brick);stroke-width:1.5}
+svg .boxC{fill:var(--moss-wash);stroke:var(--moss);stroke-width:1.5}
+svg .arw{stroke:var(--steel);stroke-width:1.6;fill:none}
+svg .arwh{fill:var(--steel)}
+svg .tick{stroke:var(--rule-2);stroke-width:1;stroke-dasharray:2 3}
+
+/* ---------- phases ---------- */
+.phases{display:grid;gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:8px}
+.phase{background:var(--surface);padding:19px 20px;display:grid;grid-template-columns:96px 1fr;gap:20px}
+.ptime{font-family:var(--f-mono);font-size:.86rem;font-weight:600;color:var(--shell-ink)}
+.ptime span{display:block;font-family:var(--f-pixel);font-size:.58rem;color:var(--ink-3);margin-top:5px}
+.pbody h3{margin-bottom:7px}
+.pbody p{color:var(--ink-2);font-size:.95rem}
+.pbody ul{margin:10px 0 0;padding-left:18px;font-size:.92rem;color:var(--ink-2)}
+.pbody li{margin-bottom:4px}
+.pbody li b{color:var(--ink)}
+
+/* ---------- tables ---------- */
+.tscroll{overflow-x:auto;border:1px solid var(--rule);margin-top:22px}
+table{border-collapse:collapse;width:100%;min-width:560px;background:var(--surface)}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--rule);vertical-align:top}
+thead th{
+  font-family:var(--f-pixel);font-size:.6rem;letter-spacing:.07em;
+  background:var(--surface-2);color:var(--ink-2);border-bottom:1px solid var(--rule-2);
+}
+tbody tr:last-child td{border-bottom:none}
+td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap;font-size:.92rem}
+td{font-size:.93rem;line-height:1.58}
+td.k{font-weight:500}
+.chip{display:inline-block;font-family:var(--f-pixel);font-size:.55rem;padding:4px 6px 3px;white-space:nowrap}
+.c-hi{background:var(--brick);color:#fff}
+.c-md{background:var(--shell);color:#231b06}
+.c-lo{background:var(--steel);color:#fff}
+
+/* ---------- juice grid ---------- */
+.juice{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:22px}
+.j{background:var(--surface);padding:16px 18px}
+.j .pix{color:var(--ink-3);display:block;margin-bottom:6px}
+.j p{font-size:.9rem;color:var(--ink-2)}
+.j p b{color:var(--ink);font-weight:600}
+
+/* ---------- build order ---------- */
+.steps{counter-reset:s;margin-top:22px;border:1px solid var(--rule);background:var(--surface)}
+.stepr{display:grid;grid-template-columns:46px 1fr;gap:16px;padding:15px 18px;border-bottom:1px solid var(--rule)}
+.stepr:last-child{border-bottom:none}
+.stepn{counter-increment:s;font-family:var(--f-pixel);font-size:.72rem;color:var(--shell-ink);padding-top:4px}
+.stepn::before{content:counter(s,decimal-leading-zero)}
+.stepr h4{margin-bottom:4px}
+.stepr p{font-size:.9rem;color:var(--ink-2)}
+.gate{background:var(--brick-wash);border-top:1px solid var(--brick)}
+.gate .stepn{color:var(--brick-ink)}
+.gate .stepn::before{content:"!!"}
+
+footer{margin-top:76px;border-top:2px solid var(--ink);padding-top:18px;display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:baseline}
+footer .pix{color:var(--ink-3)}
+
+@media (max-width:640px){
+  .phase{grid-template-columns:1fr;gap:10px}
+  .tier{grid-template-columns:88px 1fr;gap:12px}
+  body{font-size:16px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .pillar,.j,.stepr{transition:background .15s ease}
+}
+.pillar:hover,.j:hover{background:var(--surface-2)}
+:focus-visible{outline:2px solid var(--shell-ink);outline-offset:2px}
+</style>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="stripe"><i></i><i></i><i></i><i></i><i></i></div>
+  <span class="eyebrow">GAME DESIGN DOC / v0.1 / TANK-QUIZ</span>
+  <h1>กระสุนคือคำตอบ</h1>
+  <p class="lead">เกมรถถัง 2D pixel แนว Battle City ที่ทีมหนึ่งมีคนขับ 1 คนและคนตอบคำถามอีกกี่คนก็ได้ เอกสารนี้ตอบคำถามเดียว คือ <em>ความสนุกซ่อนอยู่ตรงไหน</em> และต้องออกแบบกฎอย่างไรให้มันโผล่ออกมาแน่ ๆ ไม่ใช่บังเอิญ</p>
+  <dl class="facts">
+    <div><dt>TEAM SIZE</dt><dd>1 คนขับ + N คนตอบ</dd></div>
+    <div><dt>MATCH</dt><dd>6–7 นาที</dd></div>
+    <div><dt>WIN COND</dt><dd>ทีมสุดท้ายที่รอด</dd></div>
+    <div><dt>AUDIENCE</dt><dd>นิสิต/นักศึกษา</dd></div>
+    <div><dt>SETUP</dt><dd>จอใหญ่ + มือถือ</dd></div>
+  </dl>
+</header>
+
+<section id="diag">
+  <div class="shead"><span class="snum">00</span><h2>วินิจฉัยโจทย์ก่อน</h2><span class="stag">ทำไมสูตรนี้พังได้ง่าย</span></div>
+  <div class="col">
+    <p>โครงสร้างที่ตั้งไว้มีจุดแข็งชัดเจน คือคนเยอะเข้าร่วมได้พร้อมกันโดยไม่ต้องมีคอนโทรลเลอร์ครบ แต่มันก็มีกับดักที่ซ่อนอยู่ในตัวมันเองด้วย และกับดักนี้แรงพอจะทำให้เกมจืดภายในสามนาทีแรก</p>
+    <p style="margin-top:15px">กับดักคือ <strong>คนตอบกลายเป็นตู้กดกระสุน</strong> ถ้าหน้าที่เดียวของคนตอบคือกดข้อ A B C D แล้วรอ สิ่งที่เกิดขึ้นจริงในห้องคือ คนขับหนึ่งคนกำลังเล่นเกมอยู่ ส่วนอีกสิบคนกำลังทำแบบทดสอบอยู่ในห้องเดียวกัน สองกิจกรรมนี้เกิดพร้อมกันแต่ไม่ได้เล่นด้วยกัน</p>
+    <p style="margin-top:15px">ยิ่งคนตอบเยอะ ปัญหายิ่งหนัก เพราะเสียงหนึ่งเสียงในสิบเสียงแทบไม่มีน้ำหนัก คนที่รู้สึกว่า “ตอบไปก็ไม่เปลี่ยนอะไร” จะเลิกตั้งใจตอบภายในไม่กี่ข้อ นี่คือปัญหาเดียวกับที่เกมโหวตหมู่ทุกเกมเจอ</p>
+  </div>
+  <div class="call">
+    <span class="pix">CORE PROBLEM</span>
+    <p>ความสนุกของเกมนี้ <strong>ไม่ได้อยู่ที่ quiz</strong> และ <strong>ไม่ได้อยู่ที่การขับรถถัง</strong> ทั้งสองอย่างเป็นของที่มีอยู่แล้วและไม่ได้ใหม่ ความสนุกอยู่ที่ <strong>ช่องว่างระหว่างคนขับกับคนตอบ</strong> — ใครรู้อะไร ใครทำอะไรได้ และทั้งสองฝ่ายต้องคุยกันแค่ไหนถึงจะรอด ถ้าออกแบบช่องว่างนี้ดี ห้องจะเสียงดังเอง และเสียงดังนั่นแหละคือความสนุก</p>
+  </div>
+  <div class="call good" style="margin-top:14px">
+    <span class="pix">DESIGN GOAL</span>
+    <p>ทุกกฎในเอกสารนี้ถูกออกแบบมาเพื่อบังคับให้เกิด <strong>“การตะโกนที่จำเป็น”</strong> — สถานการณ์ที่คนตอบต้องพูดกับคนขับ และคนขับต้องฟัง ไม่ใช่เพราะมารยาท แต่เพราะไม่ฟังแล้วตาย</p>
+  </div>
+</section>
+
+<section id="pillars">
+  <div class="shead"><span class="snum">01</span><h2>เสาความสนุก 7 ต้น</h2><span class="stag">แต่ละต้นแก้ปัญหาคนละข้อ</span></div>
+  <p class="col small" style="margin-bottom:22px">อ่านคอลัมน์ <span class="mono">FIX</span> ก่อน ถ้าปัญหานั้นไม่มีในเกมของคุณ เสานั้นตัดทิ้งได้ อย่าใส่เมคานิกเพราะมันเท่</p>
+  <div class="pillars">
+
+    <div class="pillar">
+      <div class="ptop"><span class="pkey">P1</span><h3>สายตากับพวงมาลัย</h3></div>
+      <span class="role">Information asymmetry — เสาที่สำคัญที่สุด</span>
+      <div class="prow"><span class="plab">FIX</span><p>คนตอบไม่มีเหตุผลต้องดูจอ</p></div>
+      <div class="prow rule"><span class="plab">RULE</span><p>คนขับเห็นแค่รัศมี 8 ช่องรอบตัว (มืดนอกนั้น) ส่วน<strong>คนตอบเห็นแผนที่ทั้งใบ</strong>รวมตำแหน่งศัตรู แต่ขยับอะไรไม่ได้เลย คนตอบมีปุ่มปัก <strong>ping</strong> 3 ครั้ง คูลดาวน์ 5 วิ ปิงเด้งบน HUD คนขับ 3 วิ</p></div>
+      <div class="prow"><span class="plab">WHY</span><p>คนที่รู้ทำไม่ได้ คนที่ทำได้ไม่รู้ นี่คือเครื่องยนต์เสียงดังของทั้งเกม และมันทำงานตลอดเวลา ไม่ใช่แค่ตอนมีคำถาม</p></div>
+    </div>
+
+    <div class="pillar">
+      <div class="ptop"><span class="pkey">P2</span><h3>กระสุนมีชื่อเจ้าของ</h3></div>
+      <span class="role">Attribution — คืนความเป็นเจ้าของให้เสียง 1 ใน N</span>
+      <div class="prow"><span class="plab">FIX</span><p>โหวตเจือจาง ตอบไปก็ไม่รู้สึกว่ามีผล</p></div>
+      <div class="prow rule"><span class="plab">RULE</span><p>กระสุนแต่ละนัดสลักชื่อ<strong>คนที่ตอบถูกเร็วที่สุด</strong>ของข้อนั้น ตอนยิงมีชื่อลอยขึ้น และ kill feed เขียนเต็ม ๆ ว่า <span class="mono">“ทีมแดงถูกทำลายด้วยกระสุนของ มานี”</span></p></div>
+      <div class="prow"><span class="plab">WHY</span><p>ไม่เปลี่ยนพลังของใครเลยสักหน่วย แต่เปลี่ยนความรู้สึกทั้งหมด ทำง่ายมาก คุ้มที่สุดในเอกสารนี้</p></div>
+    </div>
+
+    <div class="pillar">
+      <div class="ptop"><span class="pkey">P3</span><h3>ยิ่งเห็นตรงกัน ยิ่งกระสุนดี</h3></div>
+      <span class="role">Consensus tiers — เปลี่ยน quiz เป็นการเจรจา</span>
+      <div class="prow"><span class="plab">FIX</span><p>ไม่มีเหตุผลต้องคุยกันก่อนตอบ</p></div>
+      <div class="prow rule"><span class="plab">RULE</span><p>ผลไม่ใช่ถูก/ผิด แต่เป็น 4 ระดับตามสัดส่วนคนตอบถูก (ดูตารางถัดไป) ยิ่งทีมเห็นตรงกันมาก กระสุนยิ่งแรง</p></div>
+      <div class="prow"><span class="plab">WHY</span><p>บังคับให้คนตอบต้อง<strong>ชวนกันเชื่อ</strong>ภายใน 10 วินาที และโทษของการตอบผิดตกที่ทีม ไม่ตกที่คนใดคนหนึ่ง</p></div>
+    </div>
+
+    <div class="pillar">
+      <div class="ptop"><span class="pkey">P4</span><h3>เดิมพันความมั่นใจ</h3></div>
+      <span class="role">Calibration bet — ชั้นทักษะที่ไม่ใช่แค่ความรู้</span>
+      <div class="prow"><span class="plab">FIX</span><p>คนไม่รู้คำตอบกดมั่ว ทำทีมพัง เลยเลิกกด</p></div>
+      <div class="prow rule"><span class="plab">RULE</span><p>ส่งคำตอบพร้อมธง <strong>มั่นใจ / ไม่มั่นใจ</strong> — มั่นใจ+ถูก = <span class="mono">น้ำหนัก 2</span>, มั่นใจ+ผิด = <span class="mono">−1</span>, ไม่มั่นใจ+ถูก = <span class="mono">1</span>, ไม่มั่นใจ+ผิด = <span class="mono">0</span></p></div>
+      <div class="prow"><span class="plab">WHY</span><p>คนไม่รู้ยังเล่นได้โดยไม่ทำร้ายทีม และคนรู้จริงได้รางวัลสองเท่า เหมาะกับระดับมหาวิทยาลัยเพราะมันสอนเรื่องการประเมินความมั่นใจตัวเองไปในตัว</p></div>
+    </div>
+
+    <div class="pillar">
+      <div class="ptop"><span class="pkey">P5</span><h3>พลปืนหมุนเวียน</h3></div>
+      <span class="role">Rotating spotlight — สเกลได้ถึง 30 คน</span>
+      <div class="prow"><span class="plab">FIX</span><p>คนเยอะขึ้น แต่ละคนยิ่งไม่มีตัวตน</p></div>
+      <div class="prow rule"><span class="plab">RULE</span><p>ทุกข้อที่ 3 เป็น <strong>“ยิงชี้เป้า”</strong> สุ่มคนตอบ 1 คน (ถ่วงน้ำหนักให้คนที่ยังไม่เคยได้คิว) คำตอบของเขาคนเดียวตัดสิน ถ้าถูก เขาได้<strong>ลากเป้าเอง</strong>บนแผนที่ และนัดถัดไปของคนขับจะวิ่งไปที่นั่น</p></div>
+      <div class="prow"><span class="plab">WHY</span><p>ทุกคนได้เป็นฮีโร่อย่างน้อยครั้งหนึ่งต่อแมตช์ และช่วงนั้นทั้งห้องจะหันไปมองคนคนเดียว</p></div>
+    </div>
+
+    <div class="pillar">
+      <div class="ptop"><span class="pkey">P6</span><h3>สนามไม่หยุดตอนตอบ</h3></div>
+      <span class="role">No pause — กฎเหล็ก ห้ามละเมิด</span>
+      <div class="prow"><span class="plab">FIX</span><p>เกมกลายเป็น “เล่นทีละตา” แล้วจังหวะตาย</p></div>
+      <div class="prow rule"><span class="plab">RULE</span><p>ระหว่างหน้าต่างตอบ 10 วินาที <strong>รถถังทุกคันยังวิ่ง ยังยิง ยังตายได้</strong> ห้ามหยุดเกมเพื่อขึ้นคำถามเด็ดขาด</p></div>
+      <div class="prow"><span class="plab">WHY</span><p>ความกดดันเกิดจากการที่คนตอบเห็นคนขับกำลังจะตายอยู่ตรงหน้า ในขณะที่ตัวเองยังเลือกข้อไม่ได้ ความทับซ้อนนี้คือตัวเกม</p></div>
+    </div>
+
+    <div class="pillar">
+      <div class="ptop"><span class="pkey">P7</span><h3>ตายแล้วยังมีงานทำ</h3></div>
+      <span class="role">Ghost supply — กันห้องเงียบครึ่งห้อง</span>
+      <div class="prow"><span class="plab">FIX</span><p>ทีมตกรอบตอนนาทีที่ 3 แล้วก้มมือถือยาว</p></div>
+      <div class="prow rule"><span class="plab">RULE</span><p>คนของทีมที่ตกรอบเข้ากอง <strong>“คลังกลาง”</strong> ตอบคำถามร่วมกัน ถ้า consensus ถูกจะ<strong>สปอว์นลังเสบียงกลาง</strong>ลงสนามให้ทีมที่ยังเหลือแย่งกัน + เห็นเฉลยข้อที่ตัวเองตอบผิดพร้อมคำอธิบาย</p></div>
+      <div class="prow"><span class="plab">WHY</span><p>เวลาที่ตายคือเวลาที่คนพร้อมเรียนที่สุด และการที่ผีมีอิทธิพลต่อเกมทำให้ไม่มีใครวางมือถือ</p></div>
+    </div>
+
+  </div>
+
+  <h3 style="margin-top:38px">ตารางระดับ consensus <span class="pix" style="color:var(--ink-3)">(P3 + P4)</span></h3>
+  <p class="col small" style="margin-top:8px">คิดจากคะแนนน้ำหนักรวมหารด้วยจำนวนคนตอบ ไม่ใช่นับหัวดิบ ๆ</p>
+  <div class="tiers">
+    <div class="tier t1"><span class="pc">≥ 80%</span><span class="out"><b>กระสุนเจาะเกราะ</b><span>ทะลุอิฐได้ 2 ชั้น ดาเมจ 2 · ทำลายเหล็กได้</span></span></div>
+    <div class="tier t2"><span class="pc">50–79%</span><span class="out"><b>กระสุนมาตรฐาน</b><span>ดาเมจ 1 · พังอิฐ 1 ชั้น</span></span></div>
+    <div class="tier t3"><span class="pc">20–49%</span><span class="out"><b>กระสุนด้าน</b><span>ยิงออกแต่ดาเมจ 0.5 · พังกำแพงไม่ได้ · ใช้หลอกล่อได้</span></span></div>
+    <div class="tier t4"><span class="pc">&lt; 20%</span><span class="out"><b>ปืนติดขัด 3 วินาที</b><span>ยิงไม่ได้ชั่วคราว · คนขับต้องหนีอย่างเดียว</span></span></div>
+  </div>
+</section>
+
+<section id="loop">
+  <div class="shead"><span class="snum">02</span><h2>วงจรหลัก 13 วินาที</h2><span class="stag">สิ่งที่ต้องดูคือส่วนที่ทับกัน</span></div>
+  <p class="col">แผนภาพนี้ไม่ใช่วงกลม เพราะประเด็นทั้งหมดอยู่ที่<strong>สองเลนเดินพร้อมกัน</strong> ไม่ใช่สลับกันเดิน ถ้าวาดเป็นวงกลมเมื่อไหร่ แปลว่าออกแบบผิดแล้ว</p>
+  <div class="figure">
+    <div class="figscroll">
+    <svg viewBox="0 0 800 316" role="img" aria-label="แผนภาพสองเลนแสดงวงจร 13 วินาทีของฝูงชนและคนขับที่ทำงานพร้อมกัน">
+      <line class="tick" x1="60" y1="42" x2="60" y2="290"></line>
+      <line class="tick" x1="260" y1="42" x2="260" y2="290"></line>
+      <line class="tick" x1="460" y1="42" x2="460" y2="290"></line>
+      <line class="tick" x1="600" y1="42" x2="600" y2="290"></line>
+      <line class="tick" x1="760" y1="42" x2="760" y2="290"></line>
+      <text class="lblm" x="60" y="34" text-anchor="middle">0s</text>
+      <text class="lblm" x="260" y="34" text-anchor="middle">4s</text>
+      <text class="lblm" x="460" y="34" text-anchor="middle">8s</text>
+      <text class="lblm" x="600" y="34" text-anchor="middle">10s · LOCK</text>
+      <text class="lblm" x="778" y="34" text-anchor="end">13s</text>
+
+      <rect class="lane" x="20" y="52" width="760" height="90"></rect>
+      <rect class="laneb" x="20" y="52" width="760" height="90"></rect>
+      <text class="lbl" x="30" y="72">เลน A · ฝูงชน (N คน)</text>
+      <rect class="boxA" x="60" y="82" width="190" height="44"></rect>
+      <text class="step" x="72" y="100">คำถามขึ้นจอ + มือถือ</text>
+      <text class="step" x="72" y="118">ทุกคนเห็นแผนที่เต็ม</text>
+      <rect class="boxA" x="262" y="82" width="196" height="44"></rect>
+      <text class="step" x="274" y="100">ถกเถียง · ตะโกน · ปัก ping</text>
+      <text class="step" x="274" y="118">เลือกข้อ + ธงมั่นใจ</text>
+      <rect class="boxC" x="462" y="82" width="136" height="44"></rect>
+      <text class="step" x="474" y="106">นับน้ำหนัก → ระดับ</text>
+      <rect class="boxC" x="602" y="82" width="158" height="44"></rect>
+      <text class="step" x="614" y="100">กระสุนเข้าคลัง</text>
+      <text class="step" x="614" y="118">สลักชื่อคนตอบเร็วสุด</text>
+
+      <rect class="lane" x="20" y="196" width="760" height="90"></rect>
+      <rect class="laneb" x="20" y="196" width="760" height="90"></rect>
+      <text class="lbl" x="30" y="216">เลน B · คนขับ (1 คน)</text>
+      <rect class="boxB" x="60" y="226" width="398" height="44"></rect>
+      <text class="step" x="72" y="244">เคลื่อนที่ · หลบ · พังกำแพงหาสายตา · เอาตัวรอดด้วยกระสุนที่เหลือ</text>
+      <text class="step" x="72" y="262">มองเห็นแค่รัศมี 8 ช่อง — ต้องเชื่อเสียงจากเลน A</text>
+      <rect class="boxB" x="462" y="226" width="298" height="44"></rect>
+      <text class="step" x="474" y="250">รับกระสุนใหม่ → เลือกจังหวะยิง → สนามเปลี่ยนรูป</text>
+
+      <path class="arw" d="M330 128 L330 220"></path>
+      <polygon class="arwh" points="330,228 325,216 335,216"></polygon>
+      <text class="lblm" x="338" y="176">ping / เสียงตะโกน</text>
+
+      <path class="arw" d="M680 128 L680 220"></path>
+      <polygon class="arwh" points="680,228 675,216 685,216"></polygon>
+      <text class="lblm" x="688" y="176">กระสุน</text>
+
+      <path class="arw" d="M170 220 L170 132"></path>
+      <polygon class="arwh" points="170,124 165,136 175,136"></polygon>
+      <text class="lblm" x="178" y="176">สภาพสนาม/HP ที่ฝูงชนเห็น</text>
+
+      <path class="arw" d="M760 300 L 68 300"></path>
+      <polygon class="arwh" points="58,300 70,295 70,305"></polygon>
+      <text class="lblm" x="410" y="294" text-anchor="middle">รอบถัดไปเริ่มทันที — สนามไม่เคยหยุด (P6)</text>
+    </svg>
+    </div>
+    <div class="figcap"><b>อ่านแผนภาพนี้ยังไง:</b> ลูกศรกลางสองอันคือหัวใจ — เสียงลงจากบน กระสุนลงจากบน แต่<b>ข้อมูลสภาพสนามวิ่งขึ้น</b> ถ้าตัดลูกศรใดออก เกมจะกลายเป็นคนละเกมทันที</div>
+  </div>
+</section>
+
+<section id="pacing">
+  <div class="shead"><span class="snum">03</span><h2>จังหวะแมตช์</h2><span class="stag">โค้งความตึงเครียด 4 ยก</span></div>
+  <p class="col" style="margin-bottom:22px">ความยาก ความถี่คำถาม และความชุกของกระสุนต้องขยับไปด้วยกัน ไม่ใช่คงที่ทั้งแมตช์ ลำดับนี้เป็นลำดับจริงตามเวลา</p>
+  <div class="phases">
+    <div class="phase">
+      <div class="ptime">0:00–2:00<span>ROUND 01</span></div>
+      <div class="pbody">
+        <h3>สำรวจ</h3>
+        <p>ยังไม่ให้เจอกัน ให้เรียนรู้ปุ่มและเรียนรู้ว่าเสียงเพื่อนมีประโยชน์</p>
+        <ul>
+          <li>คำถาม<b>ง่าย</b> หน้าต่างตอบ <b>12 วิ</b></li>
+          <li>คลังกระสุนสูงสุด <b>6 นัด</b> — เหลือเฟือ ให้ยิงเล่นพังกำแพงได้</li>
+          <li>ทีมเกิดคนละมุม กำแพงอิฐหนา ต้องขุดออกมาเอง</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="ptime">2:00–4:30<span>ROUND 02</span></div>
+      <div class="pbody">
+        <h3>ปะทะ</h3>
+        <p>วงบีบครั้งแรก บังคับให้เจอกัน ทีมแรกเริ่มตกรอบ</p>
+        <ul>
+          <li>คำถาม<b>ปานกลาง</b> หน้าต่างตอบ <b>10 วิ</b> · คลังลดเหลือ <b>4 นัด</b></li>
+          <li>ลังโบนัสสปอว์นกลางแผนที่ = คำถามยากพิเศษ 1 ข้อ ตอบถูกได้กระสุนเจาะเกราะ 2 นัดทันที</li>
+          <li>เริ่มมีข้อ <b>ยิงชี้เป้า (P5)</b> ทุกข้อที่ 3</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="ptime">4:30–6:00<span>ROUND 03</span></div>
+      <div class="pbody">
+        <h3>โหมกระหน่ำ</h3>
+        <p>ยกที่เสียงดังที่สุด ทุกอย่างเร็วขึ้นพร้อมกัน</p>
+        <ul>
+          <li>คำถาม<b>รัว</b> หน้าต่างตอบ <b>7 วิ</b> ไม่มีช่องพัก · คลังเหลือ <b>3 นัด</b></li>
+          <li>วงบีบครั้งที่สอง เหลือพื้นที่ราว 1 ใน 4 · กำแพงอิฐนอกวงถูกเผาทิ้ง</li>
+          <li>ผีจากทีมที่ตกรอบเริ่มโยนลังเสบียงลงมาป่วน (P7)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="ptime">6:00+<span>FINAL</span></div>
+      <div class="pbody">
+        <h3>ดวลจุดโทษ</h3>
+        <p>เหลือ 2 ทีม เกมเปลี่ยนกติกาเพื่อปิดจบให้จำได้</p>
+        <ul>
+          <li><b>คำถามข้อเดียวกัน</b> ขึ้นพร้อมกันทั้งสองทีม เห็นแถบความคืบหน้าของอีกฝ่ายด้วย</li>
+          <li>ทีมที่ consensus ถูก<b>และเร็วกว่า</b> ได้ <b>“นัดสังหาร”</b> 1 นัด ดาเมจถึงตาย ทีมที่ช้ากว่าไม่ได้อะไร</li>
+          <li>จบเกมด้วย kill cam 1.5 วิ ทวนภาพนัดสุดท้าย พร้อมชื่อคนตอบและคำถามที่ทำให้ชนะ</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="numbers">
+  <div class="shead"><span class="snum">04</span><h2>ตัวเลขตั้งต้น</h2><span class="stag">เอาไว้ปรับ ไม่ใช่เอาไว้เชื่อ</span></div>
+  <p class="col">ตัวเลขชุดนี้ตั้งมาให้แมตช์จบใน 6–7 นาทีและให้คนขับ<strong>ขาดกระสุนบ่อยพอจะรู้สึกกดดัน แต่ไม่บ่อยจนยืนเฉย</strong> เริ่มจากชุดนี้แล้วปรับจาก playtest</p>
+  <div class="tscroll">
+    <table>
+      <thead><tr><th>ค่า</th><th>ตั้งต้น</th><th>เหตุผลที่ตั้งเท่านี้</th></tr></thead>
+      <tbody>
+        <tr><td class="k">ขนาดแผนที่</td><td class="num">32 × 32 ช่อง</td><td>ใหญ่พอให้ซ่อน เล็กพอให้เจอกันใน 2 นาที</td></tr>
+        <tr><td class="k">ขนาด tile</td><td class="num">16 px</td><td>รถถังกิน 2×2 tile แบบ Battle City อ่านง่ายบนโปรเจกเตอร์</td></tr>
+        <tr><td class="k">HP รถถัง</td><td class="num">3</td><td>ตายได้แต่ไม่ตายฟรี มีที่ว่างให้กระสุนด้านมีความหมาย</td></tr>
+        <tr><td class="k">ความเร็ววิ่ง</td><td class="num">3 ช่อง/วิ</td><td>ช้าพอให้เสียงเตือนจากเพื่อนมาทัน</td></tr>
+        <tr><td class="k">ความเร็วกระสุน</td><td class="num">12 ช่อง/วิ</td><td>เร็ว 4 เท่าตัวรถ หลบได้ถ้าเห็นก่อน</td></tr>
+        <tr><td class="k">คูลดาวน์ยิง</td><td class="num">0.6 วิ</td><td>กันการรัวจนกระสุนหมดโดยไม่ตั้งใจ</td></tr>
+        <tr><td class="k">คลังกระสุนสูงสุด</td><td class="num">6 → 4 → 3</td><td>บีบตามยก ทำให้ทุกนัดมีค่าขึ้นเรื่อย ๆ</td></tr>
+        <tr><td class="k">รัศมีมองเห็นคนขับ</td><td class="num">8 ช่อง</td><td>ต่ำกว่านี้อึดอัด สูงกว่านี้ไม่ต้องพึ่งเพื่อน</td></tr>
+        <tr><td class="k">หน้าต่างตอบ</td><td class="num">12 / 10 / 7 วิ</td><td>สั้นพอกัน Google ยาวพอให้เถียงกันได้</td></tr>
+        <tr><td class="k">พักระหว่างข้อ</td><td class="num">3 วิ</td><td>ให้เห็นผล consensus โดย<strong>ไม่หยุดสนาม</strong></td></tr>
+        <tr><td class="k">กำแพงอิฐ</td><td class="num">2 นัด</td><td>พังได้เร็วพอให้ผู้เล่นแกะสลักแผนที่เอง</td></tr>
+        <tr><td class="k">กำแพงเหล็ก</td><td class="num">เจาะเกราะ 3 นัด</td><td>รางวัลของทีมที่ตอบถูกพร้อมกัน 80%</td></tr>
+        <tr><td class="k">กระสุนสะท้อน</td><td class="num">เหล็ก 1 ครั้ง</td><td>เปิดทางให้ยิงมุมเทพ = คลิปที่คนอยากอัด</td></tr>
+        <tr><td class="k">ping ต่อคน</td><td class="num">3 ครั้ง / cd 5 วิ</td><td>จำกัดพอไม่ให้จอรก</td></tr>
+        <tr><td class="k">Dash คนขับ</td><td class="num">cd 4 วิ · ยิงไม่ได้ 1 วิ</td><td>ให้คนขับมีอะไรทำตอนกระสุนหมด</td></tr>
+        <tr><td class="k">ชนรถถัง (ram)</td><td class="num">0.5 / เสียเอง 0.5</td><td>ทางออกสุดท้ายเมื่อไม่มีกระสุน แลกกันเจ็บ</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="feel">
+  <div class="shead"><span class="snum">05</span><h2>ความรู้สึก (juice)</h2><span class="stag">ส่วนที่ทำให้เกมเดิมสนุกขึ้น 2 เท่าโดยไม่แตะกฎ</span></div>
+  <p class="col">Battle City สนุกไม่ใช่เพราะกฎซับซ้อน แต่เพราะ<strong>ทุกการกระทำมีเสียงและมีเศษอิฐ</strong> รายการนี้ถูกกว่าการเพิ่มเมคานิกใหม่มาก และควรทำก่อนเพิ่มเมคานิก</p>
+  <div class="juice">
+    <div class="j"><span class="pix">HIT STOP</span><p>หยุดภาพ <b>2 เฟรม</b> ตอนกระสุนโดน — เทคนิคเดียวที่ให้ผลต่อ “ความหนัก” มากที่สุดต่อบรรทัดโค้ด</p></div>
+    <div class="j"><span class="pix">SCREEN SHAKE</span><p>ยิง <b>3 px / 120 ms</b> · โดนยิง <b>8 px / 250 ms</b> — เกินนี้คนเมา</p></div>
+    <div class="j"><span class="pix">DEBRIS</span><p>อิฐพังต้องมีเศษกระเด็น <b>6 ชิ้น</b> ตกตามแรงโน้มถ่วง สนามที่จำได้คือสนามที่ผู้เล่นทุบเอง</p></div>
+    <div class="j"><span class="pix">AMMO AS OBJECT</span><p>อย่าโชว์กระสุนเป็นตัวเลข <b>วาดปลอกกระสุนเรียงข้างป้อมปืน</b> ความขาดแคลนต้องมองเห็นได้</p></div>
+    <div class="j"><span class="pix">CONSENSUS CHORD</span><p>เสียง “ตอบถูก” ให้<b>ซ้อนกันทีละคน</b> พอ 10 คนตอบถูกจะกลายเป็นคอร์ดใหญ่ ห้องจะได้ยินความเห็นตรงกันของตัวเอง</p></div>
+    <div class="j"><span class="pix">KILL CAM</span><p>รีเพลย์นัดสังหาร <b>1.5 วิ</b> พร้อมชื่อคนตอบและคำถาม เชื่อมความรู้เข้ากับความสะใจโดยตรง</p></div>
+    <div class="j"><span class="pix">READABILITY</span><p>ทีมต่างกันที่<b>รูปทรงเงา</b>ด้วย ไม่ใช่แค่สี ดูจากหลังห้องต้องแยกออก และคนตาบอดสีต้องเล่นได้</p></div>
+    <div class="j"><span class="pix">TIMER PRESSURE</span><p>3 วินาทีสุดท้ายของหน้าต่างตอบ ให้ขอบจอเต้นเป็นจังหวะ + เสียงเมโทรนอมเร่ง</p></div>
+  </div>
+</section>
+
+<section id="risks">
+  <div class="shead"><span class="snum">06</span><h2>ทะเบียนความเสี่ยง</h2><span class="stag">อาการที่จะเห็นจริงตอน playtest</span></div>
+  <p class="col">อย่าถามผู้ทดสอบว่า “สนุกไหม” เพราะเขาจะตอบว่าสนุก ให้<strong>ดูอาการในคอลัมน์กลาง</strong>แทน มันโกหกไม่ได้</p>
+  <div class="tscroll">
+    <table>
+      <thead><tr><th>ระดับ</th><th>ความเสี่ยง</th><th>อาการที่จะเห็น</th><th>ตัวแก้</th></tr></thead>
+      <tbody>
+        <tr><td><span class="chip c-hi">CRIT</span></td><td class="k">คนตอบเป็นตู้กดกระสุน</td><td>8 ใน 10 คนก้มมือถือ ไม่มีใครมองจอใหญ่</td><td>P1 สายตากับพวงมาลัย + ping</td></tr>
+        <tr><td><span class="chip c-hi">CRIT</span></td><td class="k">โหวตเจือจาง</td><td>เริ่มมีคนกดข้อเดิมทุกข้อโดยไม่อ่าน</td><td>P2 ชื่อบนกระสุน + P5 พลปืนหมุนเวียน</td></tr>
+        <tr><td><span class="chip c-hi">CRIT</span></td><td class="k">ตกรอบแล้ววางมือถือ</td><td>ห้องเงียบลงครึ่งหนึ่งตอนนาทีที่ 4</td><td>P7 คลังกลางของผี + เฉลยพร้อมคำอธิบาย</td></tr>
+        <tr><td><span class="chip c-md">HIGH</span></td><td class="k">คนเก่งคนเดียวแบก</td><td>ทีมรอผู้ชายคนนั้นตะโกนคำตอบทุกข้อ</td><td>P4 เดิมพันความมั่นใจ + คละหมวดคำถาม ไม่ผูกวิชาเดียว</td></tr>
+        <tr><td><span class="chip c-md">HIGH</span></td><td class="k">โยนความผิดกันจริง</td><td>คนขับกับคนตอบเริ่มทะเลาะ ไม่ใช่หยอกกัน</td><td>ไม่โชว์คำตอบรายคนต่อสาธารณะ · โชว์แค่แถบรวม · ฟีดแบ็กรายคนขึ้นบนมือถือตัวเอง</td></tr>
+        <tr><td><span class="chip c-md">HIGH</span></td><td class="k">คนขับไม่มีอะไรทำตอนกระสุนหมด</td><td>รถถังจอดนิ่งรอคำตอบ</td><td>Dash cd 4 วิ · ram แลกเลือด · พังกำแพงด้วยการชนไม่ได้ ต้องใช้กระสุน</td></tr>
+        <tr><td><span class="chip c-lo">MED</span></td><td class="k">เปิด Google</td><td>ทุกทีมได้ ≥80% ทุกข้อ ระดับ consensus ไร้ความหมาย</td><td>เวลาสั้น · ใช้โจทย์ภาพ / คำนวณ / เรียงลำดับ / “ข้อใด<b>ไม่ใช่</b>” · สุ่มสลับตัวเลือก</td></tr>
+        <tr><td><span class="chip c-lo">MED</span></td><td class="k">แมตช์ยืดจนเบื่อ</td><td>หลังนาทีที่ 7 คนเริ่มลุกไปเข้าห้องน้ำ</td><td>วงบีบ 2 ครั้ง + ยกดวลจุดโทษบังคับจบ</td></tr>
+        <tr><td><span class="chip c-lo">MED</span></td><td class="k">คนเข้าใหม่งงกติกา</td><td>ต้องอธิบาย 5 นาทีก่อนเริ่มทุกครั้ง</td><td>ยกที่ 1 ทำหน้าที่สอนแทนการบรรยาย · หน้าจอมือถือมีแค่ 4 ปุ่ม + 1 ธง</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="build">
+  <div class="shead"><span class="snum">07</span><h2>ลำดับการสร้าง</h2><span class="stag">อย่าสร้าง quiz เป็นอย่างแรก</span></div>
+  <p class="col">ลำดับนี้สำคัญพอ ๆ กับตัวกฎ เพราะมันทำให้คุณรู้เร็วที่สุดว่าเกมนี้จะสนุกจริงหรือไม่ ก่อนจะลงแรงกับส่วนที่แพง</p>
+  <div class="steps">
+    <div class="stepr"><span class="stepn"></span><div><h4>รถถังเดินบนกริด ยิงได้ อิฐพังได้</h4><p>ทำ Battle City เปล่า ๆ ไม่มี quiz ไม่มีเน็ตเวิร์ก เล่นคนเดียวบนคอมเครื่องเดียว</p></div></div>
+    <div class="stepr"><span class="stepn"></span><div><h4>ใส่ juice ทั้งหมดจากหัวข้อ 05</h4><p>hit stop · screen shake · เศษอิฐ · เสียง ทำตอนนี้ ไม่ใช่ตอนท้าย</p></div></div>
+    <div class="stepr gate"><span class="stepn"></span><div><h4>ด่านตัดสิน — เอาให้คนสองคนยิงกันแล้วหัวเราะ</h4><p>ถ้าถึงตรงนี้แล้วยัง<strong>ไม่สนุก</strong> ระบบ quiz จะไม่ช่วยอะไรเลย ให้กลับไปแก้ feel ก่อน อย่าเดินต่อ</p></div></div>
+    <div class="stepr"><span class="stepn"></span><div><h4>กระสุนจำกัด + คลังกระสุน</h4><p>ทดสอบว่าความขาดแคลนทำให้ตัดสินใจสนุกขึ้นจริงไหม ยังไม่ต้องมีคำถาม เติมกระสุนด้วยลังบนแผนที่ไปก่อน</p></div></div>
+    <div class="stepr"><span class="stepn"></span><div><h4>ต่อมือถือ + ระบบโหวต + consensus tiers</h4><p>จอโฮสต์ 1 จอ ไคลเอนต์มือถือ 4 ปุ่ม ทดสอบกับคนจริง 10 คนให้ได้ก่อนทำอย่างอื่น</p></div></div>
+    <div class="stepr"><span class="stepn"></span><div><h4>P1 สายตาไม่เท่ากัน + ping</h4><p>จุดที่เกมจะเปลี่ยนจาก “ควิซมีรถถัง” เป็น “เกมทีม” คาดว่าเสียงในห้องจะดังขึ้นชัดเจนตรงนี้</p></div></div>
+    <div class="stepr"><span class="stepn"></span><div><h4>ชื่อบนกระสุน + kill feed + kill cam</h4><p>ถูกมาก ผลลัพธ์ต่ออารมณ์สูงมาก ทำก่อนเมคานิกที่เหลือ</p></div></div>
+    <div class="stepr"><span class="stepn"></span><div><h4>วงบีบ + 4 ยก + ดวลจุดโทษ</h4><p>ตอนนี้ค่อยจูนโค้งความตึงเครียดจากข้อมูล playtest จริง</p></div></div>
+    <div class="stepr"><span class="stepn"></span><div><h4>P4 เดิมพันความมั่นใจ · P5 พลปืนหมุนเวียน · P7 ผี</h4><p>สามอันนี้ทำให้เกมสเกลไปถึง 30 คนได้ แต่ไม่จำเป็นสำหรับ playtest 8 คนแรก</p></div></div>
+  </div>
+</section>
+
+<section id="keep">
+  <div class="shead"><span class="snum">08</span><h2>สิ่งที่ควรขโมยจาก Battle City</h2><span class="stag">และสิ่งที่ควรทิ้ง</span></div>
+  <div class="pillars" style="margin-top:4px">
+    <div class="pillar">
+      <div class="ptop"><span class="pkey">KEEP</span><h3>แผนที่ที่พังได้</h3></div>
+      <div class="prow"><p>นี่คือเครื่องยนต์ความสนุกตัวจริงของ Battle City ผู้เล่นแกะสลักช่องมองและทางหนีขึ้นเองระหว่างเล่น แผนที่ตอนนาทีที่ 6 ไม่เหมือนตอนเริ่มเลย <strong>ห้ามทำกำแพงทึบทั้งหมด</strong></p></div>
+    </div>
+    <div class="pillar">
+      <div class="ptop"><span class="pkey">KEEP</span><h3>เดินเป็นกริด</h3></div>
+      <div class="prow"><p>อ่านง่ายจากหลังห้อง เดาการเคลื่อนที่ของศัตรูได้ และทำให้การตะโกนบอกทิศ (“ขึ้นบน! สองช่อง!”) เป็นคำสั่งที่ทำตามได้จริง ซึ่งจำเป็นมากสำหรับ P1</p></div>
+    </div>
+    <div class="pillar">
+      <div class="ptop"><span class="pkey">ADD</span><h3>ป้อมปืนหมุนแยกจากตัวถัง</h3></div>
+      <div class="prow"><p>Battle City ต้นฉบับยิงได้แค่ทิศที่หันหน้า การแยกป้อมปืนเป็น 8 ทิศเพิ่มเพดานฝีมือคนขับอย่างมาก และทำให้ตำแหน่ง “คนขับ” น่าอยากเป็น</p></div>
+    </div>
+    <div class="pillar">
+      <div class="ptop"><span class="pkey">DROP</span><h3>ฐานที่ต้องป้องกัน</h3></div>
+      <div class="prow"><p>กติกา “ทีมสุดท้ายที่รอด” ที่คุณเลือกไปแล้ว ทับซ้อนกับการป้องกันฐาน จะใส่ทั้งคู่ทำให้เกมสองใจ <em>ทางเลือก:</em> ถ้าอยากได้ฐาน ให้ฐานเป็นจุดเติมกระสุนแทน — ทีมจึงต้องเลือกระหว่างอยู่ใกล้เสบียงกับอยู่รอด</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="pix">TANK-QUIZ GDD · v0.1 · DSSI UBU</span>
+  <span class="small" style="max-width:46ch">เอกสารนี้เป็นสมมติฐาน ไม่ใช่ข้อสรุป ตัวเลขทุกตัวตั้งไว้ให้แก้หลัง playtest ครั้งแรก</span>
+</footer>
+
+</div>
+
+
+
+</body></html>

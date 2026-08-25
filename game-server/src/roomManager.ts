@@ -6,10 +6,19 @@ import {
   TankArchetype, 
   QuizQuestion, 
   GameEvent,
-  RoomConfig 
+  RoomConfig,
+  TacticalPing,
+  AmmoKind
 } from './types.js';
 import { GameEngine } from './gameEngine.js';
 import { QuizManager, getTimeLimitForDifficulty } from './quizBank.js';
+
+interface VoteRecord {
+  choice: number;
+  confident: boolean;
+  timestamp: number;
+  playerName: string;
+}
 
 interface SquadQuizSession {
   teamId: string;
@@ -19,8 +28,7 @@ interface SquadQuizSession {
   timeLimitSeconds: number;
   startTime: number;
   endTime: number;
-  votes: Map<string, number>; // socketId -> choiceIndex
-  voterNames: Map<string, string>; // socketId -> playerName
+  votes: Map<string, VoteRecord>; // socketId -> VoteRecord
   timer?: NodeJS.Timeout;
 }
 
@@ -502,6 +510,7 @@ export class RoomManager {
     crateId: string;
     questionId: string;
     selectedIndex: number;
+    confident?: boolean;
   }) {
     const roomId = this.playerRooms.get(socket.id);
     if (!roomId) return;
@@ -512,33 +521,40 @@ export class RoomManager {
       data.tankId,
       data.crateId,
       data.questionId,
-      data.selectedIndex
+      data.selectedIndex,
+      data.confident
     );
 
     socket.emit('quiz_result', result);
   }
 
-  public handleVoteTeamQuiz(socket: Socket, data: { choiceIndex: number }) {
+  public handleVoteTeamQuiz(socket: Socket, data: { choiceIndex: number; confident?: boolean }) {
     const roomId = this.playerRooms.get(socket.id);
     if (!roomId) return;
     const room = this.rooms.get(roomId);
     if (!room) return;
     const player = room.players.get(socket.id);
-    if (!player || player.role !== 'SUPPORT') return;
+    if (!player || (player.role !== 'SUPPORT' && player.role !== 'GHOST')) return;
 
     const session = room.activeSquadQuizzes.get(player.teamId);
     if (!session || Date.now() > session.endTime) return;
 
-    // Record vote
-    session.votes.set(socket.id, data.choiceIndex);
-    session.voterNames.set(socket.id, player.name);
+    // Record vote with confident flag and timestamp
+    session.votes.set(socket.id, {
+      choice: data.choiceIndex,
+      confident: !!data.confident,
+      timestamp: Date.now(),
+      playerName: player.name
+    });
 
     // Compute live tally
     const voteCounts = [0, 0, 0, 0];
-    for (const choice of session.votes.values()) {
-      if (choice >= 0 && choice < 4) {
-        voteCounts[choice]++;
+    let confidentVotes = 0;
+    for (const record of session.votes.values()) {
+      if (record.choice >= 0 && record.choice < 4) {
+        voteCounts[record.choice]++;
       }
+      if (record.confident) confidentVotes++;
     }
     const totalVotes = session.votes.size;
 
@@ -548,8 +564,33 @@ export class RoomManager {
       this.io.to(m.socketId).emit('team_quiz_vote_update', {
         teamId: player.teamId,
         voteCounts,
-        totalVotes
+        totalVotes,
+        confidentVotes
       });
+    });
+  }
+
+  public handleTacticalPing(socket: Socket, data: { x: number; y: number }) {
+    const roomId = this.playerRooms.get(socket.id);
+    if (!roomId) return;
+    const room = this.rooms.get(roomId);
+    if (!room || room.state !== 'IN_GAME') return;
+    const player = room.players.get(socket.id);
+    if (!player || !player.teamId) return;
+
+    const ping: TacticalPing = {
+      id: `ping-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      teamId: player.teamId,
+      x: data.x,
+      y: data.y,
+      senderName: player.name,
+      timestamp: Date.now()
+    };
+
+    // Broadcast ping to all team members
+    const teamMembers = Array.from(room.players.values()).filter(p => p.teamId === player.teamId);
+    teamMembers.forEach(m => {
+      this.io.to(m.socketId).emit('tactical_ping', ping);
     });
   }
 
@@ -561,7 +602,7 @@ export class RoomManager {
     const room = this.rooms.get(roomId);
     if (!room || room.state !== 'IN_GAME') return;
 
-    const teamSupporters = Array.from(room.players.values()).filter(p => p.teamId === teamId && p.role === 'SUPPORT');
+    const teamSupporters = Array.from(room.players.values()).filter(p => p.teamId === teamId && (p.role === 'SUPPORT' || p.role === 'GHOST'));
     const now = Date.now();
     const session: SquadQuizSession = {
       teamId,
@@ -571,8 +612,7 @@ export class RoomManager {
       timeLimitSeconds: item.timeLimitSeconds,
       startTime: now,
       endTime: now + item.timeLimitSeconds * 1000,
-      votes: new Map(),
-      voterNames: new Map()
+      votes: new Map()
     };
 
     // Auto-finalize only when countdown completes!
@@ -584,7 +624,7 @@ export class RoomManager {
 
     const queueLength = room.squadQuizQueues.get(teamId)?.length || 0;
 
-    // Send popup with timer ONLY to support teammates! Driver does NOT get popup!
+    // Send popup with timer ONLY to support teammates & ghosts! Driver does NOT get popup!
     teamSupporters.forEach(p => {
       this.io.to(p.socketId).emit('team_quiz_popup', {
         teamId,
@@ -619,11 +659,10 @@ export class RoomManager {
     if (!session) return;
     if (session.timer) clearTimeout(session.timer);
 
-    // Count votes
     const voteCounts = [0, 0, 0, 0];
-    for (const choice of session.votes.values()) {
-      if (choice >= 0 && choice < 4) {
-        voteCounts[choice]++;
+    for (const record of session.votes.values()) {
+      if (record.choice >= 0 && record.choice < 4) {
+        voteCounts[record.choice]++;
       }
     }
 
@@ -641,13 +680,53 @@ export class RoomManager {
     }
 
     const totalVotes = session.votes.size;
-    const supportName = totalVotes > 0 ? `เสียงส่วนใหญ่ (${maxVotes}/${totalVotes} โหวต)` : 'หมดเวลา (ไม่มีผู้โหวต)';
+    const votes = Array.from(session.votes.values());
+
+    // Consensus Algorithm (SPEC §5)
+    // WEIGHT: correct (+1, or +2 if confident), wrong (0, or -1 if confident)
+    const WEIGHT = (isCorrect: boolean, confident: boolean) =>
+      isCorrect ? (confident ? 2 : 1) : (confident ? -1 : 0);
+
+    let consensusScore = 0;
+    for (const v of votes) {
+      const isC = v.choice === session.question.correctIndex;
+      consensusScore += WEIGHT(isC, v.confident);
+    }
+
+    const N = Math.max(1, votes.length);
+    const W = Math.max(0, Math.min(1, consensusScore / (1.5 * N)));
+
+    let tier: AmmoKind = 'STD';
+    let isJammed = false;
+    if (totalVotes === 0) {
+      tier = 'DUD';
+    } else if (W >= 0.70) {
+      tier = 'AP';
+    } else if (W >= 0.40) {
+      tier = 'STD';
+    } else if (W >= 0.15) {
+      tier = 'DUD';
+    } else {
+      isJammed = true;
+      tier = 'DUD';
+    }
+
+    // Find owner: fastest correct answerer (SPEC INV-3)
+    const correctSubmissions = votes
+      .filter(v => v.choice === session.question.correctIndex)
+      .sort((a, b) => a.timestamp - b.timestamp);
+    const ownerName = correctSubmissions[0]?.playerName;
+
+    const supportName = totalVotes > 0 ? `มติทีม (${maxVotes}/${totalVotes} โหวต)` : 'หมดเวลา (ไม่มีผู้โหวต)';
 
     const result = room.engine.handleTeamSupportAnswer(
       teamId,
       supportName,
       session.question.id,
-      majorityChoice
+      majorityChoice,
+      tier,
+      ownerName,
+      isJammed
     );
 
     // Emit final result with majority decision to all players in this team
@@ -662,7 +741,10 @@ export class RoomManager {
         totalVotes,
         isCorrect: result.isCorrect,
         rewardAmmo: result.rewardAmmo,
-        explanationTh: result.explanationTh
+        explanationTh: result.explanationTh,
+        ammoKind: tier,
+        ownerName,
+        isJammed
       });
     });
 
@@ -679,7 +761,7 @@ export class RoomManager {
         this.startTeamQuizSession(roomId, teamId, nextItem);
       } else {
         // Broadcast quiz closed to team supporters
-        const supporters = Array.from(currentRoom.players.values()).filter(p => p.teamId === teamId && p.role === 'SUPPORT');
+        const supporters = Array.from(currentRoom.players.values()).filter(p => p.teamId === teamId && (p.role === 'SUPPORT' || p.role === 'GHOST'));
         supporters.forEach(s => {
           this.io.to(s.socketId).emit('team_quiz_closed', { teamId });
         });
@@ -690,9 +772,10 @@ export class RoomManager {
   public handleTeamSupportAnswer(socket: Socket, data: {
     questionId: string;
     selectedIndex: number;
+    confident?: boolean;
   }) {
     // Forward single answers directly as a vote
-    this.handleVoteTeamQuiz(socket, { choiceIndex: data.selectedIndex });
+    this.handleVoteTeamQuiz(socket, { choiceIndex: data.selectedIndex, confident: data.confident });
   }
 
   // ══════════════════════════════════════════════════════════════════════════════

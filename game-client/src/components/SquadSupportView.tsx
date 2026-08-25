@@ -36,9 +36,11 @@ interface SquadSupportViewProps {
   } | null;
   voteUpdate?: TeamQuizVoteUpdate | null;
   finalResult?: TeamQuizFinalResult | null;
-  onVote?: (choiceIndex: number) => void;
-  onVoteQuestion?: (choiceIndex: number) => void;
+  isGhost?: boolean;
+  onVote?: (choiceIndex: number, confident?: boolean) => void;
+  onVoteQuestion?: (choiceIndex: number, confident?: boolean) => void;
   onSendCheer: (msg: string) => void;
+  onPing?: (x: number, y: number) => void;
 }
 
 export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
@@ -50,11 +52,14 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
   quizSessionData,
   voteUpdate,
   finalResult,
+  isGhost = false,
   onVote,
   onVoteQuestion,
-  onSendCheer
+  onSendCheer,
+  onPing
 }) => {
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
+  const [isConfident, setIsConfident] = useState<boolean>(false);
   const [timeLeft, setTimeLeft] = useState<number>(12);
   const [duration, setDuration] = useState<number>(12);
 
@@ -118,8 +123,8 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
     if (selectedChoice !== null || finalResult || timeLeft <= 0) return;
     soundFx.playVote();
     setSelectedChoice(index);
-    if (onVote) onVote(index);
-    if (onVoteQuestion) onVoteQuestion(index);
+    if (onVote) onVote(index, isConfident);
+    if (onVoteQuestion) onVoteQuestion(index, isConfident);
   };
 
   const voteCounts = voteUpdate?.voteCounts || [0, 0, 0, 0];
@@ -132,17 +137,21 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
       {/* Top Tactical Command Uplink Header */}
       <div className="pixel-box bg-[#121624] p-3 sm:p-4 mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-cyan-600 border-2 border-black flex items-center justify-center shadow-[2px_2px_0_#000]">
+          <div className={`w-10 h-10 ${isGhost ? 'bg-purple-600' : 'bg-cyan-600'} border-2 border-black flex items-center justify-center shadow-[2px_2px_0_#000]`}>
             <PixelBrain size={24} color="#000000" />
           </div>
           <div>
             <div className="font-arcade text-[9px] text-cyan-400 flex items-center gap-1.5">
-              <PixelStar size={10} color="#22d3ee" />
-              <span>SQUAD SUPPORT COMMAND CONSOLE</span>
-              <PixelStar size={10} color="#22d3ee" />
+              <PixelStar size={10} color={isGhost ? '#c084fc' : '#22d3ee'} />
+              <span>{isGhost ? '👻 GHOST CONSOLE (วิญญาณผู้ช่วยรบ)' : 'SQUAD SUPPORT COMMAND CONSOLE'}</span>
+              <PixelStar size={10} color={isGhost ? '#c084fc' : '#22d3ee'} />
             </div>
             <div className="text-xs sm:text-sm font-bold text-white">
-              หน่วยสนับสนุนตอบคำถาม • <span className="text-amber-300">ระบบโหวตเสียงส่วนมาก</span>
+              {isGhost ? (
+                <span className="text-purple-300">ตอบช่วยส่งลังเสบียงแอร์ดรอป [AP] ลงสนามรบ!</span>
+              ) : (
+                <span>หน่วยสนับสนุนตอบคำถาม • <span className="text-amber-300">ระบบโหวตเสียงส่วนมาก & มั่นใจ</span></span>
+              )}
             </div>
           </div>
         </div>
@@ -211,6 +220,31 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
           <div className="text-base sm:text-lg font-extrabold text-amber-300 mb-4 text-center leading-relaxed font-thai">
             {currentQuestion.questionTh}
           </div>
+
+          {/* Confidence Betting Toggle Switch (SPEC §5) */}
+          <button
+            type="button"
+            disabled={selectedChoice !== null || !!finalResult || timeLeft <= 0}
+            onClick={() => {
+              soundFx.playSelect();
+              setIsConfident(!isConfident);
+            }}
+            className={`w-full mb-3 p-2.5 border-2 flex items-center justify-between font-arcade text-[10px] transition-all cursor-pointer ${
+              isConfident
+                ? 'bg-amber-950 border-amber-400 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.5)] animate-pulse'
+                : 'bg-black/70 border-slate-700 text-slate-400 hover:border-slate-500'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-base">{isConfident ? '🚩' : '💬'}</span>
+              <span className="font-bold">
+                {isConfident ? 'CONFIDENT BET (มั่นใจมาก! 🚩 +2 PTS / โอกาสได้ AP)' : 'NORMAL BET (ไม่มั่นใจ 💬 +1 PTS ปลอดภัย)'}
+              </span>
+            </div>
+            <span className={`text-[8px] px-2 py-0.5 border ${isConfident ? 'bg-amber-500 text-black border-amber-400' : 'bg-black/60 border-slate-600'}`}>
+              {isConfident ? 'CONFIDENT ON' : 'CLICK TO BET'}
+            </span>
+          </button>
 
           {/* Voting Consensus Header */}
           <div className="flex items-center justify-between font-arcade text-[8px] text-slate-400 mb-2 px-1">
@@ -281,7 +315,7 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
                   {isSelected && (
                     <div className="relative z-10 mt-1.5 font-arcade text-[8px] text-amber-300 flex items-center gap-1">
                       <PixelStar size={8} color="#fbbf24" />
-                      <span>โหวตข้อนี้แล้ว (YOUR VOTE)</span>
+                      <span>โหวตข้อนี้แล้ว {isConfident ? '(มั่นใจมาก 🚩)' : ''}</span>
                     </div>
                   )}
                 </button>
@@ -293,16 +327,18 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
           {selectedChoice !== null && !finalResult && (
             <div className="p-2.5 mb-2 bg-cyan-950/70 border-2 border-cyan-500/70 text-cyan-300 font-arcade text-[8px] sm:text-[9px] text-center animate-pulse flex items-center justify-center gap-2">
               <PixelClock size={12} color="#38bdf8" />
-              <span>บันทึกการโหวตของคุณแล้ว! กำลังรอหมดเวลาเพื่อรวมคะแนนเสียงส่วนใหญ่...</span>
+              <span>บันทึกการโหวตของคุณแล้ว! กำลังรอหมดเวลาเพื่อคำนวณฉันทามติ...</span>
             </div>
           )}
 
-          {/* Final Result / Majority Banner */}
+          {/* Final Result / Majority Banner (SPEC §5 & INV-3) */}
           {finalResult && (
             <div className={`p-3 border-2 font-thai text-xs flex items-center gap-2.5 animate-fade-in ${
-              finalResult.isCorrect 
-                ? 'bg-emerald-950 border-emerald-500 text-emerald-200' 
-                : 'bg-rose-950 border-rose-500 text-rose-200'
+              finalResult.isJammed
+                ? 'bg-rose-950 border-rose-500 text-rose-200'
+                : finalResult.isCorrect 
+                  ? 'bg-emerald-950 border-emerald-500 text-emerald-200' 
+                  : 'bg-amber-950 border-amber-500 text-amber-200'
             }`}>
               <div className="shrink-0">
                 {finalResult.isCorrect ? (
@@ -315,12 +351,19 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
                 <div className="font-extrabold text-white font-arcade text-[10px] flex items-center gap-1.5">
                   <PixelStar size={10} color={finalResult.isCorrect ? '#34d399' : '#f87171'} />
                   <span>
-                    {finalResult.isCorrect 
-                      ? `MAJORITY CORRECT! (+${finalResult.rewardAmmo} AMMO DELIVERED)` 
-                      : 'MAJORITY WRONG! (NO AMMO)'}
+                    {finalResult.isJammed
+                      ? '⚠️ GUN JAMMED 3s! (ปืนขัดลำกล้องจากการมั่นใจผิด)'
+                      : finalResult.isCorrect 
+                        ? `MAJORITY CORRECT! [${finalResult.ammoKind === 'AP' ? '⚡ AP เจาะเกราะ' : '💥 STD ธรรมดา'}] (+${finalResult.rewardAmmo} AMMO)` 
+                        : 'MAJORITY WRONG! (NO AMMO)'}
                   </span>
                   <PixelStar size={10} color={finalResult.isCorrect ? '#34d399' : '#f87171'} />
                 </div>
+                {finalResult.ownerName && (
+                  <div className="text-amber-300 font-arcade text-[9px] mt-0.5">
+                    👑 FASTEST ACCURATE HERO: {finalResult.ownerName}
+                  </div>
+                )}
                 <div className="text-slate-300 text-xs mt-0.5">
                   {finalResult.explanationTh}
                 </div>
@@ -332,7 +375,7 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
       ) : (
         <div className="text-center p-6 pixel-box bg-black/60 mb-4">
           <div className="inline-block mb-3 animate-bounce-short">
-            <PixelRadar size={36} color="#06b6d4" />
+            <PixelRadar size={36} color={isGhost ? '#c084fc' : '#06b6d4'} />
           </div>
           <div className="font-arcade text-xs text-amber-400 mb-1 flex items-center justify-center gap-1.5">
             <PixelStar size={10} color="#fbbf24" />
@@ -347,8 +390,36 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
         </div>
       )}
 
-      {/* Quick 8-bit Tactical Radio Cheering (2x2 grid on mobile) */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2">
+      {/* Tactical Radar for Pinging Co-ordinates (INV-2) */}
+      <div className="mb-4 p-3 bg-black/80 border-2 border-cyan-900 pixel-box">
+        <div className="flex items-center justify-between text-[9px] font-arcade text-cyan-400 mb-2">
+          <span className="flex items-center gap-1.5">
+            <PixelRadar size={12} color="#06b6d4" />
+            <span>TACTICAL RADAR (แตะเพื่อส่ง PING 📍 ชี้เป้าให้พลขับ)</span>
+          </span>
+        </div>
+        <div
+          className="w-full h-28 bg-[#090c14] border border-cyan-500/40 relative cursor-crosshair overflow-hidden grid place-items-center select-none active:scale-[0.99] transition-transform"
+          onClick={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const clickX = ((e.clientX - rect.left) / rect.width) * 512;
+            const clickY = ((e.clientY - rect.top) / rect.height) * 512;
+            soundFx.playSelect();
+            if (onPing) onPing(clickX, clickY);
+          }}
+        >
+          {/* Grid Lines */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#06b6d415_1px,transparent_1px),linear-gradient(to_bottom,#06b6d415_1px,transparent_1px)] bg-[size:16px_16px]" />
+          {/* Sweeping Radar Line */}
+          <div className="absolute inset-0 animate-spin origin-center bg-[conic-gradient(from_0deg,transparent_0_300deg,#06b6d430_360deg)] pointer-events-none" />
+          <span className="font-arcade text-[8px] text-cyan-400/80 z-10 pointer-events-none">
+            🎯 แตะบนเรดาร์นี้เพื่อส่ง PING 📍 แจ้งเตือนคนขับ
+          </span>
+        </div>
+      </div>
+
+      {/* Quick 8-bit Tactical Radio Cheering */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
         <button
           onClick={() => {
             soundFx.playSelect();
@@ -362,12 +433,12 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
         <button
           onClick={() => {
             soundFx.playSelect();
-            onSendCheer('ระวังศัตรูทางซ้าย!');
+            onSendCheer('ระวังศัตรูข้างๆ!');
           }}
           className="px-2.5 py-2.5 arcade-btn arcade-btn-rose font-arcade text-[8px] flex items-center justify-center gap-1.5 cursor-pointer"
         >
           <PixelExplosion size={12} color="#ffffff" />
-          <span>ENEMY LEFT!</span>
+          <span>ENEMY NEAR!</span>
         </button>
         <button
           onClick={() => {
@@ -394,3 +465,5 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
     </div>
   );
 };
+
+

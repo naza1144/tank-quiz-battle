@@ -7,7 +7,7 @@ interface QuizModalProps {
   question: QuizQuestion;
   tankId: string;
   crateId: string;
-  onAnswer: (selectedIndex: number) => void;
+  onAnswer: (selectedIndex: number, confident?: boolean) => void;
   onClose: () => void;
 }
 
@@ -25,6 +25,7 @@ export const QuizModal: React.FC<QuizModalProps> = ({
   const totalDuration = getDuration(question);
   const [timeLeft, setTimeLeft] = useState<number>(totalDuration);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [isConfident, setIsConfident] = useState<boolean>(false);
   const [isAnswered, setIsAnswered] = useState<boolean>(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
 
@@ -80,7 +81,7 @@ export const QuizModal: React.FC<QuizModalProps> = ({
       soundFx.playQuizWrong();
     }
 
-    onAnswer(index);
+    onAnswer(index, isConfident);
 
     // Auto close after 2.5s
     setTimeout(() => {
@@ -126,9 +127,34 @@ export const QuizModal: React.FC<QuizModalProps> = ({
         </div>
 
         {/* Question Text */}
-        <div className="mb-4 text-base sm:text-lg font-bold text-center text-amber-300 leading-relaxed bg-black/70 p-4 border-2 border-slate-800">
+        <div className="mb-3 text-base sm:text-lg font-bold text-center text-amber-300 leading-relaxed bg-black/70 p-4 border-2 border-slate-800">
           {question.questionTh}
         </div>
+
+        {/* Confidence Betting Toggle Switch */}
+        <button
+          type="button"
+          disabled={isAnswered}
+          onClick={() => {
+            soundFx.playSelect();
+            setIsConfident(!isConfident);
+          }}
+          className={`w-full mb-3 p-2 border-2 flex items-center justify-between font-arcade text-[10px] cursor-pointer transition-all ${
+            isConfident
+              ? 'bg-amber-950 border-amber-400 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.5)]'
+              : 'bg-black/70 border-slate-700 text-slate-400 hover:border-slate-500'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <span>{isConfident ? '🚩' : '💬'}</span>
+            <span className="font-bold">
+              {isConfident ? 'CONFIDENT BET (มั่นใจ! 🚩 ได้กระสุน AP เจาะเกราะ ⚡)' : 'NORMAL BET (ไม่มั่นใจ 💬 ได้กระสุนธรรมดา)'}
+            </span>
+          </div>
+          <span className={`text-[8px] px-2 py-0.5 border ${isConfident ? 'bg-amber-500 text-black border-amber-400' : 'bg-black/60 border-slate-600'}`}>
+            {isConfident ? 'ACTIVE' : 'TOGGLE'}
+          </span>
+        </button>
 
         {/* 4 Choices */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">

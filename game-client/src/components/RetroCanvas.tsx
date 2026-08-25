@@ -6,6 +6,7 @@ export interface GameStateSnapshot {
   tanks: Tank[];
   bullets: Bullet[];
   crates: QuizCrate[];
+  pings?: { id: string; x: number; y: number; senderName: string; timestamp: number }[];
   myTankId: string;
 }
 
@@ -46,6 +47,7 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = React.memo(({ stateRef })
         tanks: curTanks, 
         bullets: curBullets, 
         crates: curCrates, 
+        pings: curPings,
         myTankId: curMyTankId 
       } = curState;
 
@@ -82,29 +84,52 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = React.memo(({ stateRef })
         }
       }
 
-      // 3. Render Quiz Crates
+      // 3. Render Quiz Crates (including Ghost Airdrop)
       curCrates?.forEach((crate) => {
         if (crate.isActive) {
-          drawQuizCrate(ctx, crate.x, crate.y, crate.category, tick);
+          drawQuizCrate(ctx, crate.x, crate.y, crate.category, tick, !!crate.isGhostAirdrop);
         }
       });
 
-      // 4. Render Bullets
+      // 4. Render Bullets (AP, STD, DUD)
       curBullets?.forEach((bullet) => {
         if (!bullet.isDestroyed) {
-          drawBullet(ctx, bullet.x, bullet.y, bullet.vx, bullet.vy);
+          drawBullet(ctx, bullet.x, bullet.y, bullet.shell?.kind);
         }
       });
 
-      // 5. Render Tanks
+      // 5. Render Tactical Pings (Pulsing radar rings from teammates)
+      if (curPings && curPings.length > 0) {
+        const now = Date.now();
+        curPings.forEach(ping => {
+          const age = now - ping.timestamp;
+          if (age < 4000) {
+            const ringRadius = (age / 4000) * 36;
+            const alpha = Math.max(0, 1 - age / 4000);
+            ctx.save();
+            ctx.strokeStyle = `rgba(6, 182, 212, ${alpha})`;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(ping.x, ping.y, ringRadius, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.fillStyle = `rgba(251, 191, 36, ${alpha})`;
+            ctx.font = 'bold 8px "Prompt", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(`📍 ${ping.senderName}`, ping.x, ping.y - ringRadius - 4);
+            ctx.restore();
+          }
+        });
+      }
+
+      // 6. Render Tanks
       curTanks?.forEach((tank) => {
         if (!tank.isDead) {
-          const isMe = tank.id === curMyTankId;
-          drawTank(ctx, tank, isMe, tick);
+          drawTank(ctx, tank, tank.id === curMyTankId, tick);
         }
       });
 
-      // 6. Render High Tiles (Bushes) - bushes cover tanks inside them!
+      // 7. Render High Obstacles / Bush over tanks
       if (curMap && curMap.length > 0) {
         for (let r = 0; r < curMap.length; r++) {
           for (let c = 0; c < curMap[r].length; c++) {
@@ -130,42 +155,35 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = React.memo(({ stateRef })
   // ── Drawing Helpers ──────────────────────────────
 
   const drawBrickTile = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
-    ctx.fillStyle = '#b43a12';
+    ctx.fillStyle = '#b91c1c';
     ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 
-    ctx.fillStyle = '#1c1917';
-    ctx.fillRect(x, y + 7, TILE_SIZE, 2);
-    ctx.fillRect(x, y + 15, TILE_SIZE, 2);
-    ctx.fillRect(x, y + 23, TILE_SIZE, 2);
-    ctx.fillRect(x, y + 31, TILE_SIZE, 1);
+    ctx.fillStyle = '#7f1d1d';
+    ctx.fillRect(x, y, TILE_SIZE, 2);
+    ctx.fillRect(x, y + 16, TILE_SIZE, 2);
 
-    ctx.fillRect(x + 15, y, 2, 7);
-    ctx.fillRect(x + 7, y + 8, 2, 7);
-    ctx.fillRect(x + 23, y + 8, 2, 7);
-    ctx.fillRect(x + 15, y + 16, 2, 7);
-    ctx.fillRect(x + 7, y + 24, 2, 7);
-    ctx.fillRect(x + 23, y + 24, 2, 7);
+    ctx.fillRect(x + 15, y, 2, 16);
+    ctx.fillRect(x + 7, y + 16, 2, 16);
+    ctx.fillRect(x + 23, y + 16, 2, 16);
+
+    ctx.fillStyle = '#ef4444';
+    ctx.fillRect(x + 2, y + 4, 11, 8);
+    ctx.fillRect(x + 18, y + 4, 11, 8);
+    ctx.fillRect(x + 10, y + 20, 11, 8);
   };
 
   const drawSteelTile = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
-    ctx.fillStyle = '#64748b';
+    ctx.fillStyle = '#94a3b8';
     ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 
-    ctx.fillStyle = '#94a3b8';
-    ctx.fillRect(x + 2, y + 2, 13, 13);
-    ctx.fillRect(x + 17, y + 2, 13, 13);
-    ctx.fillRect(x + 2, y + 17, 13, 13);
-    ctx.fillRect(x + 17, y + 17, 13, 13);
-
     ctx.fillStyle = '#cbd5e1';
-    ctx.fillRect(x + 2, y + 2, 13, 2);
-    ctx.fillRect(x + 2, y + 2, 2, 13);
-    ctx.fillRect(x + 17, y + 2, 13, 2);
-    ctx.fillRect(x + 17, y + 2, 2, 13);
-    ctx.fillRect(x + 2, y + 17, 13, 2);
-    ctx.fillRect(x + 2, y + 17, 2, 13);
-    ctx.fillRect(x + 17, y + 17, 13, 2);
-    ctx.fillRect(x + 17, y + 17, 2, 13);
+    ctx.fillRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(x + 4, y + 4, 8, 8);
+
+    ctx.fillStyle = '#475569';
+    ctx.fillRect(x + 16, y + 16, 12, 12);
   };
 
   const drawBushTile = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
@@ -173,30 +191,21 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = React.memo(({ stateRef })
     ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 
     ctx.fillStyle = '#22c55e';
-    ctx.fillRect(x + 2, y + 2, 6, 6);
-    ctx.fillRect(x + 18, y + 2, 6, 6);
-    ctx.fillRect(x + 10, y + 10, 6, 6);
-    ctx.fillRect(x + 2, y + 18, 6, 6);
-    ctx.fillRect(x + 18, y + 18, 6, 6);
-
-    ctx.fillStyle = '#14532d';
-    ctx.fillRect(x + 4, y + 4, 3, 3);
-    ctx.fillRect(x + 20, y + 12, 3, 3);
-    ctx.fillRect(x + 12, y + 20, 3, 3);
+    ctx.fillRect(x + 4, y + 4, 10, 10);
+    ctx.fillRect(x + 18, y + 18, 10, 10);
   };
 
   const drawWaterTile = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
-    ctx.fillStyle = '#0369a1';
+    ctx.fillStyle = '#0284c7';
     ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 
     ctx.fillStyle = '#38bdf8';
-    ctx.fillRect(x + 2, y + 6, 12, 2);
-    ctx.fillRect(x + 16, y + 14, 12, 2);
-    ctx.fillRect(x + 4, y + 22, 14, 2);
+    ctx.fillRect(x + 2, y + 8, 12, 4);
+    ctx.fillRect(x + 16, y + 20, 12, 4);
   };
 
   const drawIceTile = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
-    ctx.fillStyle = '#e0f2fe';
+    ctx.fillStyle = '#7dd3fc';
     ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 
     ctx.fillStyle = '#bae6fd';
@@ -209,47 +218,94 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = React.memo(({ stateRef })
     x: number,
     y: number,
     category: string,
-    tick: number
+    tick: number,
+    isGhostAirdrop: boolean = false
   ) => {
     const floatY = Math.sin(tick * 0.1) * 2;
     const cy = y + floatY;
 
-    // 8-Bit Crate box
-    ctx.fillStyle = '#ca8a04';
-    ctx.fillRect(x, cy, 24, 24);
+    if (isGhostAirdrop) {
+      // Golden Glowing Airdrop Crate [AP]
+      ctx.fillStyle = '#a855f7';
+      ctx.fillRect(x - 2, cy - 2, 28, 28);
 
-    ctx.fillStyle = '#facc15';
-    ctx.fillRect(x + 2, cy + 2, 20, 20);
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(x, cy, 24, 24);
 
-    // Inner Question Mark '?'
-    ctx.fillStyle = '#713f12';
-    ctx.font = 'bold 14px "Press Start 2P", monospace';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('?', x + 12, cy + 13);
+      ctx.fillStyle = '#fef08a';
+      ctx.fillRect(x + 2, cy + 2, 20, 20);
 
-    // Category Label Badge
-    ctx.font = '7px "Prompt", sans-serif';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(category.slice(0, 4), x + 12, cy - 4);
+      ctx.fillStyle = '#7e22ce';
+      ctx.font = 'bold 10px "Press Start 2P", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('AP', x + 12, cy + 12);
+
+      ctx.font = 'bold 7px "Prompt", sans-serif';
+      ctx.fillStyle = '#c084fc';
+      ctx.fillText('👻 AIRDROP', x + 12, cy - 6);
+    } else {
+      // Standard 8-Bit Crate box
+      ctx.fillStyle = '#ca8a04';
+      ctx.fillRect(x, cy, 24, 24);
+
+      ctx.fillStyle = '#facc15';
+      ctx.fillRect(x + 2, cy + 2, 20, 20);
+
+      // Inner Question Mark '?'
+      ctx.fillStyle = '#713f12';
+      ctx.font = 'bold 14px "Press Start 2P", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('?', x + 12, cy + 13);
+
+      // Category Label Badge
+      ctx.font = '7px "Prompt", sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(category.slice(0, 4), x + 12, cy - 4);
+    }
   };
 
   const drawBullet = (
     ctx: CanvasRenderingContext2D,
     x: number,
     y: number,
-    vx: number,
-    vy: number
+    kind?: 'AP' | 'STD' | 'DUD'
   ) => {
-    ctx.fillStyle = '#facc15';
-    ctx.beginPath();
-    ctx.arc(x, y, 4, 0, Math.PI * 2);
-    ctx.fill();
+    if (kind === 'AP') {
+      // Electric Cyan Armor-Piercing Bullet
+      ctx.fillStyle = '#0284c7';
+      ctx.beginPath();
+      ctx.arc(x, y, 6, 0, Math.PI * 2);
+      ctx.fill();
 
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(x, y, 2, 0, Math.PI * 2);
-    ctx.fill();
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(x, y, 2, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (kind === 'DUD') {
+      // Grey Smoke Dud Bullet
+      ctx.fillStyle = '#64748b';
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      // Standard Bright Gold Bullet
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(x, y, 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
   };
 
   const drawTank = (

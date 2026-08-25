@@ -329,16 +329,20 @@ io.on('connection', (socket: Socket) => {
     roomManager.handleTankShoot(socket);
   });
 
-  socket.on('answer_quiz', (data: { tankId: string; crateId: string; questionId: string; selectedIndex: number }) => {
+  socket.on('answer_quiz', (data: { tankId: string; crateId: string; questionId: string; selectedIndex: number; confident?: boolean }) => {
     roomManager.handleQuizAnswer(socket, data);
   });
 
-  socket.on('team_support_answer', (data: { questionId: string; selectedIndex: number }) => {
+  socket.on('team_support_answer', (data: { questionId: string; selectedIndex: number; confident?: boolean }) => {
     roomManager.handleTeamSupportAnswer(socket, data);
   });
 
-  socket.on('vote_team_quiz', (data: { choiceIndex: number }) => {
+  socket.on('vote_team_quiz', (data: { choiceIndex: number; confident?: boolean }) => {
     roomManager.handleVoteTeamQuiz(socket, data);
+  });
+
+  socket.on('tactical_ping', (data: { x: number; y: number }) => {
+    roomManager.handleTacticalPing(socket, data);
   });
 
   socket.on('auto_balance_teams', () => {

@@ -155,6 +155,8 @@ export class GameEngine {
       shieldEndTime: Date.now() + 3000, // 3s spawn shield
       speedBoostEndTime: 0,
       stunEndTime: 0,
+      jammedUntil: 0,
+      shells: [],
       teamId,
       isBot,
       botDifficulty,
@@ -183,10 +185,22 @@ export class GameEngine {
   public tankShoot(tankId: string): boolean {
     const tank = this.tanks.get(tankId);
     if (!tank || tank.isDead) return false;
-    if (Date.now() < tank.stunEndTime) return false;
+    const now = Date.now();
+    if (now < tank.stunEndTime) return false;
+
+    // Check Gun Jammed from Consensus Tier 'JAM'
+    if (now < (tank.jammedUntil || 0)) {
+      this.listeners.onGameEvent({
+        type: 'QUIZ_FAIL',
+        message: `⚠️ ปืนของ ${tank.playerName} ขัดลำกล้อง! ไม่สามารถยิงได้ชั่วคราว`,
+        sound: 'NO_AMMO',
+        tankId: tank.id,
+        timestamp: now
+      });
+      return false;
+    }
 
     // Cooldown check (250ms minimum)
-    const now = Date.now();
     if (now - tank.lastShootTime < 250) return false;
 
     // Check ammo
@@ -204,13 +218,19 @@ export class GameEngine {
     tank.ammo -= 1;
     tank.lastShootTime = now;
 
+    // Pop top shell from tank stack (SPEC §4 Ammo as object)
+    if (!tank.shells) tank.shells = [];
+    const shell = tank.shells.length > 0
+      ? tank.shells.pop()
+      : { kind: 'STD' as const, damage: tank.bulletDamage };
+
     // Spawn bullet at cannon tip
     let bx = tank.x + tank.width / 2;
     let by = tank.y + tank.height / 2;
     let vx = 0;
     let vy = 0;
 
-    const bSpeed = tank.bulletSpeed;
+    const bSpeed = shell?.kind === 'AP' ? tank.bulletSpeed * 1.2 : tank.bulletSpeed;
     if (tank.direction === 'UP') {
       by = tank.y - 4;
       vy = -bSpeed;
@@ -233,17 +253,19 @@ export class GameEngine {
       y: by,
       vx,
       vy,
-      damage: tank.bulletDamage,
+      damage: shell ? shell.damage : tank.bulletDamage,
       speed: bSpeed,
-      radius: 4,
-      isDestroyed: false
+      radius: shell?.kind === 'AP' ? 5 : 4,
+      isDestroyed: false,
+      shell,
+      bouncesLeft: 1 // Steel wall ricochet (SPEC §3)
     };
 
     this.bullets.push(bullet);
 
     this.listeners.onGameEvent({
       type: 'TANK_HIT',
-      message: `${tank.playerName} ยิงกระสุน!`,
+      message: `${tank.playerName} ยิงกระสุน${shell?.kind === 'AP' ? 'เจาะเกราะ (AP) ⚡' : shell?.kind === 'DUD' ? 'ด้าน (DUD)' : ''}!`,
       sound: 'SHOOT',
       tankId: tank.id,
       timestamp: now
@@ -257,14 +279,15 @@ export class GameEngine {
     tankId: string, 
     crateId: string, 
     questionId: string, 
-    selectedIndex: number
-  ): { isCorrect: boolean; rewardAmmo: number; explanationTh: string } {
+    selectedIndex: number,
+    confident: boolean = false
+  ): { isCorrect: boolean; rewardAmmo: number; explanationTh: string; ammoKind: 'AP' | 'STD' | 'DUD' } {
     const tank = this.tanks.get(tankId);
     const question = this.quizManager.getQuestionById(questionId);
     const now = Date.now();
 
     if (!question) {
-      return { isCorrect: false, rewardAmmo: 0, explanationTh: 'คำถามไม่ถูกต้อง' };
+      return { isCorrect: false, rewardAmmo: 0, explanationTh: 'คำถามไม่ถูกต้อง', ammoKind: 'STD' };
     }
 
     const isCorrect = selectedIndex === question.correctIndex;
@@ -275,31 +298,60 @@ export class GameEngine {
       crate.respawnTime = now + 12000; // Respawn after 12s
     }
 
+    let ammoKind: 'AP' | 'STD' | 'DUD' = 'STD';
+    let damage = 1;
+
     if (tank) {
       tank.answeringQuizId = undefined;
+      if (!tank.shells) tank.shells = [];
+
       if (isCorrect) {
-        tank.ammo = Math.min(tank.maxAmmo, tank.ammo + question.rewardAmmo);
-        tank.score += question.bonusPoints;
+        if (confident) {
+          ammoKind = 'AP';
+          damage = 2;
+        } else {
+          ammoKind = 'STD';
+          damage = 1;
+        }
+
+        const ammoGain = question.rewardAmmo || 2;
+        for (let k = 0; k < ammoGain; k++) {
+          tank.shells.push({
+            kind: ammoKind,
+            damage,
+            ownerId: tank.playerId,
+            ownerName: tank.playerName,
+            questionId: question.id
+          });
+        }
+
+        tank.ammo = Math.min(tank.maxAmmo, tank.ammo + ammoGain);
+        tank.score += question.bonusPoints * (confident ? 1.5 : 1);
         tank.correctAnswers += 1;
 
-        // Bonus: 25% chance of speed boost or shield
+        // Bonus: 25% chance of shield
         if (Math.random() < 0.25) {
           tank.shieldEndTime = now + 4000;
         }
 
         this.listeners.onGameEvent({
           type: 'QUIZ_SUCCESS',
-          message: `🎯 ${tank.playerName} ตอบคำถามถูก! ได้รับกระสุน +${question.rewardAmmo} นัด (+${question.bonusPoints} คะแนน)`,
+          message: `🎯 ${tank.playerName} ตอบถูก${confident ? ' (มั่นใจมาก! 🚩)' : ''}! ได้รับกระสุน ${ammoKind === 'AP' ? 'เจาะเกราะ (AP) ⚡' : 'มาตรฐาน'} +${ammoGain} นัด`,
           sound: 'QUIZ_CORRECT',
           tankId: tank.id,
           teamId: tank.teamId,
           timestamp: now
         });
       } else {
-        tank.stunEndTime = now + 1500; // 1.5s stun
+        if (confident) {
+          tank.jammedUntil = now + 3000; // 3s jammed if confident wrong!
+        } else {
+          tank.stunEndTime = now + 1200; // 1.2s stun
+        }
+
         this.listeners.onGameEvent({
           type: 'QUIZ_FAIL',
-          message: `❌ ${tank.playerName} ตอบผิด! ไม่ได้กระสุน (ติดสตัน 1.5 วิ)`,
+          message: `❌ ${tank.playerName} ตอบผิด${confident ? ' (มั่นใจผิด! ปืนขัด 3 วิ ⚠️)' : '!'} ไม่ได้กระสุน`,
           sound: 'QUIZ_WRONG',
           tankId: tank.id,
           teamId: tank.teamId,
@@ -311,7 +363,8 @@ export class GameEngine {
     return {
       isCorrect,
       rewardAmmo: isCorrect ? question.rewardAmmo : 0,
-      explanationTh: question.explanationTh
+      explanationTh: question.explanationTh,
+      ammoKind
     };
   }
 
@@ -320,13 +373,16 @@ export class GameEngine {
     teamId: string, 
     supportPlayerName: string, 
     questionId: string, 
-    selectedIndex: number
-  ): { isCorrect: boolean; rewardAmmo: number; explanationTh: string } {
+    selectedIndex: number,
+    tier: 'AP' | 'STD' | 'DUD' = 'STD',
+    ownerName?: string,
+    isJammed: boolean = false
+  ): { isCorrect: boolean; rewardAmmo: number; explanationTh: string; ammoKind: 'AP' | 'STD' | 'DUD'; ownerName?: string; isJammed: boolean } {
     const question = this.quizManager.getQuestionById(questionId);
     const now = Date.now();
 
     if (!question) {
-      return { isCorrect: false, rewardAmmo: 0, explanationTh: 'คำถามไม่ถูกต้อง' };
+      return { isCorrect: false, rewardAmmo: 0, explanationTh: 'คำถามไม่ถูกต้อง', ammoKind: tier, isJammed: false };
     }
 
     const isCorrect = selectedIndex === question.correctIndex;
@@ -340,16 +396,43 @@ export class GameEngine {
       }
     }
 
+    let rewardAmmo = isCorrect ? (question.rewardAmmo || 2) : 0;
+    let damage = tier === 'AP' ? 2 : tier === 'DUD' ? 0.5 : 1;
+
     if (teamTank) {
       teamTank.answeringQuizId = undefined; // Release crate lock
-      if (isCorrect) {
-        teamTank.ammo = Math.min(teamTank.maxAmmo, teamTank.ammo + question.rewardAmmo);
-        teamTank.score += question.bonusPoints;
+      if (!teamTank.shells) teamTank.shells = [];
+
+      if (isJammed) {
+        teamTank.jammedUntil = now + 3000; // 3s gun jam
+        this.listeners.onGameEvent({
+          type: 'QUIZ_FAIL',
+          message: `⚠️ ทีม ${teamId} ตอบผิดและมั่นใจผิด! ปืนของ ${teamTank.playerName} ขัดลำกล้อง 3 วินาที`,
+          sound: 'NO_AMMO',
+          tankId: teamTank.id,
+          teamId: teamId,
+          timestamp: now
+        });
+      } else if (isCorrect) {
+        for (let k = 0; k < rewardAmmo; k++) {
+          teamTank.shells.push({
+            kind: tier,
+            damage,
+            ownerName,
+            questionId: question.id
+          });
+        }
+
+        teamTank.ammo = Math.min(teamTank.maxAmmo, teamTank.ammo + rewardAmmo);
+        teamTank.score += question.bonusPoints * (tier === 'AP' ? 1.5 : 1);
         teamTank.correctAnswers += 1;
+
+        const tierLabel = tier === 'AP' ? '⚡ กระสุนเจาะเกราะ (AP)' : tier === 'DUD' ? '💨 กระสุนด้าน (DUD)' : '💥 กระสุนมาตรฐาน';
+        const contributorBadge = ownerName ? ` [เครดิต: ${ownerName} 🧠]` : '';
 
         this.listeners.onGameEvent({
           type: 'AMMO_DELIVERED',
-          message: `📦 [${supportPlayerName}] ตอบถูก! ส่งกระสุน +${question.rewardAmmo} นัด ให้ ${teamTank.playerName}`,
+          message: `📦 [${supportPlayerName}] ส่ง${tierLabel} +${rewardAmmo} นัด ให้ ${teamTank.playerName}${contributorBadge}`,
           sound: 'QUIZ_CORRECT',
           tankId: teamTank.id,
           teamId: teamId,
@@ -358,7 +441,7 @@ export class GameEngine {
       } else {
         this.listeners.onGameEvent({
           type: 'QUIZ_FAIL',
-          message: `❌ [${supportPlayerName}] ตอบคำถามผิด! (ไม่ได้กระสุน)`,
+          message: `❌ ทีม ${teamId} ตอบผิด! ไม่ได้กระสุน`,
           sound: 'QUIZ_WRONG',
           tankId: teamTank.id,
           teamId: teamId,
@@ -369,8 +452,11 @@ export class GameEngine {
 
     return {
       isCorrect,
-      rewardAmmo: isCorrect ? question.rewardAmmo : 0,
-      explanationTh: question.explanationTh
+      rewardAmmo,
+      explanationTh: question.explanationTh,
+      ammoKind: tier,
+      ownerName,
+      isJammed
     };
   }
 
@@ -493,26 +579,59 @@ export class GameEngine {
       if (gridR >= 0 && gridR < MAP_GRID_SIZE && gridC >= 0 && gridC < MAP_GRID_SIZE) {
         const tile = this.map[gridR][gridC];
         if (tile === 'BRICK') {
-          this.map[gridR][gridC] = 'EMPTY'; // Destroy brick
+          // DUD bullets cannot break bricks (SPEC §4)
+          if (b.shell?.kind !== 'DUD') {
+            this.map[gridR][gridC] = 'EMPTY'; // Destroy brick
+            this.listeners.onGameEvent({
+              type: 'TANK_HIT',
+              message: 'กำแพงอิฐถูกทำลาย!',
+              sound: 'BRICK_HIT',
+              timestamp: now
+            });
+          }
           b.isDestroyed = true;
-          this.listeners.onGameEvent({
-            type: 'TANK_HIT',
-            message: 'กำแพงอิฐถูกทำลาย!',
-            sound: 'BRICK_HIT',
-            timestamp: now
-          });
           this.bullets.splice(i, 1);
           continue;
         } else if (tile === 'STEEL') {
-          b.isDestroyed = true;
-          this.listeners.onGameEvent({
-            type: 'TANK_HIT',
-            message: 'กระสุนกระทบกำแพงเหล็ก!',
-            sound: 'STEEL_HIT',
-            timestamp: now
-          });
-          this.bullets.splice(i, 1);
-          continue;
+          // Ricochet: Bounce once if bouncesLeft > 0 (SPEC §3 & §10)
+          if (b.bouncesLeft && b.bouncesLeft > 0) {
+            b.bouncesLeft--;
+            if (Math.abs(b.vx) > Math.abs(b.vy)) {
+              b.vx = -b.vx;
+              b.x += b.vx * dt * 2;
+            } else {
+              b.vy = -b.vy;
+              b.y += b.vy * dt * 2;
+            }
+            this.listeners.onGameEvent({
+              type: 'TANK_HIT',
+              message: '⚡ กระสุนชิ่งกำแพงเหล็ก!',
+              sound: 'STEEL_HIT',
+              timestamp: now
+            });
+            continue;
+          } else {
+            // AP Shell penetrates and destroys Steel (SPEC §4)
+            if (b.shell?.kind === 'AP') {
+              this.map[gridR][gridC] = 'EMPTY';
+              this.listeners.onGameEvent({
+                type: 'TANK_HIT',
+                message: '💥 กระสุนเจาะเกราะ (AP) ระเบิดกำแพงเหล็กกระจุย!',
+                sound: 'EXPLOSION',
+                timestamp: now
+              });
+            } else {
+              this.listeners.onGameEvent({
+                type: 'TANK_HIT',
+                message: 'กระสุนกระทบกำแพงเหล็ก!',
+                sound: 'STEEL_HIT',
+                timestamp: now
+              });
+            }
+            b.isDestroyed = true;
+            this.bullets.splice(i, 1);
+            continue;
+          }
         }
       }
 
@@ -567,9 +686,11 @@ export class GameEngine {
                 shooterTank.score += 300;
               }
 
+              const contributorBadge = b.shell?.ownerName ? ` [กระสุนของ: ${b.shell.ownerName} 🧠]` : '';
+
               this.listeners.onGameEvent({
                 type: 'TANK_DESTROYED',
-                message: `💥 ${shooterName} ยิงทำลายรถถังของ ${targetTank.playerName}!`,
+                message: `💥 ${shooterName} ยิงทำลายรถถังของ ${targetTank.playerName}!${contributorBadge}`,
                 sound: 'EXPLOSION',
                 tankId: targetTank.id,
                 timestamp: now
