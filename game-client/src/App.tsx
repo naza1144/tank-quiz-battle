@@ -662,9 +662,6 @@ export const App: React.FC = () => {
                 finalResult={squadFinalResult}
                 isGhost={myPlayer?.role === 'GHOST'}
                 onVote={handleSquadVote}
-                onSendCheer={(msg) => {
-                  socketRef.current?.emit('send_cheer', { message: msg });
-                }}
               />
             ) : (
               // 2D Battle City Canvas

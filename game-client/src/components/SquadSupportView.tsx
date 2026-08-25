@@ -39,7 +39,6 @@ interface SquadSupportViewProps {
   isGhost?: boolean;
   onVote?: (choiceIndex: number, confident?: boolean) => void;
   onVoteQuestion?: (choiceIndex: number, confident?: boolean) => void;
-  onSendCheer: (msg: string) => void;
 }
 
 export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
@@ -53,8 +52,7 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
   finalResult,
   isGhost = false,
   onVote,
-  onVoteQuestion,
-  onSendCheer
+  onVoteQuestion
 }) => {
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
   const [isConfident, setIsConfident] = useState<boolean>(false);
@@ -410,50 +408,6 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
           </div>
         </div>
       )}
-
-      {/* Quick 8-bit Tactical Radio Cheering */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-        <button
-          onClick={() => {
-            soundFx.playSelect();
-            onSendCheer('เติมกระสุนแล้วนะ สู้ๆ!');
-          }}
-          className="px-2.5 py-2.5 arcade-btn arcade-btn-slate font-arcade text-[8px] flex items-center justify-center gap-1.5 cursor-pointer"
-        >
-          <PixelAmmo size={12} color="#fbbf24" />
-          <span>AMMO SENT!</span>
-        </button>
-        <button
-          onClick={() => {
-            soundFx.playSelect();
-            onSendCheer('ระวังศัตรูข้างๆ!');
-          }}
-          className="px-2.5 py-2.5 arcade-btn arcade-btn-rose font-arcade text-[8px] flex items-center justify-center gap-1.5 cursor-pointer"
-        >
-          <PixelExplosion size={12} color="#ffffff" />
-          <span>ENEMY NEAR!</span>
-        </button>
-        <button
-          onClick={() => {
-            soundFx.playSelect();
-            onSendCheer('ลุยเลยเพื่อน รอดแน่นอน!');
-          }}
-          className="px-2.5 py-2.5 arcade-btn arcade-btn-amber font-arcade text-[8px] flex items-center justify-center gap-1.5 cursor-pointer"
-        >
-          <PixelTrophy size={12} color="#000000" />
-          <span>WE GOT THIS!</span>
-        </button>
-        <button
-          onClick={() => {
-            soundFx.playSelect();
-            onSendCheer('รวมพลังโหวตข้อถูกเร็ว!');
-          }}
-          className="px-2.5 py-2.5 arcade-btn arcade-btn-cyan font-arcade text-[8px] flex items-center justify-center gap-1.5 cursor-pointer"
-        >
-          <PixelBrain size={12} color="#000000" />
-          <span>VOTE FAST!</span>
-        </button>
-      </div>
 
     </div>
   );
