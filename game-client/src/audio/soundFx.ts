@@ -5,6 +5,36 @@ class RetroSoundEngine {
   private bgmTimer: number | null = null;
   private bgmStep: number = 0;
   private bgmGain: GainNode | null = null;
+  private bgmIntensity: 'NORMAL' | 'CRITICAL_HP' | 'PANIC' = 'NORMAL';
+
+  constructor() {
+    if (typeof window !== 'undefined') {
+      // Try immediate auto-start
+      setTimeout(() => {
+        this.initContext();
+        this.startBgm();
+      }, 100);
+
+      // Instant unblock on any user gesture across the whole page
+      const triggerAutoplay = () => {
+        if (!this.isMuted && !this.isBgmMuted) {
+          this.initContext();
+          if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume().catch(() => {});
+          }
+          if (!this.bgmTimer) {
+            this.startBgm();
+          }
+        }
+      };
+
+      const events = ['click', 'pointerdown', 'touchstart', 'touchend', 'keydown', 'mousedown', 'focus'];
+      events.forEach(evt => {
+        window.addEventListener(evt, triggerAutoplay, { passive: true });
+        document.addEventListener(evt, triggerAutoplay, { passive: true });
+      });
+    }
+  }
 
   private initContext() {
     if (!this.ctx) {
@@ -14,7 +44,7 @@ class RetroSoundEngine {
       }
     }
     if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
+      this.ctx.resume().catch(() => {});
     }
   }
 
@@ -41,8 +71,6 @@ class RetroSoundEngine {
     }
     return !this.isBgmMuted;
   }
-
-  private bgmIntensity: 'NORMAL' | 'CRITICAL_HP' | 'PANIC' = 'NORMAL';
 
   public isBgmActive(): boolean {
     return !this.isBgmMuted && !this.isMuted;
