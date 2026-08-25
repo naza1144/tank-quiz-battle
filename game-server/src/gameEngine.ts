@@ -258,7 +258,7 @@ export class GameEngine {
       radius: shell?.kind === 'AP' ? 5 : 4,
       isDestroyed: false,
       shell,
-      bouncesLeft: 1 // Steel wall ricochet (SPEC §3)
+      bouncesLeft: 2 // Steel wall ricochet up to 2 times!
     };
 
     this.bullets.push(bullet);
@@ -593,7 +593,8 @@ export class GameEngine {
           this.bullets.splice(i, 1);
           continue;
         } else if (tile === 'STEEL') {
-          // Ricochet: Bounce once if bouncesLeft > 0 (SPEC §3 & §10)
+          // Steel walls (including outer border) are 100% INDESTRUCTIBLE.
+          // Ricochet: Bounce up to 2 times on steel/border walls!
           if (b.bouncesLeft && b.bouncesLeft > 0) {
             b.bouncesLeft--;
             if (Math.abs(b.vx) > Math.abs(b.vy)) {
@@ -611,23 +612,13 @@ export class GameEngine {
             });
             continue;
           } else {
-            // AP Shell penetrates and destroys Steel (SPEC §4)
-            if (b.shell?.kind === 'AP') {
-              this.map[gridR][gridC] = 'EMPTY';
-              this.listeners.onGameEvent({
-                type: 'TANK_HIT',
-                message: '💥 กระสุนเจาะเกราะ (AP) ระเบิดกำแพงเหล็กกระจุย!',
-                sound: 'EXPLOSION',
-                timestamp: now
-              });
-            } else {
-              this.listeners.onGameEvent({
-                type: 'TANK_HIT',
-                message: 'กระสุนกระทบกำแพงเหล็ก!',
-                sound: 'STEEL_HIT',
-                timestamp: now
-              });
-            }
+            // Out of bounces: bullet disintegrates, steel wall is 100% indestructible
+            this.listeners.onGameEvent({
+              type: 'TANK_HIT',
+              message: 'กระสุนกระทบกำแพงเหล็ก!',
+              sound: 'STEEL_HIT',
+              timestamp: now
+            });
             b.isDestroyed = true;
             this.bullets.splice(i, 1);
             continue;
