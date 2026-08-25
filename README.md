@@ -77,13 +77,21 @@
 - **GPU Anti-Flicker Fix**: กำจัดอาการกระพริบของ Canvas บนเบราว์เซอร์มือถือ (iOS Safari / Android Chrome)
 - **High-Precision useRef Countdown**: ตัวนับเวลาแม่นยำสูง ไม่แกว่งหรือค้างจากการ Re-render
 
+### 10. 📖 สมุดคู่มือสนามรบเปิดอ่านได้ตลอดเวลา (In-Game Tactical Field Manual)
+- คลิกปุ่ม **`[📖 คู่มือการเล่น]`** ได้จากทุกหน้าจอ (Lobby, Room Select, Game HUD)
+- อธิบายครบทุกระบบ: วิธีควบคุม, คลาสรถถัง 4 สาย, กระสุนพิเศษ 4 ธาตุ, ไม้ตายเลเซอร์, โดรนเสบียง, ระบบวิญญาณชุบชีวิต และเทคนิคการรบ
+
+### 11. 🔐 ระบบยืนยันตัวตน Google OAuth & Standalone Guest Mode
+- **เข้าสู่ระบบด้วย Google**: ล็อกอินผ่านบัญชี Google จริงได้อย่างราบรื่นผ่าน Identity Provider
+- **Guest Mode**: เข้าเล่นได้ทันที 1-Click โดยไม่ต้องลงทะเบียน
+
 ---
 
 ## 📂 โครงสร้างโปรเจกต์ (Project Architecture)
 
 ```text
 tank-quiz-battle/
-├── game-client/                     # Frontend Application (React + Vite + Tailwind)
+├── game-client/                     # Frontend Application (React 18 + Vite + Tailwind)
 │   ├── src/
 │   │   ├── audio/soundFx.ts         # 8-Bit Multi-channel Chiptune Synthesizer
 │   │   ├── components/
@@ -93,6 +101,7 @@ tank-quiz-battle/
 │   │   │   ├── SquadSupportView.tsx # Mobile-friendly Squad Voting Console & Airdrop Dock
 │   │   │   ├── LobbyView.tsx        # 6-Team Arcade Squad Formation & Role Picker
 │   │   │   ├── RoomSelectView.tsx   # Mission Select & Subject Selection
+│   │   │   ├── GameGuideModal.tsx   # Interactive In-Game Field Manual (7 Tabs)
 │   │   │   ├── TeacherPortalView.tsx# PIN-Protected Teacher Dashboard & Room Manager
 │   │   │   ├── TeacherQuizModal.tsx # Quiz Bank Management Modal
 │   │   │   ├── QuizModal.tsx        # Single-player FFA Quiz Popup
@@ -106,38 +115,49 @@ tank-quiz-battle/
 ├── game-server/                     # Backend Server (Node.js + Express + Socket.io)
 │   ├── src/
 │   │   ├── auth.ts                  # Authentication & Guest Token Handler
+│   │   ├── googleAuth.ts            # Google OAuth & Identity Provider Integration
 │   │   ├── gameEngine.ts            # Authoritative 2D Physics, Mega Laser & Ghost Revival Logic
 │   │   ├── mapTemplates.ts          # 28x28 Procedural & Thematic Map Generators
 │   │   ├── quizBank.ts              # Quiz CRUD Manager, Category Counter & Bulk Importer
 │   │   ├── roomManager.ts           # 6-Team Lifecycle, Sequential Queues & Auto-balance
 │   │   ├── server.ts                # HTTP Server, Open Quiz REST APIs & WebSockets
 │   │   └── types.ts                 # Shared Server Types & Protocols
-│   ├── test-multi-round-exhaustive.ts # Master 4-Phase Exhaustive Stress Test Suite
+│   ├── test-google-auth.ts          # Google OAuth Flow & Token Verification Tests
+│   ├── test-brutal-full-room-coop.ts# 60-Player Full-Room 6-Squad Brutal Stress Test
+│   ├── test-multi-round-exhaustive.ts # Master 4-Phase Multi-Round Stress Test Suite
+│   ├── test-exhaustive-all-modes.ts # Archetypes, Ammo Types, Friendly Fire & Scoring Tests
+│   ├── test-multiplayer-full.ts     # Real Socket.IO FFA & Squad Multiplayer E2E Tests
+│   ├── test-socket-multiplayer.ts   # Room Lifecycle & Combat Resolution Tests
+│   ├── test-spec-features.ts        # Tactical Ping, Confidence Betting & Ricochet Tests
+│   ├── test-game.ts                 # Core Map Generation & Physics Engine Tests
 │   ├── Dockerfile
 │   └── package.json
 │
 ├── deploy-all.sh                    # Single-Command Automated Deployment Pipeline
 │
 ├── terraform/                       # Infrastructure as Code (Terraform for Kubernetes)
-│   ├── main.tf                      # Namespaces, Deployments, Services & NodePorts
-│   ├── variables.tf                 # Configuration Variables & Secrets
-│   ├── outputs.tf                   # Endpoints Output
-│   └── terraform.tfvars             # Production Values
-│
 ├── ansible/                         # Configuration Management & Automation Playbook
-│   ├── ansible.cfg                  # SSH & Inventory Configuration
-│   ├── inventory.ini                # K3s Node Server Definitions
-│   └── playbook.yml                 # Build, Export, Import & Deploy Playbook
-│
 ├── k8s/                             # Kubernetes Manifests
-│   ├── namespace.yaml
-│   ├── game-server-deployment.yaml
-│   ├── game-client-deployment.yaml
-│   ├── ingress.yaml
-│   └── service.yaml
-│
 ├── DOCS_PROJECT_MANUAL.md           # คู่มือโครงการและสถาปัตยกรรมระบบอย่างละเอียด
 └── DOCS_IAC_DEPLOYMENT.md           # คู่มือการติดตั้งระบบอัตโนมัติด้วย Terraform & Ansible
+```
+
+---
+
+## 🧪 การทดสอบระบบอัตโนมัติ (Automated Test Battery)
+
+รันชุดทดสอบครอบคลุมทุกระบบแบบครบ 100%:
+
+```bash
+cd game-server
+npx tsx test-google-auth.ts
+npx tsx test-brutal-full-room-coop.ts
+npx tsx test-multi-round-exhaustive.ts
+npx tsx test-exhaustive-all-modes.ts
+npx tsx test-multiplayer-full.ts
+npx tsx test-socket-multiplayer.ts
+npx tsx test-spec-features.ts
+npx tsx test-game.ts
 ```
 
 ---
@@ -166,7 +186,8 @@ npm run dev
 ---
 
 ## 🌐 การเข้าใช้งานระบบ (Access Endpoints)
-- **🎮 Game Client URL**: `http://192.168.50.96:30080`
+- **🎮 Game Client (หลัก)**: `http://192.168.50.96:30080` หรือ `https://tank.192-168-50-96.sslip.io`
 - **🔒 Teacher Portal (PIN: 1990)**: `http://192.168.50.96:30080/#teacher`
 - **📚 Open REST API Categories**: `http://192.168.50.96:30080/api/quiz/categories`
 - **📚 Open REST API Questions**: `http://192.168.50.96:30080/api/quiz/questions`
+- **🩺 Health Check**: `http://192.168.50.96:30080/api/health`
