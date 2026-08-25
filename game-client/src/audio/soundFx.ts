@@ -42,12 +42,34 @@ class RetroSoundEngine {
     return !this.isBgmMuted;
   }
 
+  private bgmIntensity: 'NORMAL' | 'CRITICAL_HP' | 'PANIC' = 'NORMAL';
+
   public isBgmActive(): boolean {
     return !this.isBgmMuted && !this.isMuted;
   }
 
-  // --- 8-BIT RETRO BACKGROUND MUSIC (CHIPTUNE) ---
-  // Authentic 8-bit battle theme loop generated with Square + Triangle + Noise channels
+  // --- DYNAMIC ADAPTIVE 8-BIT BGM ENGINE ---
+  // Modulates tempo, pitch, and arpeggios based on HP & Round Timer (Normal -> Critical HP -> Panic)
+  public updateGameStateAudio(hp: number, maxHp: number, roundTimeRemaining: number) {
+    let nextIntensity: 'NORMAL' | 'CRITICAL_HP' | 'PANIC' = 'NORMAL';
+
+    if (roundTimeRemaining > 0 && roundTimeRemaining <= 35) {
+      nextIntensity = 'PANIC'; // 🚨 Final 35 seconds countdown!
+    } else if (hp === 1 && maxHp > 1) {
+      nextIntensity = 'CRITICAL_HP'; // 💔 1 HP left - Danger mode!
+    } else {
+      nextIntensity = 'NORMAL';
+    }
+
+    if (nextIntensity !== this.bgmIntensity) {
+      this.bgmIntensity = nextIntensity;
+      if (this.bgmTimer) {
+        this.stopBgm();
+        this.startBgm();
+      }
+    }
+  }
+
   public startBgm() {
     if (this.isMuted || this.isBgmMuted || this.bgmTimer) return;
     this.initContext();
@@ -59,20 +81,28 @@ class RetroSoundEngine {
     this.bgmGain.connect(this.ctx.destination);
 
     // Chiptune melody notes (C4, D4, E4, G4, A4, C5, Bb4, etc.)
-    const melody = [
+    const baseMelody = [
       261.63, 0, 329.63, 392.00, 523.25, 0, 392.00, 329.63,
       293.66, 0, 349.23, 440.00, 587.33, 0, 440.00, 349.23,
       329.63, 0, 392.00, 493.88, 659.25, 0, 493.88, 392.00,
       466.16, 440.00, 392.00, 349.23, 293.66, 329.63, 349.23, 392.00
     ];
 
-    const bass = [
+    const baseBass = [
       130.81, 130.81, 130.81, 130.81, 146.83, 146.83, 146.83, 146.83,
       164.81, 164.81, 164.81, 164.81, 174.61, 174.61, 196.00, 196.00
     ];
 
-    this.bgmStep = 0;
-    const stepDuration = 140; // ~107 BPM 16th notes
+    // Pitch multiplier based on intensity
+    const pitchMultiplier = this.bgmIntensity === 'PANIC' ? 1.122 : 1.0; // +2 semitones in Panic mode!
+    const melody = baseMelody.map(freq => freq * pitchMultiplier);
+    const bass = baseBass.map(freq => freq * pitchMultiplier);
+
+    // Adaptive Tempo: Normal ~107 BPM (140ms), Critical ~136 BPM (110ms), Panic ~166 BPM (90ms)
+    const stepDuration = 
+      this.bgmIntensity === 'PANIC' ? 90 : 
+      this.bgmIntensity === 'CRITICAL_HP' ? 110 : 
+      140;
 
     const tick = () => {
       if (!this.ctx || this.isMuted || this.isBgmMuted) {
@@ -81,6 +111,7 @@ class RetroSoundEngine {
       }
 
       const now = this.ctx.currentTime;
+      const stepDurSec = stepDuration / 1000;
       const mNote = melody[this.bgmStep % melody.length];
       const bNote = bass[Math.floor(this.bgmStep / 2) % bass.length];
 
@@ -92,12 +123,12 @@ class RetroSoundEngine {
         osc.frequency.setValueAtTime(mNote, now);
 
         g.gain.setValueAtTime(0.06, now);
-        g.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+        g.gain.exponentialRampToValueAtTime(0.001, now + stepDurSec * 0.8);
 
         osc.connect(g);
         g.connect(this.bgmGain);
         osc.start(now);
-        osc.stop(now + 0.11);
+        osc.stop(now + stepDurSec * 0.8);
       }
 
       // 2. Triangle Wave Bassline
@@ -108,17 +139,44 @@ class RetroSoundEngine {
         bOsc.frequency.setValueAtTime(bNote, now);
 
         bG.gain.setValueAtTime(0.09, now);
-        bG.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+        bG.gain.exponentialRampToValueAtTime(0.01, now + stepDurSec * 1.6);
 
         bOsc.connect(bG);
         bG.connect(this.bgmGain);
         bOsc.start(now);
-        bOsc.stop(now + 0.22);
+        bOsc.stop(now + stepDurSec * 1.6);
       }
 
-      // 3. 8-bit Noise Hi-Hat & Snare Percussion
-      if (this.bgmGain && (this.bgmStep % 4 === 2 || this.bgmStep % 8 === 6)) {
-        this.playNoisePercussion(now, this.bgmStep % 8 === 6);
+      // 3. Fast High-Intensity Arpeggiator (Critical HP & Panic Mode)
+      if (this.bgmIntensity !== 'NORMAL' && this.bgmGain) {
+        const arpNotes = [mNote * 1.5, mNote * 2, mNote * 2.5];
+        const arpNote = arpNotes[this.bgmStep % arpNotes.length];
+        if (arpNote > 0) {
+          const arpOsc = this.ctx.createOscillator();
+          const arpG = this.ctx.createGain();
+          arpOsc.type = 'sawtooth';
+          arpOsc.frequency.setValueAtTime(arpNote, now);
+          arpG.gain.setValueAtTime(0.02, now);
+          arpG.gain.exponentialRampToValueAtTime(0.001, now + stepDurSec * 0.5);
+          arpOsc.connect(arpG);
+          arpG.connect(this.bgmGain);
+          arpOsc.start(now);
+          arpOsc.stop(now + stepDurSec * 0.5);
+        }
+      }
+
+      // 4. 8-bit Noise Hi-Hat & Snare Percussion (Accelerated in Panic)
+      if (this.bgmGain) {
+        if (this.bgmIntensity === 'PANIC') {
+          // Double-time frantic snare & hi-hats
+          if (this.bgmStep % 2 === 0) {
+            this.playNoisePercussion(now, this.bgmStep % 4 === 2);
+          }
+        } else {
+          if (this.bgmStep % 4 === 2 || this.bgmStep % 8 === 6) {
+            this.playNoisePercussion(now, this.bgmStep % 8 === 6);
+          }
+        }
       }
 
       this.bgmStep++;

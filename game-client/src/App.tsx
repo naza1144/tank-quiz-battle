@@ -262,6 +262,12 @@ export const App: React.FC = () => {
 
       const newTimer = snapshot.roundTimeRemaining || 0;
       setRoundTimer((prev) => (prev !== newTimer ? newTimer : prev));
+
+      // Adaptive Dynamic 8-Bit BGM Modulation (Normal -> Critical HP -> Panic Mode)
+      const activeTank = myT || (myPlayer?.teamId ? snapshot.tanks?.find((t: Tank) => t.teamId === myPlayer.teamId) : null);
+      const curHp = activeTank?.hp ?? 2;
+      const maxHp = activeTank?.maxHp ?? 2;
+      soundFx.updateGameStateAudio(curHp, maxHp, newTimer);
     });
 
     socket.on('quiz_popup', (data: { tankId: string; crateId: string; question: QuizQuestion }) => {
@@ -323,6 +329,7 @@ export const App: React.FC = () => {
       setActiveQuiz(null);
       setSquadQuiz(null);
       setSquadQuizSession(null);
+      soundFx.updateGameStateAudio(2, 2, 240);
     });
 
     return () => {
