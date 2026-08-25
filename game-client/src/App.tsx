@@ -127,6 +127,22 @@ export const App: React.FC = () => {
 
   const [isMuted, setIsMuted] = useState<boolean>(soundFx.getIsMuted());
 
+  const [myTankHud, setMyTankHud] = useState<{ hp: number; maxHp: number; ammo: number }>({ hp: 3, maxHp: 3, ammo: 0 });
+  const [hasTouch, setHasTouch] = useState<boolean>(false);
+
+  useEffect(() => {
+    const checkTouch = () => {
+      const isTouch = 
+        'ontouchstart' in window || 
+        navigator.maxTouchPoints > 0 || 
+        (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+      setHasTouch(isTouch);
+    };
+    checkTouch();
+    window.addEventListener('resize', checkTouch);
+    return () => window.removeEventListener('resize', checkTouch);
+  }, []);
+
   const socketRef = useRef<Socket | null>(null);
   const myPlayerIdRef = useRef<string>('');
 
@@ -179,6 +195,10 @@ export const App: React.FC = () => {
         myTankId: socketRef.current?.id || ''
       };
       setTanks(data.initialState.tanks || []);
+      const myT = data.initialState.tanks?.find((t: Tank) => t.id === socketRef.current?.id);
+      if (myT) {
+        setMyTankHud({ hp: myT.hp, maxHp: myT.maxHp, ammo: myT.ammo });
+      }
       setRoundTimer(data.initialState.roundTimeRemaining || 240);
       setView('GAME');
       setGameOverData(null);
@@ -193,8 +213,14 @@ export const App: React.FC = () => {
         myTankId: socketRef.current?.id || ''
       };
 
-      if (snapshot.tanks) {
-        setTanks(snapshot.tanks);
+      const myT = snapshot.tanks?.find((t: Tank) => t.id === socketRef.current?.id);
+      if (myT) {
+        setMyTankHud((prev) => {
+          if (prev.hp !== myT.hp || prev.ammo !== myT.ammo || prev.maxHp !== myT.maxHp) {
+            return { hp: myT.hp, maxHp: myT.maxHp, ammo: myT.ammo };
+          }
+          return prev;
+        });
       }
 
       const newTimer = snapshot.roundTimeRemaining || 0;
@@ -403,9 +429,16 @@ export const App: React.FC = () => {
 
   const myPlayer = players.find(p => socketRef.current?.id && p.socketId === socketRef.current.id);
   const isHost = myPlayer?.isHost || false;
-  const myTank = tanks.find(t => (socketRef.current?.id && t.id === socketRef.current.id) || (myPlayer && t.playerId === myPlayer.id));
   const isSquadSupport = myPlayer?.role === 'SUPPORT' && currentRoomConfig?.mode === 'SQUAD';
   const [isBgmMuted, setIsBgmMuted] = useState<boolean>(!soundFx.isBgmActive());
+
+  const handleTankMove = React.useCallback((dir: Direction | null, isMoving: boolean) => {
+    socketRef.current?.emit('tank_input', { direction: dir, isMoving });
+  }, []);
+
+  const handleTankShoot = React.useCallback(() => {
+    socketRef.current?.emit('tank_shoot');
+  }, []);
 
   const handleToggleBgm = () => {
     const active = soundFx.toggleBgm();
@@ -442,24 +475,22 @@ export const App: React.FC = () => {
 
       {/* 2. Room Select View */}
       {view === 'ROOMS' && (
-        <div className="py-6 px-3 sm:px-4 flex-1 flex flex-col justify-center">
-          <RoomSelectView
-            rooms={rooms}
-            userName={userName}
-            onJoinRoom={handleJoinRoom}
-            onCreateRoom={handleCreateRoom}
-            onLogout={handleLogout}
-            onOpenTeacherRoute={() => {
-              window.history.pushState(null, '', '/teacher');
-              setIsTeacherRoute(true);
-            }}
-          />
-        </div>
+        <RoomSelectView
+          rooms={rooms}
+          userName={userName}
+          onCreateRoom={handleCreateRoom}
+          onJoinRoom={handleJoinRoom}
+          onLogout={handleLogout}
+          onOpenTeacherRoute={() => {
+            window.history.pushState(null, '', '/#teacher');
+            setIsTeacherRoute(true);
+          }}
+        />
       )}
 
       {/* 3. Lobby View */}
       {view === 'LOBBY' && (
-        <div className="py-6 px-3 sm:px-4 flex-1">
+        <div className="flex-1 flex flex-col items-center justify-center p-2 sm:p-4">
           <LobbyView
             roomConfig={currentRoomConfig}
             players={players}
@@ -503,18 +534,16 @@ export const App: React.FC = () => {
             </div>
 
             {/* Middle Stats (HP & Ammo for Driver) */}
-            {myTank && !isSquadSupport && (
+            {!isSquadSupport && myTankHud && (
               <div className="flex items-center gap-2 sm:gap-3 bg-black border-2 border-slate-700 px-2 sm:px-3 py-1 font-arcade text-[9px] sm:text-[10px]">
                 <div className="flex items-center gap-1 text-rose-400 font-extrabold">
                   <span>HP:</span>
-                  <span>{'■'.repeat(Math.max(0, myTank.hp))}{'□'.repeat(Math.max(0, myTank.maxHp - myTank.hp))}</span>
+                  <span>{'■'.repeat(Math.max(0, myTankHud.hp))}{'□'.repeat(Math.max(0, myTankHud.maxHp - myTankHud.hp))}</span>
                 </div>
                 <div className="h-3 w-0.5 bg-slate-700" />
-                <div className={`flex items-center gap-1 font-extrabold ${
-                  myTank.ammo > 0 ? 'text-amber-300' : 'text-rose-400'
-                }`}>
+                <div className="flex items-center gap-1 font-extrabold text-amber-300">
                   <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current" />
-                  <span>AMMO: {myTank.ammo}</span>
+                  <span>AMMO: {myTankHud.ammo}</span>
                 </div>
               </div>
             )}
@@ -568,26 +597,22 @@ export const App: React.FC = () => {
               <div className="w-full flex flex-col items-center">
                 <RetroCanvas stateRef={gameStateRef} />
 
-                {/* Mobile Touch Controls */}
-                <div className="w-full max-w-lg mt-2 lg:hidden">
+                {/* Touch Controls (Tablets & Mobile) */}
+                <div className={`w-full max-w-xl mt-1.5 ${hasTouch ? 'block' : 'lg:hidden'}`}>
                   <TouchControls
-                    onMove={(dir, isMoving) => {
-                      socketRef.current?.emit('tank_input', { direction: dir, isMoving });
-                    }}
-                    onShoot={() => {
-                      socketRef.current?.emit('tank_shoot');
-                    }}
+                    onMove={handleTankMove}
+                    onShoot={handleTankShoot}
                   />
                 </div>
               </div>
             )}
 
             {/* Live Combat Event Ticker */}
-            <div className="fixed bottom-4 left-4 z-20 space-y-1.5 pointer-events-none max-w-sm hidden sm:block">
+            <div className="fixed bottom-4 left-4 z-20 space-y-1 pointer-events-none max-w-xs hidden sm:block">
               {gameEvents.map((evt, idx) => (
                 <div
                   key={evt.timestamp + idx}
-                  className="px-3 py-1.5 pixel-box bg-black/90 text-xs font-arcade text-amber-300 shadow-lg animate-fade-in"
+                  className="px-2.5 py-1 pixel-box bg-black/90 text-[10px] font-arcade text-amber-300 shadow-md"
                 >
                   {evt.message}
                 </div>

@@ -351,7 +351,7 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = React.memo(({ stateRef })
   };
 
   return (
-    <div className="relative flex justify-center items-center p-1 sm:p-2.5 pixel-box bg-black shadow-2xl w-full max-w-[min(96vw,700px,68vh)] mx-auto aspect-square">
+    <div className="relative flex justify-center items-center p-1 sm:p-2 pixel-box bg-black shadow-2xl w-full max-w-[min(96vw,680px,calc(100vh-220px))] mx-auto aspect-square">
       <canvas
         ref={canvasRef}
         className="w-full h-full aspect-square bg-black object-contain cursor-crosshair rounded-sm"
