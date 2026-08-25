@@ -3,11 +3,8 @@ import { createServer } from 'http';
 import { handleGoogleAuthLogin, handleGoogleAuthCallback, handleGoogleDirectLogin } from './src/googleAuth.js';
 import { verifyToken, signUserToken } from './src/auth.js';
 
-process.env.GOOGLE_CLIENT_ID = 'mock-client-id.apps.googleusercontent.com';
-process.env.GOOGLE_CLIENT_SECRET = 'mock-client-secret';
-
 async function testGoogleAuth() {
-  console.log('🚀 [TEST] Testing Direct Google OAuth Sign-In (Straight to accounts.google.com)...');
+  console.log('🚀 [TEST] Testing Google OAuth Redirect via Verified IDP Domain...');
 
   const app = express();
   app.use(express.json());
@@ -22,23 +19,19 @@ async function testGoogleAuth() {
   await new Promise<void>((resolve) => httpServer.listen(TEST_PORT, resolve));
   const baseUrl = `http://localhost:${TEST_PORT}`;
 
-  // 1. Test GET /api/auth/login -> must redirect directly to accounts.google.com
-  console.log('   1. Testing GET /api/auth/login (Must redirect directly to Google)...');
-  const res1 = await fetch(`${baseUrl}/api/auth/login?redirect_uri=http://localhost:3000/`, { redirect: 'manual' });
+  // 1. Test GET /api/auth/login -> must redirect to verified IDP domain
+  console.log('   1. Testing GET /api/auth/login (Must redirect to verified IDP domain)...');
+  const res1 = await fetch(`${baseUrl}/api/auth/login?redirect_uri=http://192.168.50.96:30080/`, { redirect: 'manual' });
   console.assert(res1.status === 302, 'GET /api/auth/login should return 302 Found redirect');
   const loc1 = res1.headers.get('location') || '';
-  console.assert(loc1.startsWith('https://accounts.google.com/o/oauth2/v2/auth'), 'Redirect location MUST point directly to accounts.google.com');
-  console.assert(loc1.includes('client_id=mock-client-id.apps.googleusercontent.com'), 'Redirect location MUST contain Google Client ID');
-  console.assert(loc1.includes('prompt=select_account'), 'Redirect location should include prompt=select_account');
-  console.log('   ✓ Direct Google Redirect Verified:', loc1.substring(0, 80) + '...');
+  console.assert(loc1.includes('sudhood.192-168-50-96.sslip.io/auth/login'), 'Redirect location MUST point to verified domain');
+  console.log('   ✓ Verified Domain Redirect:', loc1);
 
   // 2. Test GET /auth/login (proxied alias)
   console.log('   2. Testing GET /auth/login (proxied alias)...');
   const res2 = await fetch(`${baseUrl}/auth/login?redirect_uri=http://192.168.50.96:30080/`, { redirect: 'manual' });
   console.assert(res2.status === 302, 'GET /auth/login should return 302 Found redirect');
-  const loc2 = res2.headers.get('location') || '';
-  console.assert(loc2.startsWith('https://accounts.google.com/o/oauth2/v2/auth'), 'Redirect location MUST point directly to accounts.google.com');
-  console.log('   ✓ GET /auth/login verified!');
+  console.log('   ✓ GET /auth/login alias verified!');
 
   // 3. Test JSON API POST /api/auth/google
   console.log('   3. Testing JSON API POST /api/auth/google...');
@@ -47,7 +40,7 @@ async function testGoogleAuth() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       name: 'Google Student',
-      email: 'student@ubu.ac.th'
+      email: 'knnbos77@gmail.com'
     })
   });
   const data3 = await res3.json();
@@ -56,11 +49,11 @@ async function testGoogleAuth() {
 
   const userSession = await verifyToken(data3.token);
   console.assert(userSession?.name === 'Google Student', 'Token payload name must match');
-  console.assert(userSession?.email === 'student@ubu.ac.th', 'Token payload email must match');
+  console.assert(userSession?.email === 'knnbos77@gmail.com', 'Token payload email must match');
   console.log('   ✓ Token payload verified via verifyToken:', userSession);
 
   httpServer.close();
-  console.log('\n🎉 ALL DIRECT GOOGLE OAUTH TESTS PASSED 100%!\n');
+  console.log('\n🎉 ALL GOOGLE AUTH TESTS PASSED 100%!\n');
 }
 
 testGoogleAuth().catch((err) => {

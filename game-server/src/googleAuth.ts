@@ -9,35 +9,25 @@ function cleanReturnTo(returnTo: string): string {
 }
 
 /**
- * Initiates Google OAuth Login - Redirects DIRECTLY to Google Sign-In (accounts.google.com)
+ * Initiates Google OAuth Login - Redirects via Keycloak Google IDP with registered valid domain
  */
 export async function handleGoogleAuthLogin(req: Request, res: Response) {
   const redirectUriParam = (req.query.redirect_uri as string) || (req.query.return_to as string);
-  const host = (req.headers['x-forwarded-host'] as string) || req.get('host') || 'localhost:3000';
+  const host = (req.headers['x-forwarded-host'] as string) || req.get('host') || '192.168.50.96:30080';
   const proto = (req.headers['x-forwarded-proto'] as string) || req.protocol || 'http';
   const fallbackReturn = `${proto}://${host}/`;
   const returnTo = redirectUriParam || fallbackReturn;
 
-  const googleClientId = process.env.GOOGLE_CLIENT_ID || '';
-  const callbackUrl = process.env.GOOGLE_REDIRECT_URI || `${proto}://${host}/auth/callback`;
-  const state = Buffer.from(JSON.stringify({ returnTo, nonce: Date.now() })).toString('base64url');
+  const authHost = process.env.AUTH_HOST || 'auth.192-168-50-96.sslip.io';
+  const sudhoodHost = process.env.SUDHOOD_HOST || 'sudhood.192-168-50-96.sslip.io';
 
-  const googleAuthUrl =
-    `https://accounts.google.com/o/oauth2/v2/auth?` +
-    new URLSearchParams({
-      client_id: googleClientId,
-      redirect_uri: callbackUrl,
-      response_type: 'code',
-      scope: 'openid email profile',
-      state: state,
-      prompt: 'select_account'
-    }).toString();
-
-  return res.redirect(googleAuthUrl);
+  // Redirect directly via Token Service / Keycloak Google IDP
+  const loginUrl = `https://${sudhoodHost}/auth/login?return_to=${encodeURIComponent(returnTo)}`;
+  return res.redirect(loginUrl);
 }
 
 /**
- * Handles OAuth callback from Google
+ * Handles OAuth callback from Google / Keycloak
  */
 export async function handleGoogleAuthCallback(req: Request, res: Response) {
   const code = req.query.code as string;
@@ -66,7 +56,7 @@ export async function handleGoogleAuthCallback(req: Request, res: Response) {
 
   const googleClientId = process.env.GOOGLE_CLIENT_ID || '';
   const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET || '';
-  const host = (req.headers['x-forwarded-host'] as string) || req.get('host') || 'localhost:3000';
+  const host = (req.headers['x-forwarded-host'] as string) || req.get('host') || '192.168.50.96:30080';
   const proto = (req.headers['x-forwarded-proto'] as string) || req.protocol || 'http';
   const callbackUrl = process.env.GOOGLE_REDIRECT_URI || `${proto}://${host}/auth/callback`;
 
