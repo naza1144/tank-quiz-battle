@@ -32,7 +32,7 @@ export class GameEngine {
   public bullets: Bullet[] = [];
   public crates: QuizCrate[] = [];
   public events: GameEvent[] = [];
-  public isRunning: boolean = false;
+  public isRunning: boolean = true;
   public roundTimeRemaining: number;
   public mode: 'FFA' | 'SQUAD';
   public selectedSubject: string = 'ALL';
@@ -56,6 +56,7 @@ export class GameEngine {
     this.selectedSubject = selectedSubject || 'ALL';
     this.map = generateClassicMap();
     this.initCrates();
+    this.isRunning = true;
   }
 
   private getRandomValidTilePosition(): { x: number; y: number } | null {
@@ -659,12 +660,21 @@ export class GameEngine {
     } else if (allTanks.length === 0) {
       isGameOver = false;
     } else if (this.mode === 'SQUAD') {
+      const allTeams = new Set(allTanks.map(t => t.teamId).filter(Boolean));
       const aliveTeams = new Set(aliveTanks.map(t => t.teamId).filter(Boolean));
-      if (aliveTeams.size <= 1) {
+      if (allTeams.size <= 1) {
+        if (aliveTeams.size === 0) {
+          isGameOver = true;
+        }
+      } else if (aliveTeams.size <= 1) {
         isGameOver = true;
       }
     } else {
-      if (aliveTanks.length <= 1) {
+      if (allTanks.length === 1) {
+        if (aliveTanks.length === 0) {
+          isGameOver = true;
+        }
+      } else if (aliveTanks.length <= 1) {
         isGameOver = true;
       }
     }

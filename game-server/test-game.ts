@@ -71,13 +71,17 @@ console.log('✅ Physics Loop Simulation Passed!\n');
 
   // 6. Test bullet damage and death
   console.log('\n🧪 [TEST 5] Testing Tank Bullet Damage & Destruction...');
+  let declaredWinner: string | undefined;
   const combatEngine = new GameEngine(
     quizManager,
     {
       onGameEvent: (e) => console.log(`   [EVENT] ${e.message}`),
       onQuizTrigger: () => {},
       onTeamQuizTrigger: () => {},
-      onGameOver: (winnerId, teamId, name) => console.log(`   [GAME OVER] Winner: ${name}`)
+      onGameOver: (winnerId, teamId, name) => {
+        declaredWinner = name;
+        console.log(`   🏆 [GAME OVER EVENT] Winner: ${name}`);
+      }
     },
     180,
     'FFA'
@@ -113,6 +117,9 @@ console.log('✅ Physics Loop Simulation Passed!\n');
   if (!combatTankB.isDead || combatTankB.hp > 0) {
     throw new Error('CombatTankB should have been destroyed by sniper shot!');
   }
-  console.log('✅ Tank Combat Damage & Destruction Test Passed!');
+  if (!declaredWinner) {
+    throw new Error('onGameOver was not triggered when last tank survived!');
+  }
+  console.log(`✅ Game Over & Winner Declaration Test Passed! Winner: ${declaredWinner}`);
 
   console.log('\n🎉 ALL GAME ENGINE TESTS PASSED PERFECTLY!\n');
