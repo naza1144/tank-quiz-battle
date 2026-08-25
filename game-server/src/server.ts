@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import { QuizManager } from './quizBank.js';
 import { RoomManager } from './roomManager.js';
 import { verifyToken, signUserToken } from './auth.js';
+import { handleGoogleAuthLogin, handleGoogleAuthCallback, handleGoogleDirectLogin } from './googleAuth.js';
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const io = new Server(httpServer, {
   cors: {
@@ -30,12 +32,17 @@ const quizManager = new QuizManager();
 const roomManager = new RoomManager(io, quizManager);
 
 // REST API Endpoints
-app.get('/api/health', (req, res) => {
+app.get(['/api/health', '/health'], (req, res) => {
   res.json({ status: 'ok', service: 'tank-quiz-game-server', standalone: true, timestamp: new Date().toISOString() });
 });
 
-// Standalone Auth Endpoints
-app.post('/api/auth/login', (req, res) => {
+// ── Google OAuth & Account Authentication Endpoints ──────────────────────
+app.get(['/api/auth/login', '/auth/login'], handleGoogleAuthLogin);
+app.get(['/api/auth/callback', '/auth/callback'], handleGoogleAuthCallback);
+app.post(['/api/auth/google', '/auth/google'], handleGoogleDirectLogin);
+
+// ── Standalone & Student Auth Endpoints ─────────────────────────────────
+app.post(['/api/auth/login', '/auth/login'], (req, res) => {
   const { name, email, studentId } = req.body;
   const displayName = name || studentId || 'TankPlayer';
   const token = signUserToken({
@@ -47,7 +54,7 @@ app.post('/api/auth/login', (req, res) => {
   res.json({ success: true, token, name: displayName });
 });
 
-app.post('/api/auth/guest', (req, res) => {
+app.post(['/api/auth/guest', '/auth/guest'], (req, res) => {
   const { name } = req.body;
   const displayName = name || `พลขับ_${Math.floor(1000 + Math.random() * 9000)}`;
   const token = signUserToken({

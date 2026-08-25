@@ -108,7 +108,7 @@ spec:
     - web
     - websecure
   routes:
-    - match: (Host(`tank.192-168-50-96.sslip.io`) || Host(`game.192-168-50-96.sslip.io`)) && (PathPrefix(`/api`) || PathPrefix(`/socket.io`))
+    - match: (Host(`tank.192-168-50-96.sslip.io`) || Host(`game.192-168-50-96.sslip.io`)) && (PathPrefix(`/api`) || PathPrefix(`/auth`) || PathPrefix(`/socket.io`))
       kind: Rule
       services:
         - name: game-server

@@ -81,8 +81,25 @@ export const App: React.FC = () => {
     const hash = window.location.hash.replace('#', '');
     const params = new URLSearchParams(hash || window.location.search);
     const urlToken = params.get('access_token') || params.get('token');
+    const urlName = params.get('name');
+
+    if (urlName) {
+      localStorage.setItem('tank_user_name', decodeURIComponent(urlName));
+    }
+
     if (urlToken) {
       localStorage.setItem('tank_auth_token', urlToken);
+      if (!urlName) {
+        try {
+          const parts = urlToken.split('.');
+          if (parts.length >= 2) {
+            const payload = JSON.parse(atob(parts[1]));
+            if (payload && (payload.name || payload.preferred_username)) {
+              localStorage.setItem('tank_user_name', payload.name || payload.preferred_username);
+            }
+          }
+        } catch (e) {}
+      }
       window.history.replaceState(null, '', window.location.pathname);
       return urlToken;
     }
