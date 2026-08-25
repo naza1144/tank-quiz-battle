@@ -46,7 +46,7 @@ interface SquadSupportViewProps {
   } | null;
   onVote?: (choiceIndex: number, confident?: boolean) => void;
   onVoteQuestion?: (choiceIndex: number, confident?: boolean) => void;
-  onAirdropSupply?: (supplyType: 'SHIELD' | 'REPAIR' | 'AMMO') => void;
+  onAirdropSupply?: (supplyType: 'SHIELD' | 'REPAIR') => void;
   onGhostRevivalAnswer?: (choiceIndex: number) => void;
 }
 
@@ -258,7 +258,7 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
           )}
         </div>
 
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => {
               if (airdropCooldownSeconds <= 0 && onAirdropSupply) {
@@ -291,23 +291,6 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
           >
             <span className="text-sm">💚</span>
             <span className="font-arcade text-[8px] sm:text-[9px] font-bold">REPAIR (+1 HP)</span>
-          </button>
-
-          <button
-            onClick={() => {
-              if (airdropCooldownSeconds <= 0 && onAirdropSupply) {
-                soundFx.playSelect();
-                onAirdropSupply('AMMO');
-              }
-            }}
-            disabled={airdropCooldownSeconds > 0}
-            className={`p-2 arcade-btn text-center text-xs flex flex-col items-center justify-center gap-1 ${
-              airdropCooldownSeconds > 0 ? 'arcade-btn-slate opacity-50 cursor-not-allowed' : 'arcade-btn-amber'
-            }`}
-            title="หย่อนเสบียงกระสุน +4 นัดให้พลขับ"
-          >
-            <span className="text-sm">📦</span>
-            <span className="font-arcade text-[8px] sm:text-[9px] font-bold">AMMO (+4)</span>
           </button>
         </div>
       </div>

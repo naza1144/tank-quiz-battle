@@ -1172,16 +1172,6 @@ export class GameEngine {
         teamId,
         timestamp: now
       });
-    } else if (supplyType === 'AMMO') {
-      tank.ammo = Math.min(tank.maxAmmo, tank.ammo + 4);
-      this.listeners.onGameEvent({
-        type: 'AIRDROP_SUPPLY',
-        message: `📦 หน่วยสนับสนุนหย่อนโดรนเสบียงกระสุน (+4 AMMO) ให้ ${tank.playerName}!`,
-        sound: 'AMMO_REFILL',
-        tankId: tank.id,
-        teamId,
-        timestamp: now
-      });
     }
     return true;
   }

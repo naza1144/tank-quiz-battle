@@ -142,7 +142,7 @@ export interface LaserBeamEffect {
   expiresAt: number;
 }
 
-export type AirdropSupplyType = 'SHIELD' | 'REPAIR' | 'AMMO';
+export type AirdropSupplyType = 'SHIELD' | 'REPAIR';
 
 export interface Bullet {
   id: string;
