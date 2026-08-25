@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { GameMode, RoomConfig } from '../types.js';
-import { Users, LogOut, BookOpen } from 'lucide-react';
+import { Users, LogOut } from 'lucide-react';
 import { soundFx } from '../audio/soundFx.js';
 import { 
   PixelGamepad, 
@@ -10,7 +10,6 @@ import {
   PixelCrosshair, 
   PixelBrain 
 } from './PixelIcons.js';
-import { TeacherQuizModal } from './TeacherQuizModal.js';
 
 interface RoomSelectViewProps {
   rooms: {
@@ -331,24 +330,6 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
           </div>
         </div>
       )}
-
-      {/* Subtle Teacher Portal Route Link (PIN-Protected) */}
-      <div className="mt-8 pt-4 border-t border-slate-800 text-center">
-        <button
-          onClick={() => {
-            soundFx.playSelect();
-            if (onOpenTeacherRoute) {
-              onOpenTeacherRoute();
-            } else {
-              window.history.pushState(null, '', '/teacher');
-              window.dispatchEvent(new PopStateEvent('popstate'));
-            }
-          }}
-          className="font-arcade text-[8px] sm:text-[9px] text-slate-600 hover:text-cyan-400 transition-colors cursor-pointer"
-        >
-          [ 🔐 อาจารย์เข้าจัดการคลังข้อสอบ (TEACHER PORTAL / ROUTE: /teacher) ]
-        </button>
-      </div>
 
     </div>
   );
