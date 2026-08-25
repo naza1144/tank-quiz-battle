@@ -12,20 +12,6 @@
 
 ---
 
-## 📸 ภาพตัวอย่างภายในเกม (Gameplay Screenshots)
-
-| 🕹️ สมรภูมิรบ Battle City 1990 เรโทรเต็มจอ | 📺 โหมดจอแก้ว CRT Scanlines & Visual Polish |
-|:---:|:---:|
-| ![Battle City Arena](docs/images/battlefield-gameplay.png) | ![CRT Scanline Mode](docs/images/crt-retro-mode.png) |
-| *สมรภูมิ 28x28 พร้อมบล็อกอิฐ, เหล็ก, คลองน้ำ, น้ำแข็ง และพุ่มไม้* | *ฟิลเตอร์จอแก้ว CRT 1990 พร้อมหมุดตู้เกมและเอฟเฟกต์ Screen Shake* |
-
-| 🧠 แผงควบคุมผู้ช่วยรบ (Squad Support Console) | 🛡️ ห้องล็อบบี้ & เลือกสายรถถัง (Lobby & Archetypes) |
-|:---:|:---:|
-| ![Squad Support Console](docs/images/squad-support-console.png) | ![Lobby & Tank Selection](docs/images/lobby-preview.png) |
-| *ระบบโหวตเสียงส่วนมาก มั่นใจคูณคะแนน และโดรนเสบียงยุทธวิธี* | *4 สายรถถังเฉพาะทาง (Standard, Scout, Heavy, Sniper) 6 สีทีม* |
-
----
-
 ## 🌟 จุดเด่นและระบบสำคัญ (Key Features)
 
 ### 1. ⚡ ท่าไม้ตายร่วมมือ (Ultimate Synergy Beam)
@@ -97,13 +83,6 @@
 
 ```text
 tank-quiz-battle/
-├── docs/
-│   └── images/                      # Screenshot Gallery Assets for README & Documentation
-│       ├── battlefield-gameplay.png # 28x28 Battle City Arena Gameplay
-│       ├── crt-retro-mode.png       # CRT Scanlines & Visual Polish Screen
-│       ├── squad-support-console.png# Squad Consensus Voting & Airdrop Dock
-│       └── lobby-preview.png        # Lobby & Tank Archetype Selection
-│
 ├── game-client/                     # Frontend Application (React + Vite + Tailwind)
 │   ├── src/
 │   │   ├── audio/soundFx.ts         # 8-Bit Multi-channel Chiptune Synthesizer
