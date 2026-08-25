@@ -185,12 +185,16 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
           <span className="w-2.5 h-2.5 border border-black shadow shrink-0" style={{ backgroundColor: teamTank?.color || '#3b82f6' }} />
           <span>DRIVER: {teamTank?.playerName || playerName || 'กำลังรอพลขับ...'} ({teamTank?.archetype || 'STANDARD'})</span>
         </span>
-        <div className="flex items-center gap-3">
-          {teamTank?.shells && teamTank.shells.some(s => s.kind === 'AP') && (
+        <div className="flex items-center gap-2 sm:gap-3">
+          {teamTank?.specialAmmo && Date.now() < teamTank.specialAmmo.expiresAt ? (
+            <span className="px-2 py-0.5 bg-cyan-950 text-cyan-300 border border-cyan-400 font-arcade text-[8px] animate-pulse">
+              ✨ {teamTank.specialAmmo.nameTh} ({((teamTank.specialAmmo.expiresAt - Date.now()) / 1000).toFixed(0)}s • {teamTank.specialAmmo.shotsLeft} นัด)
+            </span>
+          ) : teamTank?.shells && teamTank.shells.some(s => s.kind === 'AP') ? (
             <span className="text-cyan-400 font-bold">
               ⚡ AP SHELLS READY
             </span>
-          )}
+          ) : null}
           <span className="text-amber-400">
             SCORE: {teamTank?.score ?? 0}
           </span>

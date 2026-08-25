@@ -58,7 +58,17 @@ export const ARCHETYPE_CONFIGS: Record<TankArchetype, TankArchetypeConfig> = {
   }
 };
 
-export type AmmoKind = 'AP' | 'STD' | 'DUD';
+export type SpecialAmmoKind = 'AP' | 'CRYO' | 'EXPLOSIVE' | 'RAPID' | 'HEAL';
+export type AmmoKind = SpecialAmmoKind | 'STD' | 'DUD';
+
+export interface ActiveSpecialAmmo {
+  kind: SpecialAmmoKind;
+  nameTh: string;
+  expiresAt: number; // timestamp when it expires
+  durationSeconds: number;
+  shotsLeft: number;
+  ownerName?: string;
+}
 
 export interface Shell {
   kind: AmmoKind;
@@ -94,6 +104,7 @@ export interface Tank {
   ammo: number;
   maxAmmo: number;
   shells?: Shell[];
+  specialAmmo?: ActiveSpecialAmmo | null;
   speed: number;
   bulletSpeed: number;
   bulletDamage: number;
@@ -126,6 +137,7 @@ export interface Bullet {
   radius: number;
   isDestroyed: boolean;
   shell?: Shell;
+  specialKind?: SpecialAmmoKind;
   bouncesLeft?: number;
 }
 

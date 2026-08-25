@@ -6,7 +6,9 @@ import {
   QuizCrate, 
   GameEvent, 
   ARCHETYPE_CONFIGS,
-  QuizQuestion 
+  QuizQuestion,
+  SpecialAmmoKind,
+  AmmoKind
 } from './types.js';
 import { 
   MAP_GRID_SIZE, 
@@ -182,17 +184,35 @@ export class GameEngine {
     tank.isMoving = isMoving;
   }
 
+  private getSpecialAmmoFromCategory(category: string): { kind: SpecialAmmoKind; nameTh: string } {
+    switch (category?.toUpperCase()) {
+      case 'SCIENCE':
+      case 'CHEMISTRY':
+        return { kind: 'CRYO', nameTh: 'กระสุนแช่แข็ง (CRYO ❄️)' };
+      case 'MATH':
+      case 'LOGIC':
+        return { kind: 'AP', nameTh: 'กระสุนเจาะเกราะ (AP ⚡)' };
+      case 'ENGLISH':
+      case 'GENERAL':
+        return { kind: 'RAPID', nameTh: 'กระสุนรัว 3 ทิศทาง (RAPID 💥)' };
+      case 'HEAL':
+        return { kind: 'HEAL', nameTh: 'กระสุนซ่อมแซม (HEAL 💚)' };
+      default:
+        return { kind: 'EXPLOSIVE', nameTh: 'กระสุนระเบิดกัมปนาท (HE 💣)' };
+    }
+  }
+
+  // Shoot Bullet
   public tankShoot(tankId: string): boolean {
     const tank = this.tanks.get(tankId);
-    if (!tank || tank.isDead) return false;
     const now = Date.now();
-    if (now < tank.stunEndTime) return false;
+    if (!tank || tank.isDead) return false;
 
-    // Check Gun Jammed from Consensus Tier 'JAM'
-    if (now < (tank.jammedUntil || 0)) {
+    // Check gun jammed
+    if (tank.jammedUntil && now < tank.jammedUntil) {
       this.listeners.onGameEvent({
-        type: 'QUIZ_FAIL',
-        message: `⚠️ ปืนของ ${tank.playerName} ขัดลำกล้อง! ไม่สามารถยิงได้ชั่วคราว`,
+        type: 'TANK_HIT',
+        message: `⚠️ ปืนของ ${tank.playerName} ขัดลำกล้องอยู่ (${((tank.jammedUntil - now) / 1000).toFixed(1)}s)`,
         sound: 'NO_AMMO',
         tankId: tank.id,
         timestamp: now
@@ -200,13 +220,9 @@ export class GameEngine {
       return false;
     }
 
-    // Cooldown check (250ms minimum)
-    if (now - tank.lastShootTime < 250) return false;
-
-    // Check ammo
     if (tank.ammo <= 0) {
       this.listeners.onGameEvent({
-        type: 'QUIZ_FAIL',
+        type: 'TANK_HIT',
         message: `${tank.playerName} ไม่มีกระสุน! วิ่งไปเก็บกล่อง Quiz [?] หรือให้เพื่อนช่วยตอบคำถาม`,
         sound: 'NO_AMMO',
         tankId: tank.id,
@@ -218,7 +234,16 @@ export class GameEngine {
     tank.ammo -= 1;
     tank.lastShootTime = now;
 
-    // Pop top shell from tank stack (SPEC §4 Ammo as object)
+    // Check active special ammo & 15s duration
+    let activeSpecial = tank.specialAmmo && now <= tank.specialAmmo.expiresAt && tank.specialAmmo.shotsLeft > 0
+      ? tank.specialAmmo
+      : null;
+
+    if (tank.specialAmmo && now > tank.specialAmmo.expiresAt) {
+      tank.specialAmmo = null;
+    }
+
+    // Pop top shell from tank stack (SPEC §4)
     if (!tank.shells) tank.shells = [];
     const shell = tank.shells.length > 0
       ? tank.shells.pop()
@@ -227,45 +252,102 @@ export class GameEngine {
     // Spawn bullet at cannon tip
     let bx = tank.x + tank.width / 2;
     let by = tank.y + tank.height / 2;
-    let vx = 0;
-    let vy = 0;
+    let baseAngle = 0;
 
-    const bSpeed = shell?.kind === 'AP' ? tank.bulletSpeed * 1.2 : tank.bulletSpeed;
+    const bSpeed = activeSpecial?.kind === 'AP' || shell?.kind === 'AP' ? tank.bulletSpeed * 1.25 : tank.bulletSpeed;
     if (tank.direction === 'UP') {
       by = tank.y - 4;
-      vy = -bSpeed;
+      baseAngle = -Math.PI / 2;
     } else if (tank.direction === 'DOWN') {
       by = tank.y + tank.height + 4;
-      vy = bSpeed;
+      baseAngle = Math.PI / 2;
     } else if (tank.direction === 'LEFT') {
       bx = tank.x - 4;
-      vx = -bSpeed;
+      baseAngle = Math.PI;
     } else if (tank.direction === 'RIGHT') {
       bx = tank.x + tank.width + 4;
-      vx = bSpeed;
+      baseAngle = 0;
     }
 
-    const bullet: Bullet = {
-      id: `bullet-${this.bulletIdCounter++}`,
-      tankId: tank.id,
-      teamId: tank.teamId,
-      x: bx,
-      y: by,
-      vx,
-      vy,
-      damage: shell ? shell.damage : tank.bulletDamage,
-      speed: bSpeed,
-      radius: shell?.kind === 'AP' ? 5 : 4,
-      isDestroyed: false,
-      shell,
-      bouncesLeft: 2 // Steel wall ricochet up to 2 times!
-    };
+    if (activeSpecial && activeSpecial.kind === 'RAPID') {
+      // 💥 RAPID TRIPLE SHOT SPREAD
+      const spreadAngles = [-0.22, 0, 0.22];
+      spreadAngles.forEach(offset => {
+        const angle = baseAngle + offset;
+        this.bullets.push({
+          id: `bullet-${this.bulletIdCounter++}`,
+          tankId: tank.id,
+          teamId: tank.teamId,
+          x: bx,
+          y: by,
+          vx: Math.cos(angle) * bSpeed,
+          vy: Math.sin(angle) * bSpeed,
+          damage: 1,
+          speed: bSpeed,
+          radius: 4,
+          isDestroyed: false,
+          shell,
+          specialKind: 'RAPID',
+          bouncesLeft: 1
+        });
+      });
+      activeSpecial.shotsLeft -= 1;
+      if (activeSpecial.shotsLeft <= 0) tank.specialAmmo = null;
+    } else {
+      // Standard or Single Special Bullet
+      let dmg = shell ? shell.damage : tank.bulletDamage;
+      let radius = 4;
+      let bouncesLeft = 2;
+      let specialKind: SpecialAmmoKind | undefined = activeSpecial ? activeSpecial.kind : (shell?.kind === 'AP' ? 'AP' : undefined);
 
-    this.bullets.push(bullet);
+      if (activeSpecial) {
+        if (activeSpecial.kind === 'AP') {
+          dmg = 2;
+          radius = 5;
+          bouncesLeft = 2;
+        } else if (activeSpecial.kind === 'CRYO') {
+          dmg = 1.5;
+          radius = 5;
+          bouncesLeft = 1;
+        } else if (activeSpecial.kind === 'EXPLOSIVE') {
+          dmg = 2;
+          radius = 6;
+          bouncesLeft = 0;
+        } else if (activeSpecial.kind === 'HEAL') {
+          dmg = 1;
+          radius = 5;
+          bouncesLeft = 1;
+        }
+
+        activeSpecial.shotsLeft -= 1;
+        if (activeSpecial.shotsLeft <= 0) tank.specialAmmo = null;
+      }
+
+      this.bullets.push({
+        id: `bullet-${this.bulletIdCounter++}`,
+        tankId: tank.id,
+        teamId: tank.teamId,
+        x: bx,
+        y: by,
+        vx: Math.cos(baseAngle) * bSpeed,
+        vy: Math.sin(baseAngle) * bSpeed,
+        damage: dmg,
+        speed: bSpeed,
+        radius,
+        isDestroyed: false,
+        shell,
+        specialKind,
+        bouncesLeft
+      });
+    }
+
+    const ammoLabel = activeSpecial 
+      ? activeSpecial.nameTh 
+      : (shell?.kind === 'AP' ? 'เจาะเกราะ (AP ⚡)' : shell?.kind === 'DUD' ? 'ด้าน (DUD)' : 'มาตรฐาน');
 
     this.listeners.onGameEvent({
       type: 'TANK_HIT',
-      message: `${tank.playerName} ยิงกระสุน${shell?.kind === 'AP' ? 'เจาะเกราะ (AP) ⚡' : shell?.kind === 'DUD' ? 'ด้าน (DUD)' : ''}!`,
+      message: `${tank.playerName} ยิง${ammoLabel}!`,
       sound: 'SHOOT',
       tankId: tank.id,
       timestamp: now
@@ -281,7 +363,7 @@ export class GameEngine {
     questionId: string, 
     selectedIndex: number,
     confident: boolean = false
-  ): { isCorrect: boolean; rewardAmmo: number; explanationTh: string; ammoKind: 'AP' | 'STD' | 'DUD' } {
+  ): { isCorrect: boolean; rewardAmmo: number; explanationTh: string; ammoKind: AmmoKind } {
     const tank = this.tanks.get(tankId);
     const question = this.quizManager.getQuestionById(questionId);
     const now = Date.now();
@@ -298,7 +380,7 @@ export class GameEngine {
       crate.respawnTime = now + 12000; // Respawn after 12s
     }
 
-    let ammoKind: 'AP' | 'STD' | 'DUD' = 'STD';
+    let ammoKind: AmmoKind = 'STD';
     let damage = 1;
 
     if (tank) {
@@ -307,8 +389,19 @@ export class GameEngine {
 
       if (isCorrect) {
         if (confident) {
-          ammoKind = 'AP';
+          const specInfo = this.getSpecialAmmoFromCategory(question.category);
+          ammoKind = specInfo.kind;
           damage = 2;
+
+          // OVERWRITE RULE: Resets old special ammo and replaces with new 15s special ammo!
+          tank.specialAmmo = {
+            kind: specInfo.kind,
+            nameTh: specInfo.nameTh,
+            expiresAt: now + 15000,
+            durationSeconds: 15,
+            shotsLeft: 4,
+            ownerName: tank.playerName
+          };
         } else {
           ammoKind = 'STD';
           damage = 1;
@@ -334,9 +427,11 @@ export class GameEngine {
           tank.shieldEndTime = now + 4000;
         }
 
+        const specialBadge = tank.specialAmmo ? ` พร้อมพลังออร่า ${tank.specialAmmo.nameTh} (15 วิ)!` : '';
+
         this.listeners.onGameEvent({
           type: 'QUIZ_SUCCESS',
-          message: `🎯 ${tank.playerName} ตอบถูก${confident ? ' (มั่นใจมาก! 🚩)' : ''}! ได้รับกระสุน ${ammoKind === 'AP' ? 'เจาะเกราะ (AP) ⚡' : 'มาตรฐาน'} +${ammoGain} นัด`,
+          message: `🎯 ${tank.playerName} ตอบถูก${confident ? ' (มั่นใจมาก! 🚩)' : ''}! ได้รับกระสุน +${ammoGain} นัด${specialBadge}`,
           sound: 'QUIZ_CORRECT',
           tankId: tank.id,
           teamId: tank.teamId,
@@ -377,7 +472,7 @@ export class GameEngine {
     tier: 'AP' | 'STD' | 'DUD' = 'STD',
     ownerName?: string,
     isJammed: boolean = false
-  ): { isCorrect: boolean; rewardAmmo: number; explanationTh: string; ammoKind: 'AP' | 'STD' | 'DUD'; ownerName?: string; isJammed: boolean } {
+  ): { isCorrect: boolean; rewardAmmo: number; explanationTh: string; ammoKind: AmmoKind; ownerName?: string; isJammed: boolean } {
     const question = this.quizManager.getQuestionById(questionId);
     const now = Date.now();
 
@@ -414,9 +509,26 @@ export class GameEngine {
           timestamp: now
         });
       } else if (isCorrect) {
+        let ammoKind: AmmoKind = tier;
+        if (tier === 'AP') {
+          const specInfo = this.getSpecialAmmoFromCategory(question.category);
+          ammoKind = specInfo.kind;
+          damage = 2;
+
+          // OVERWRITE RULE: Resets old special ammo and replaces with new 15s special ammo!
+          teamTank.specialAmmo = {
+            kind: specInfo.kind,
+            nameTh: specInfo.nameTh,
+            expiresAt: now + 15000,
+            durationSeconds: 15,
+            shotsLeft: 4,
+            ownerName
+          };
+        }
+
         for (let k = 0; k < rewardAmmo; k++) {
           teamTank.shells.push({
-            kind: tier,
+            kind: ammoKind,
             damage,
             ownerName,
             questionId: question.id
@@ -427,12 +539,12 @@ export class GameEngine {
         teamTank.score += question.bonusPoints * (tier === 'AP' ? 1.5 : 1);
         teamTank.correctAnswers += 1;
 
-        const tierLabel = tier === 'AP' ? '⚡ กระสุนเจาะเกราะ (AP)' : tier === 'DUD' ? '💨 กระสุนด้าน (DUD)' : '💥 กระสุนมาตรฐาน';
+        const specBadge = teamTank.specialAmmo ? ` + ปลุกพลังออร่า ${teamTank.specialAmmo.nameTh} (15 วิ)!` : '';
         const contributorBadge = ownerName ? ` [เครดิต: ${ownerName} 🧠]` : '';
 
         this.listeners.onGameEvent({
           type: 'AMMO_DELIVERED',
-          message: `📦 [${supportPlayerName}] ส่ง${tierLabel} +${rewardAmmo} นัด ให้ ${teamTank.playerName}${contributorBadge}`,
+          message: `📦 [${supportPlayerName}] ส่งกระสุน +${rewardAmmo} นัด ให้ ${teamTank.playerName}${specBadge}${contributorBadge}`,
           sound: 'QUIZ_CORRECT',
           tankId: teamTank.id,
           teamId: teamId,
@@ -579,9 +691,27 @@ export class GameEngine {
       if (gridR >= 0 && gridR < MAP_GRID_SIZE && gridC >= 0 && gridC < MAP_GRID_SIZE) {
         const tile = this.map[gridR][gridC];
         if (tile === 'BRICK') {
-          // DUD bullets cannot break bricks (SPEC §4)
-          if (b.shell?.kind !== 'DUD') {
-            this.map[gridR][gridC] = 'EMPTY'; // Destroy brick
+          // EXPLOSIVE shell destroys all bricks in 3x3 blast radius!
+          if (b.specialKind === 'EXPLOSIVE') {
+            for (let dr = -1; dr <= 1; dr++) {
+              for (let dc = -1; dc <= 1; dc++) {
+                const nr = gridR + dr;
+                const nc = gridC + dc;
+                if (nr >= 0 && nr < MAP_GRID_SIZE && nc >= 0 && nc < MAP_GRID_SIZE) {
+                  if (this.map[nr][nc] === 'BRICK') {
+                    this.map[nr][nc] = 'EMPTY';
+                  }
+                }
+              }
+            }
+            this.listeners.onGameEvent({
+              type: 'TANK_HIT',
+              message: '💣 กระสุนระเบิดกัมปนาท (HE) ทำลายกำแพงรอบข้างเป็นวงกว้าง!',
+              sound: 'EXPLOSION',
+              timestamp: now
+            });
+          } else if (b.shell?.kind !== 'DUD') {
+            this.map[gridR][gridC] = 'EMPTY'; // Destroy single brick
             this.listeners.onGameEvent({
               type: 'TANK_HIT',
               message: 'กำแพงอิฐถูกทำลาย!',
@@ -631,9 +761,37 @@ export class GameEngine {
       for (const targetTank of this.tanks.values()) {
         if (targetTank.isDead) continue;
         if (targetTank.id === b.tankId) continue; // Cannot hit self
-        // Friendly fire is ONLY disabled in SQUAD mode! In FFA mode, all tanks can damage each other.
+
+        // Friendly HEAL Bullet: heals teammate in SQUAD mode!
         if (this.mode === 'SQUAD' && b.teamId && targetTank.teamId && b.teamId === targetTank.teamId) {
-          continue;
+          if (b.specialKind === 'HEAL') {
+            const isHealHit = this.isBoxColliding(
+              b.x - b.radius,
+              b.y - b.radius,
+              b.radius * 2,
+              b.radius * 2,
+              targetTank.x,
+              targetTank.y,
+              targetTank.width,
+              targetTank.height
+            );
+            if (isHealHit) {
+              b.isDestroyed = true;
+              hitTank = true;
+              targetTank.hp = Math.min(targetTank.maxHp, targetTank.hp + 1);
+              const shooterTank = this.tanks.get(b.tankId);
+              const shooterName = shooterTank ? shooterTank.playerName : 'เพื่อนร่วมทีม';
+              this.listeners.onGameEvent({
+                type: 'AMMO_DELIVERED',
+                message: `💚 ${shooterName} ยิงกระสุนซ่อมแซมฟื้นฟูเลือดให้ ${targetTank.playerName} +1 HP!`,
+                sound: 'QUIZ_CORRECT',
+                tankId: targetTank.id,
+                timestamp: now
+              });
+              break;
+            }
+          }
+          continue; // Friendly fire disabled for non-heal bullets
         }
 
         // Bounding box collision with bullet radius
@@ -667,6 +825,30 @@ export class GameEngine {
           } else {
             targetTank.hp = Math.max(0, targetTank.hp - b.damage);
             if (shooterTank) shooterTank.score += 50;
+
+            // Apply CRYO Freeze Stun
+            if (b.specialKind === 'CRYO') {
+              targetTank.stunEndTime = Math.max(targetTank.stunEndTime, now + 1500);
+              this.listeners.onGameEvent({
+                type: 'TANK_HIT',
+                message: `❄️ ${targetTank.playerName} โดนกระสุนแช่แข็ง (CRYO) สตั๊น 1.5 วินาที!`,
+                sound: 'TANK_HIT',
+                tankId: targetTank.id,
+                timestamp: now
+              });
+            }
+
+            // Apply EXPLOSIVE AOE Blast to nearby enemies
+            if (b.specialKind === 'EXPLOSIVE') {
+              for (const nearby of this.tanks.values()) {
+                if (nearby.isDead || nearby.id === targetTank.id || nearby.id === b.tankId) continue;
+                if (this.mode === 'SQUAD' && b.teamId && nearby.teamId === b.teamId) continue;
+                const dist = Math.hypot(nearby.x - b.x, nearby.y - b.y);
+                if (dist <= 56 && now >= nearby.shieldEndTime) {
+                  nearby.hp = Math.max(0, nearby.hp - 1);
+                }
+              }
+            }
 
             if (targetTank.hp <= 0) {
               targetTank.hp = 0;
