@@ -392,11 +392,11 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
       ) : (
         <div className="text-center p-6 pixel-box bg-black/60 mb-4">
           <div className="inline-block mb-3 animate-bounce-short">
-            <PixelRadar size={36} color={isGhost ? '#c084fc' : '#06b6d4'} />
+            <PixelCrate size={36} color={isGhost ? '#c084fc' : '#f59e0b'} />
           </div>
           <div className="font-arcade text-xs text-amber-400 mb-1 flex items-center justify-center gap-1.5">
             <PixelStar size={10} color="#fbbf24" />
-            <span>RADAR SCANNING FOR CRATES...</span>
+            <span>STANDBY • WAITING FOR QUIZ CRATE...</span>
             <PixelStar size={10} color="#fbbf24" />
           </div>
           <div className="text-xs text-slate-400 flex items-center justify-center gap-1.5 mt-1">
