@@ -32,6 +32,18 @@ spec:
               value: "4000"
             - name: JWT_SECRET
               value: "tank-battle-quiz-secret-2026"
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: GOOGLE_CLIENT_ID
+                  optional: true
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sudhood-secrets
+                  key: GOOGLE_CLIENT_SECRET
+                  optional: true
           resources:
             requests:
               cpu: 100m

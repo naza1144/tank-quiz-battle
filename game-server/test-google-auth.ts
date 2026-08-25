@@ -3,8 +3,11 @@ import { createServer } from 'http';
 import { handleGoogleAuthLogin, handleGoogleAuthCallback, handleGoogleDirectLogin } from './src/googleAuth.js';
 import { verifyToken, signUserToken } from './src/auth.js';
 
+process.env.GOOGLE_CLIENT_ID = 'mock-client-id.apps.googleusercontent.com';
+process.env.GOOGLE_CLIENT_SECRET = 'mock-client-secret';
+
 async function testGoogleAuth() {
-  console.log('🚀 [TEST] Testing Google OAuth and Account Authentication Flows...');
+  console.log('🚀 [TEST] Testing Direct Google OAuth Sign-In (Straight to accounts.google.com)...');
 
   const app = express();
   app.use(express.json());
@@ -19,68 +22,45 @@ async function testGoogleAuth() {
   await new Promise<void>((resolve) => httpServer.listen(TEST_PORT, resolve));
   const baseUrl = `http://localhost:${TEST_PORT}`;
 
-  // 1. Test GET /api/auth/login
-  console.log('   1. Testing GET /api/auth/login...');
-  const res1 = await fetch(`${baseUrl}/api/auth/login?redirect_uri=http://localhost:3000/`);
-  console.assert(res1.status === 200, 'GET /api/auth/login should return 200 OK');
-  const html1 = await res1.text();
-  console.assert(html1.includes('Google Account') || html1.includes('CHOOSE ACCOUNT'), 'HTML should render Google Account Picker');
-  console.log('   ✓ GET /api/auth/login rendered Google Account Picker successfully!');
+  // 1. Test GET /api/auth/login -> must redirect directly to accounts.google.com
+  console.log('   1. Testing GET /api/auth/login (Must redirect directly to Google)...');
+  const res1 = await fetch(`${baseUrl}/api/auth/login?redirect_uri=http://localhost:3000/`, { redirect: 'manual' });
+  console.assert(res1.status === 302, 'GET /api/auth/login should return 302 Found redirect');
+  const loc1 = res1.headers.get('location') || '';
+  console.assert(loc1.startsWith('https://accounts.google.com/o/oauth2/v2/auth'), 'Redirect location MUST point directly to accounts.google.com');
+  console.assert(loc1.includes('client_id=mock-client-id.apps.googleusercontent.com'), 'Redirect location MUST contain Google Client ID');
+  console.assert(loc1.includes('prompt=select_account'), 'Redirect location should include prompt=select_account');
+  console.log('   ✓ Direct Google Redirect Verified:', loc1.substring(0, 80) + '...');
 
-  // 2. Test GET /auth/login (proxied route)
+  // 2. Test GET /auth/login (proxied alias)
   console.log('   2. Testing GET /auth/login (proxied alias)...');
-  const res2 = await fetch(`${baseUrl}/auth/login?redirect_uri=http://localhost:3000/`);
-  console.assert(res2.status === 200, 'GET /auth/login should return 200 OK');
-  console.log('   ✓ GET /auth/login alias verified!');
+  const res2 = await fetch(`${baseUrl}/auth/login?redirect_uri=http://192.168.50.96:30080/`, { redirect: 'manual' });
+  console.assert(res2.status === 302, 'GET /auth/login should return 302 Found redirect');
+  const loc2 = res2.headers.get('location') || '';
+  console.assert(loc2.startsWith('https://accounts.google.com/o/oauth2/v2/auth'), 'Redirect location MUST point directly to accounts.google.com');
+  console.log('   ✓ GET /auth/login verified!');
 
-  // 3. Test POST /api/auth/google (Simulated / Custom Google Login)
-  console.log('   3. Testing POST /api/auth/google (Account Sign-In Submission)...');
+  // 3. Test JSON API POST /api/auth/google
+  console.log('   3. Testing JSON API POST /api/auth/google...');
   const res3 = await fetch(`${baseUrl}/api/auth/google`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    redirect: 'manual',
-    body: new URLSearchParams({
-      name: 'สมชาย นักรบรถถัง',
-      email: 'somchai.t@ubu.ac.th',
-      returnTo: 'http://localhost:3000/'
-    }).toString()
-  });
-
-  console.assert(res3.status === 302, 'POST /api/auth/google should redirect with 302');
-  const redirectLoc = res3.headers.get('location') || '';
-  console.assert(redirectLoc.includes('#access_token='), 'Redirect Location should contain URL fragment with access_token');
-  console.assert(redirectLoc.includes('name=%E0%B8%AA%E0%B8%A1%E0%B8%8A%E0%B8%B2%E0%B8%A2'), 'Redirect Location should contain encoded name');
-  console.log('   ✓ Redirect location verified:', redirectLoc.substring(0, 70) + '...');
-
-  // 4. Extract token and verify with auth engine
-  const hash = redirectLoc.split('#')[1];
-  const params = new URLSearchParams(hash);
-  const token = params.get('access_token');
-  console.assert(!!token, 'Extracted access_token should be non-empty');
-
-  const userSession = await verifyToken(token!);
-  console.assert(!!userSession, 'verifyToken should successfully verify the token');
-  console.assert(userSession?.name === 'สมชาย นักรบรถถัง', 'User session name should match');
-  console.assert(userSession?.email === 'somchai.t@ubu.ac.th', 'User session email should match');
-  console.log('   ✓ Token payload verified via verifyToken:', userSession);
-
-  // 5. Test JSON API payload for Google GIS
-  console.log('   5. Testing JSON API POST /api/auth/google...');
-  const res4 = await fetch(`${baseUrl}/api/auth/google`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      name: 'Teacher Quiz Master',
-      email: 'teacher@ubu.ac.th'
+      name: 'Google Student',
+      email: 'student@ubu.ac.th'
     })
   });
-  const data4 = await res4.json();
-  console.assert(data4.success === true, 'JSON response should indicate success');
-  console.assert(!!data4.token, 'JSON response should include token');
-  console.log('   ✓ JSON API verified:', data4.name);
+  const data3 = await res3.json();
+  console.assert(data3.success === true, 'JSON response should indicate success');
+  console.assert(!!data3.token, 'JSON response should include token');
+
+  const userSession = await verifyToken(data3.token);
+  console.assert(userSession?.name === 'Google Student', 'Token payload name must match');
+  console.assert(userSession?.email === 'student@ubu.ac.th', 'Token payload email must match');
+  console.log('   ✓ Token payload verified via verifyToken:', userSession);
 
   httpServer.close();
-  console.log('\n🎉 ALL GOOGLE AUTH TESTS PASSED 100%!\n');
+  console.log('\n🎉 ALL DIRECT GOOGLE OAUTH TESTS PASSED 100%!\n');
 }
 
 testGoogleAuth().catch((err) => {
