@@ -26,6 +26,7 @@ import { SquadSupportView } from './components/SquadSupportView.js';
 import { GameOverModal } from './components/GameOverModal.js';
 import { TouchControls } from './components/TouchControls.js';
 import { TeacherPortalView } from './components/TeacherPortalView.js';
+import { GameGuideModal } from './components/GameGuideModal.js';
 import { 
   PixelClock, 
   PixelMusic, 
@@ -127,6 +128,7 @@ export const App: React.FC = () => {
 
   const [isMuted, setIsMuted] = useState<boolean>(soundFx.getIsMuted());
   const [isCrtMode, setIsCrtMode] = useState<boolean>(() => localStorage.getItem('tank_crt_mode') !== 'false');
+  const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
 
   const [airdropCooldownSeconds, setAirdropCooldownSeconds] = useState<number>(0);
   const [ghostRevivalData, setGhostRevivalData] = useState<any>(null);
@@ -590,6 +592,7 @@ export const App: React.FC = () => {
             window.history.pushState(null, '', '/#teacher');
             setIsTeacherRoute(true);
           }}
+          onOpenGuide={() => setIsGuideOpen(true)}
         />
       )}
 
@@ -606,6 +609,7 @@ export const App: React.FC = () => {
             onAutoBalanceTeams={handleAutoBalanceTeams}
             onStartGame={handleStartGame}
             onLeaveRoom={handleLeaveRoom}
+            onOpenGuide={() => setIsGuideOpen(true)}
           />
         </div>
       )}
@@ -659,6 +663,21 @@ export const App: React.FC = () => {
                 <PixelClock size={10} color="#fbbf24" />
                 <span>{formatTimer(roundTimer)}</span>
               </div>
+
+              {/* In-Game Guide Manual Button */}
+              <button
+                onClick={() => {
+                  soundFx.playSelect();
+                  setIsGuideOpen(true);
+                }}
+                className="p-1.5 sm:p-2 arcade-btn arcade-btn-amber"
+                title="เปิดคู่มือสนามรบ & กฎกติกาการเล่น"
+              >
+                <span className="font-arcade text-[8px] font-extrabold flex items-center gap-0.5">
+                  <span>📖</span>
+                  <span className="hidden md:inline">GUIDE</span>
+                </span>
+              </button>
 
               {/* CRT Scanline FX Toggle Button */}
               <button
@@ -775,6 +794,12 @@ export const App: React.FC = () => {
           }}
         />
       )}
+
+      {/* Global Interactive Game Guide Field Manual Modal */}
+      <GameGuideModal
+        isOpen={isGuideOpen}
+        onClose={() => setIsGuideOpen(false)}
+      />
 
       {/* Retro Arcade Footer */}
       <footer className="py-2 text-center font-arcade text-[8px] text-slate-600 border-t-2 border-slate-900 bg-black/80">

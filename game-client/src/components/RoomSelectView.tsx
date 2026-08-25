@@ -26,6 +26,7 @@ interface RoomSelectViewProps {
   onCreateRoom: (config: Partial<RoomConfig>) => void;
   onLogout: () => void;
   onOpenTeacherRoute?: () => void;
+  onOpenGuide?: () => void;
 }
 
 export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
@@ -34,7 +35,8 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
   onJoinRoom,
   onCreateRoom,
   onLogout,
-  onOpenTeacherRoute
+  onOpenTeacherRoute,
+  onOpenGuide
 }) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [roomName, setRoomName] = useState('');
@@ -88,6 +90,17 @@ export const RoomSelectView: React.FC<RoomSelectViewProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              soundFx.playSelect();
+              if (onOpenGuide) onOpenGuide();
+            }}
+            className="px-3 py-2.5 arcade-btn arcade-btn-cyan font-arcade text-[10px] flex items-center gap-1.5 cursor-pointer shadow-md hover:scale-105 transition-transform"
+            title="เปิดคู่มือสนามรบและกฎกติกาการเล่น"
+          >
+            <span>📖</span> <span>GUIDE (คู่มือ)</span>
+          </button>
+
           <button
             onClick={() => {
               soundFx.playSelect();

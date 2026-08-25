@@ -43,6 +43,7 @@ interface LobbyViewProps {
   onAutoBalanceTeams?: () => void;
   onStartGame: () => void;
   onLeaveRoom: () => void;
+  onOpenGuide?: () => void;
 }
 
 const TANK_PRESETS: {
@@ -204,7 +205,8 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
   onSetReady,
   onAutoBalanceTeams,
   onStartGame,
-  onLeaveRoom
+  onLeaveRoom,
+  onOpenGuide
 }) => {
   const myPlayer = players.find(p => p.id === myPlayerId || p.socketId === myPlayerId);
   const [selectedArchetype, setSelectedArchetype] = useState<TankArchetype>(myPlayer?.tankArchetype || 'STANDARD');
@@ -267,6 +269,18 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
         </div>
 
         <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => {
+              soundFx.playSelect();
+              if (onOpenGuide) onOpenGuide();
+            }}
+            className="px-2.5 py-1.5 arcade-btn arcade-btn-amber font-arcade text-[9px] flex items-center gap-1 cursor-pointer shadow-md hover:scale-105 transition-transform"
+            title="เปิดคู่มือสนามรบ & กฎกติกาการเล่น"
+          >
+            <span>📖</span>
+            <span className="hidden sm:inline">GUIDE (คู่มือ)</span>
+          </button>
+
           <button
             onClick={handleToggleBgm}
             className={`p-2 arcade-btn ${isBgmMuted ? 'arcade-btn-slate' : 'arcade-btn-cyan'}`}
