@@ -490,7 +490,7 @@ export const App: React.FC = () => {
                 </div>
                 <div className="h-3 w-0.5 bg-slate-700" />
                 <div className={`flex items-center gap-1 font-extrabold ${
-                  myTank.ammo > 0 ? 'text-amber-300' : 'text-rose-400 animate-blink'
+                  myTank.ammo > 0 ? 'text-amber-300' : 'text-rose-400'
                 }`}>
                   <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current" />
                   <span>AMMO: {myTank.ammo}</span>

@@ -67,7 +67,7 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
             } else if (tile === 'STEEL') {
               drawSteelTile(ctx, x, y);
             } else if (tile === 'WATER') {
-              drawWaterTile(ctx, x, y, tick);
+              drawWaterTile(ctx, x, y);
             } else if (tile === 'ICE') {
               drawIceTile(ctx, x, y);
             }
@@ -189,17 +189,15 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
     ctx.fillRect(x + 12, y + 20, 3, 3);
   };
 
-  const drawWaterTile = (ctx: CanvasRenderingContext2D, x: number, y: number, tick: number) => {
+  const drawWaterTile = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
     ctx.fillStyle = '#0369a1';
     ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 
-    // Moving water waves
+    // Clean static water wave ripples strictly within tile
     ctx.fillStyle = '#38bdf8';
-    const offset = Math.floor((tick / 6) % 8);
-    for (let r = 0; r < 4; r++) {
-      const wx = (x + (r * 4) + offset) % TILE_SIZE;
-      ctx.fillRect(x + wx, y + r * 8 + 2, 8, 2);
-    }
+    ctx.fillRect(x + 2, y + 6, 12, 2);
+    ctx.fillRect(x + 16, y + 14, 12, 2);
+    ctx.fillRect(x + 4, y + 22, 14, 2);
   };
 
   const drawIceTile = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
@@ -219,21 +217,15 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
     category: string,
     tick: number
   ) => {
-    const floatY = Math.sin(tick * 0.1) * 3;
+    const floatY = Math.sin(tick * 0.1) * 2;
     const cy = y + floatY;
 
-    // Glowing aura
-    ctx.shadowColor = '#eab308';
-    ctx.shadowBlur = 10;
-
-    // Crate box (Golden question box)
+    // 8-Bit Crate box (Golden question box without GPU-heavy shadowBlur)
     ctx.fillStyle = '#ca8a04';
     ctx.fillRect(x, cy, 24, 24);
 
     ctx.fillStyle = '#facc15';
     ctx.fillRect(x + 2, cy + 2, 20, 20);
-
-    ctx.shadowBlur = 0;
 
     // Inner Question Mark '?'
     ctx.fillStyle = '#713f12';
@@ -373,15 +365,26 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
     ctx.fillText(ammoText, cx, hudY + 12);
   };
 
-  const canvasW = (map && map[0]?.length ? map[0].length : 20) * TILE_SIZE;
-  const canvasH = (map && map.length ? map.length : 20) * TILE_SIZE;
+  const gridCols = map && map[0]?.length ? map[0].length : 20;
+  const gridRows = map && map.length ? map.length : 20;
+  const canvasW = gridCols * TILE_SIZE;
+  const canvasH = gridRows * TILE_SIZE;
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    if (canvas.width !== canvasW) {
+      canvas.width = canvasW;
+    }
+    if (canvas.height !== canvasH) {
+      canvas.height = canvasH;
+    }
+  }, [canvasW, canvasH]);
 
   return (
     <div className="relative flex justify-center items-center p-1 sm:p-2.5 pixel-box bg-black shadow-2xl w-full max-w-[min(96vw,700px,68vh)] mx-auto aspect-square">
       <canvas
         ref={canvasRef}
-        width={canvasW}
-        height={canvasH}
         className="w-full h-full aspect-square bg-black object-contain cursor-crosshair rounded-sm"
       />
     </div>
