@@ -20,7 +20,7 @@ import { soundFx } from './audio/soundFx.js';
 import { AuthModal } from './components/AuthModal.js';
 import { RoomSelectView } from './components/RoomSelectView.js';
 import { LobbyView } from './components/LobbyView.js';
-import { RetroCanvas } from './components/RetroCanvas.js';
+import { RetroCanvas, GameStateSnapshot } from './components/RetroCanvas.js';
 import { QuizModal } from './components/QuizModal.js';
 import { SquadSupportView } from './components/SquadSupportView.js';
 import { GameOverModal } from './components/GameOverModal.js';
@@ -130,6 +130,14 @@ export const App: React.FC = () => {
   const socketRef = useRef<Socket | null>(null);
   const myPlayerIdRef = useRef<string>('');
 
+  const gameStateRef = useRef<GameStateSnapshot>({
+    map: [],
+    tanks: [],
+    bullets: [],
+    crates: [],
+    myTankId: ''
+  });
+
   // 1. Initialize Socket Connection
   useEffect(() => {
     if (!token) {
@@ -163,21 +171,34 @@ export const App: React.FC = () => {
     });
 
     socket.on('game_start', (data: { mode: string; map: TileType[][]; initialState: any }) => {
-      setGameMap(data.map);
+      gameStateRef.current = {
+        map: data.map || [],
+        tanks: data.initialState.tanks || [],
+        bullets: data.initialState.bullets || [],
+        crates: data.initialState.crates || [],
+        myTankId: socketRef.current?.id || ''
+      };
       setTanks(data.initialState.tanks || []);
-      setBullets(data.initialState.bullets || []);
-      setCrates(data.initialState.crates || []);
       setRoundTimer(data.initialState.roundTimeRemaining || 240);
       setView('GAME');
       setGameOverData(null);
     });
 
     socket.on('game_tick', (snapshot: any) => {
-      setTanks(snapshot.tanks || []);
-      setBullets(snapshot.bullets || []);
-      setCrates(snapshot.crates || []);
-      setGameMap(snapshot.map || []);
-      setRoundTimer(snapshot.roundTimeRemaining || 0);
+      gameStateRef.current = {
+        map: snapshot.map || gameStateRef.current.map,
+        tanks: snapshot.tanks || [],
+        bullets: snapshot.bullets || [],
+        crates: snapshot.crates || [],
+        myTankId: socketRef.current?.id || ''
+      };
+
+      if (snapshot.tanks) {
+        setTanks(snapshot.tanks);
+      }
+
+      const newTimer = snapshot.roundTimeRemaining || 0;
+      setRoundTimer((prev) => (prev !== newTimer ? newTimer : prev));
     });
 
     socket.on('quiz_popup', (data: { tankId: string; crateId: string; question: QuizQuestion }) => {
@@ -545,13 +566,7 @@ export const App: React.FC = () => {
             ) : (
               // 2D Battle City Canvas
               <div className="w-full flex flex-col items-center">
-                <RetroCanvas
-                  map={gameMap}
-                  tanks={tanks}
-                  bullets={bullets}
-                  crates={crates}
-                  myTankId={socketRef.current?.id}
-                />
+                <RetroCanvas stateRef={gameStateRef} />
 
                 {/* Mobile Touch Controls */}
                 <div className="w-full max-w-lg mt-2 lg:hidden">

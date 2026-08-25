@@ -190,9 +190,10 @@ export class RoomManager {
         if (nextHost) nextHost.isHost = true;
       }
 
-      // If game running, remove tank
+      // If game running, remove tank and check win condition immediately
       if (room.engine && leavingPlayer) {
         room.engine.removeTank(socket.id);
+        room.engine.checkWinCondition();
       }
 
       this.broadcastRoomState(roomId);

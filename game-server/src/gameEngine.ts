@@ -593,6 +593,9 @@ export class GameEngine {
         this.bullets.splice(i, 1);
       }
     }
+
+    // 5. Check Win Condition on every frame
+    this.checkWinCondition();
   }
 
   private moveTankWithCollision(tank: Tank, dx: number, dy: number) {
@@ -655,10 +658,6 @@ export class GameEngine {
       isGameOver = true;
     } else if (allTanks.length === 0) {
       isGameOver = false;
-    } else if (allTanks.length === 1) {
-      if (aliveTanks.length === 0) {
-        isGameOver = true;
-      }
     } else if (this.mode === 'SQUAD') {
       const aliveTeams = new Set(aliveTanks.map(t => t.teamId).filter(Boolean));
       if (aliveTeams.size <= 1) {

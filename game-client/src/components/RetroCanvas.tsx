@@ -1,54 +1,61 @@
 import React, { useEffect, useRef } from 'react';
 import { Tank, Bullet, QuizCrate, TileType, Direction } from '../types.js';
 
-interface RetroCanvasProps {
+export interface GameStateSnapshot {
   map: TileType[][];
   tanks: Tank[];
   bullets: Bullet[];
   crates: QuizCrate[];
-  myTankId?: string;
+  myTankId: string;
+}
+
+interface RetroCanvasProps {
+  stateRef: React.RefObject<GameStateSnapshot>;
 }
 
 const TILE_SIZE = 32;
 
-export const RetroCanvas: React.FC<RetroCanvasProps> = ({
-  map,
-  tanks,
-  bullets,
-  crates,
-  myTankId
-}) => {
+export const RetroCanvas: React.FC<RetroCanvasProps> = React.memo(({ stateRef }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const tickRef = useRef<number>(0);
 
-  // Keep latest props in ref so continuous rAF loop never tears down
-  const stateRef = useRef({ map, tanks, bullets, crates, myTankId });
-  stateRef.current = { map, tanks, bullets, crates, myTankId };
-
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) return;
 
     ctx.imageSmoothingEnabled = false;
 
+    // Default internal buffer resolution
+    canvas.width = 640;
+    canvas.height = 640;
+
     const render = () => {
       tickRef.current += 1;
       const tick = tickRef.current;
+      const curState = stateRef.current;
+      if (!curState) {
+        animationFrameRef.current = requestAnimationFrame(render);
+        return;
+      }
+
       const { 
         map: curMap, 
         tanks: curTanks, 
         bullets: curBullets, 
         crates: curCrates, 
         myTankId: curMyTankId 
-      } = stateRef.current;
+      } = curState;
 
-      const gridRows = curMap && curMap.length > 0 ? curMap.length : 28;
-      const gridCols = curMap && curMap[0]?.length > 0 ? curMap[0].length : 28;
+      const gridRows = curMap && curMap.length > 0 ? curMap.length : 20;
+      const gridCols = curMap && curMap[0]?.length > 0 ? curMap[0].length : 20;
       const mapW = gridCols * TILE_SIZE;
       const mapH = gridRows * TILE_SIZE;
+
+      if (canvas.width !== mapW) canvas.width = mapW;
+      if (canvas.height !== mapH) canvas.height = mapH;
 
       // 1. Clear background (Classic black battlefield)
       ctx.fillStyle = '#0a0a0c';
@@ -76,21 +83,21 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
       }
 
       // 3. Render Quiz Crates
-      curCrates.forEach((crate) => {
+      curCrates?.forEach((crate) => {
         if (crate.isActive) {
           drawQuizCrate(ctx, crate.x, crate.y, crate.category, tick);
         }
       });
 
       // 4. Render Bullets
-      curBullets.forEach((bullet) => {
+      curBullets?.forEach((bullet) => {
         if (!bullet.isDestroyed) {
           drawBullet(ctx, bullet.x, bullet.y, bullet.vx, bullet.vy);
         }
       });
 
       // 5. Render Tanks
-      curTanks.forEach((tank) => {
+      curTanks?.forEach((tank) => {
         if (!tank.isDead) {
           const isMe = tank.id === curMyTankId;
           drawTank(ctx, tank, isMe, tick);
@@ -123,11 +130,9 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
   // ── Drawing Helpers ──────────────────────────────
 
   const drawBrickTile = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
-    // Red-brown base
     ctx.fillStyle = '#b43a12';
     ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 
-    // Brick mortar lines
     ctx.fillStyle = '#1c1917';
     ctx.fillRect(x, y + 7, TILE_SIZE, 2);
     ctx.fillRect(x, y + 15, TILE_SIZE, 2);
@@ -140,33 +145,25 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
     ctx.fillRect(x + 15, y + 16, 2, 7);
     ctx.fillRect(x + 7, y + 24, 2, 7);
     ctx.fillRect(x + 23, y + 24, 2, 7);
-
-    // Brick highlights
-    ctx.fillStyle = '#ea580c';
-    ctx.fillRect(x + 1, y + 1, 13, 2);
-    ctx.fillRect(x + 17, y + 1, 13, 2);
-    ctx.fillRect(x + 1, y + 9, 5, 2);
-    ctx.fillRect(x + 9, y + 9, 13, 2);
   };
 
   const drawSteelTile = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
-    // Silver metal block with 4 plates
-    ctx.fillStyle = '#94a3b8';
+    ctx.fillStyle = '#64748b';
     ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 
-    // Dark grooves
-    ctx.fillStyle = '#334155';
-    ctx.fillRect(x + 15, y, 2, TILE_SIZE);
-    ctx.fillRect(x, y + 15, TILE_SIZE, 2);
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(x + 2, y + 2, 13, 13);
+    ctx.fillRect(x + 17, y + 2, 13, 13);
+    ctx.fillRect(x + 2, y + 17, 13, 13);
+    ctx.fillRect(x + 17, y + 17, 13, 13);
 
-    // White highlights
-    ctx.fillStyle = '#f8fafc';
-    ctx.fillRect(x + 1, y + 1, 13, 2);
-    ctx.fillRect(x + 1, y + 1, 2, 13);
-    ctx.fillRect(x + 17, y + 1, 13, 2);
-    ctx.fillRect(x + 17, y + 1, 2, 13);
-    ctx.fillRect(x + 1, y + 17, 13, 2);
-    ctx.fillRect(x + 1, y + 17, 2, 13);
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillRect(x + 2, y + 2, 13, 2);
+    ctx.fillRect(x + 2, y + 2, 2, 13);
+    ctx.fillRect(x + 17, y + 2, 13, 2);
+    ctx.fillRect(x + 17, y + 2, 2, 13);
+    ctx.fillRect(x + 2, y + 17, 13, 2);
+    ctx.fillRect(x + 2, y + 17, 2, 13);
     ctx.fillRect(x + 17, y + 17, 13, 2);
     ctx.fillRect(x + 17, y + 17, 2, 13);
   };
@@ -175,7 +172,6 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
     ctx.fillStyle = '#15803d';
     ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 
-    // Static crisp foliage pattern (no flashing)
     ctx.fillStyle = '#22c55e';
     ctx.fillRect(x + 2, y + 2, 6, 6);
     ctx.fillRect(x + 18, y + 2, 6, 6);
@@ -193,7 +189,6 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
     ctx.fillStyle = '#0369a1';
     ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 
-    // Clean static water wave ripples strictly within tile
     ctx.fillStyle = '#38bdf8';
     ctx.fillRect(x + 2, y + 6, 12, 2);
     ctx.fillRect(x + 16, y + 14, 12, 2);
@@ -204,7 +199,6 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
     ctx.fillStyle = '#e0f2fe';
     ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 
-    // Shiny diagonals
     ctx.fillStyle = '#bae6fd';
     ctx.fillRect(x + 4, y + 4, 10, 2);
     ctx.fillRect(x + 18, y + 18, 10, 2);
@@ -220,7 +214,7 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
     const floatY = Math.sin(tick * 0.1) * 2;
     const cy = y + floatY;
 
-    // 8-Bit Crate box (Golden question box without GPU-heavy shadowBlur)
+    // 8-Bit Crate box
     ctx.fillStyle = '#ca8a04';
     ctx.fillRect(x, cy, 24, 24);
 
@@ -252,7 +246,6 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
     ctx.arc(x, y, 4, 0, Math.PI * 2);
     ctx.fill();
 
-    // Hot bullet core
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
     ctx.arc(x, y, 2, 0, Math.PI * 2);
@@ -277,24 +270,18 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
     const treadAnim = isMoving ? (tick % 4 < 2 ? 0 : 2) : 0;
 
     if (direction === 'UP' || direction === 'DOWN') {
-      // Left tread
       ctx.fillRect(x, y, 5, height);
-      // Right tread
       ctx.fillRect(x + width - 5, y, 5, height);
 
-      // Tread notches
       ctx.fillStyle = '#64748b';
       for (let ty = 0; ty < height; ty += 6) {
         ctx.fillRect(x, y + ((ty + treadAnim) % height), 5, 2);
         ctx.fillRect(x + width - 5, y + ((ty + treadAnim) % height), 5, 2);
       }
     } else {
-      // Top tread
       ctx.fillRect(x, y, width, 5);
-      // Bottom tread
-      ctx.fillRect(x, y + height - 5, width, 5);
+      ctx.fillRect(x + height - 5, y, width, 5);
 
-      // Tread notches
       ctx.fillStyle = '#64748b';
       for (let tx = 0; tx < width; tx += 6) {
         ctx.fillRect(x + ((tx + treadAnim) % width), y, 2, 5);
@@ -342,44 +329,26 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
     // 7. Tank Overhead HUD (Name, HP Bar, Ammo Badge)
     const hudY = y - 8;
 
-    // Player Name
     ctx.fillStyle = isMe ? '#fde047' : '#ffffff';
     ctx.font = isMe ? 'bold 9px "Prompt", sans-serif' : '8px "Prompt", sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(`${tank.playerName}${isMe ? ' (คุณ)' : ''}`, cx, hudY - 4);
 
-    // HP Bar
-    const hpBarW = 28;
-    const hpBarH = 4;
-    ctx.fillStyle = '#334155';
-    ctx.fillRect(cx - hpBarW / 2, hudY, hpBarW, hpBarH);
+    const hpBarW = 24;
+    const hpBarH = 3;
+    const hpBarX = cx - hpBarW / 2;
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(hpBarX, hudY + 4, hpBarW, hpBarH);
 
-    const hpPercent = Math.max(0, tank.hp / tank.maxHp);
-    ctx.fillStyle = hpPercent > 0.5 ? '#22c55e' : (hpPercent > 0.25 ? '#eab308' : '#ef4444');
-    ctx.fillRect(cx - hpBarW / 2, hudY, hpBarW * hpPercent, hpBarH);
+    const hpRatio = Math.max(0, tank.hp / tank.maxHp);
+    ctx.fillStyle = hpRatio > 0.5 ? '#22c55e' : hpRatio > 0.25 ? '#eab308' : '#ef4444';
+    ctx.fillRect(hpBarX, hudY + 4, hpBarW * hpRatio, hpBarH);
 
-    // Ammo Indicator (Dots or Number)
     const ammoText = `⚡ ${tank.ammo}/${tank.maxAmmo}`;
     ctx.fillStyle = tank.ammo > 0 ? '#38bdf8' : '#f87171';
     ctx.font = 'bold 8px "Prompt", monospace';
     ctx.fillText(ammoText, cx, hudY + 12);
   };
-
-  const gridCols = map && map[0]?.length ? map[0].length : 20;
-  const gridRows = map && map.length ? map.length : 20;
-  const canvasW = gridCols * TILE_SIZE;
-  const canvasH = gridRows * TILE_SIZE;
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    if (canvas.width !== canvasW) {
-      canvas.width = canvasW;
-    }
-    if (canvas.height !== canvasH) {
-      canvas.height = canvasH;
-    }
-  }, [canvasW, canvasH]);
 
   return (
     <div className="relative flex justify-center items-center p-1 sm:p-2.5 pixel-box bg-black shadow-2xl w-full max-w-[min(96vw,700px,68vh)] mx-auto aspect-square">
@@ -389,4 +358,4 @@ export const RetroCanvas: React.FC<RetroCanvasProps> = ({
       />
     </div>
   );
-};
+});
