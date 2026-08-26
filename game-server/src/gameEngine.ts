@@ -47,6 +47,17 @@ export class GameEngine {
   private bulletIdCounter: number = 1;
   private crateIdCounter: number = 1;
 
+  // Tiles changed since the last snapshot — lets us stop re-sending the whole
+  // 28x28 map 30 times a second (it was 59% of every packet).
+  private dirtyTiles: { r: number; c: number; t: TileType }[] = [];
+  // Every tank that ever joined this match. Needed to tell "1 player alone in
+  // the arena" apart from "1 survivor out of N" when deciding the winner.
+  private participants: Set<string> = new Set();
+  // Teams that still have a Ghost Revival challenge open. Only these may hold
+  // up the end of the match.
+  public revivalPendingTeams: Set<string> = new Set();
+  public static readonly FIRE_COOLDOWN_MS = 350;
+
   constructor(
     quizManager: QuizManager, 
     listeners: GameEngineListener, 
@@ -169,11 +180,59 @@ export class GameEngine {
     };
 
     this.tanks.set(id, tank);
+    this.participants.add(id);
     return tank;
   }
 
   public removeTank(id: string) {
     this.tanks.delete(id);
+  }
+
+  // Re-bind an existing tank to a new socket id so a player who lost wifi can
+  // reclaim the tank they were driving instead of losing it for good.
+  public rekeyTank(oldId: string, newId: string): Tank | null {
+    const tank = this.tanks.get(oldId);
+    if (!tank) return null;
+    this.tanks.delete(oldId);
+    tank.id = newId;
+    tank.isMoving = false;
+    this.tanks.set(newId, tank);
+    this.participants.add(newId);
+    // Bullets already in flight keep firing on behalf of the reclaimed tank
+    this.bullets.forEach(b => { if (b.tankId === oldId) b.tankId = newId; });
+    return tank;
+  }
+
+  private setTile(r: number, c: number, t: TileType) {
+    if (r < 0 || r >= MAP_GRID_SIZE || c < 0 || c >= MAP_GRID_SIZE) return;
+    if (this.map[r][c] === t) return;
+    this.map[r][c] = t;
+    this.dirtyTiles.push({ r, c, t });
+  }
+
+  /**
+   * Adds shells to a tank while keeping `ammo` and `shells` in lock-step.
+   * The shell stack is the single source of truth; overflow drops the OLDEST
+   * shell (SPEC §6) instead of silently growing forever.
+   */
+  private grantShells(
+    tank: Tank,
+    kind: AmmoKind,
+    damage: number,
+    count: number,
+    ownerId?: string,
+    ownerName?: string,
+    questionId?: string
+  ): number {
+    if (!tank.shells) tank.shells = [];
+    let granted = 0;
+    for (let i = 0; i < count; i++) {
+      tank.shells.push({ kind, damage, ownerId, ownerName, questionId });
+      if (tank.shells.length > tank.maxAmmo) tank.shells.shift();
+      else granted++;
+    }
+    tank.ammo = tank.shells.length;
+    return granted;
   }
 
   public setTankInput(tankId: string, direction: Direction | null, isMoving: boolean) {
@@ -223,7 +282,15 @@ export class GameEngine {
       return false;
     }
 
-    if (tank.ammo <= 0) {
+    // Rate of fire (SPEC §3 FIRE_CD). Without this, one held-down key emptied
+    // the whole magazine in 600ms.
+    if (tank.lastShootTime && now - tank.lastShootTime < GameEngine.FIRE_COOLDOWN_MS) {
+      return false;
+    }
+
+    if (!tank.shells) tank.shells = [];
+    if (tank.shells.length === 0) {
+      tank.ammo = 0;
       this.listeners.onGameEvent({
         type: 'TANK_HIT',
         message: `${tank.playerName} ไม่มีกระสุน! วิ่งไปเก็บกล่อง Quiz [?] หรือให้เพื่อนช่วยตอบคำถาม`,
@@ -234,7 +301,6 @@ export class GameEngine {
       return false;
     }
 
-    tank.ammo -= 1;
     tank.lastShootTime = now;
 
     // Check active special ammo & 15s duration
@@ -246,11 +312,9 @@ export class GameEngine {
       tank.specialAmmo = null;
     }
 
-    // Pop top shell from tank stack (SPEC §4)
-    if (!tank.shells) tank.shells = [];
-    const shell = tank.shells.length > 0
-      ? tank.shells.pop()
-      : { kind: 'STD' as const, damage: tank.bulletDamage };
+    // Pop top shell from tank stack (SPEC §4) — ammo mirrors the stack length
+    const shell = tank.shells.pop();
+    tank.ammo = tank.shells.length;
 
     // Spawn bullet at cannon tip
     let bx = tank.x + tank.width / 2;
@@ -411,17 +475,7 @@ export class GameEngine {
         }
 
         const ammoGain = question.rewardAmmo || 2;
-        for (let k = 0; k < ammoGain; k++) {
-          tank.shells.push({
-            kind: ammoKind,
-            damage,
-            ownerId: tank.playerId,
-            ownerName: tank.playerName,
-            questionId: question.id
-          });
-        }
-
-        tank.ammo = Math.min(tank.maxAmmo, tank.ammo + ammoGain);
+        this.grantShells(tank, ammoKind, damage, ammoGain, tank.playerId, tank.playerName, question.id);
         tank.score += question.bonusPoints * (confident ? 1.5 : 1);
         tank.correctAnswers += 1;
 
@@ -529,16 +583,7 @@ export class GameEngine {
           };
         }
 
-        for (let k = 0; k < rewardAmmo; k++) {
-          teamTank.shells.push({
-            kind: ammoKind,
-            damage,
-            ownerName,
-            questionId: question.id
-          });
-        }
-
-        teamTank.ammo = Math.min(teamTank.maxAmmo, teamTank.ammo + rewardAmmo);
+        this.grantShells(teamTank, ammoKind, damage, rewardAmmo, undefined, ownerName, question.id);
         teamTank.score += question.bonusPoints * (tier === 'AP' ? 1.5 : 1);
         teamTank.correctAnswers += 1;
 
@@ -702,7 +747,7 @@ export class GameEngine {
                 const nc = gridC + dc;
                 if (nr >= 0 && nr < MAP_GRID_SIZE && nc >= 0 && nc < MAP_GRID_SIZE) {
                   if (this.map[nr][nc] === 'BRICK') {
-                    this.map[nr][nc] = 'EMPTY';
+                    this.setTile(nr, nc, 'EMPTY');
                   }
                 }
               }
@@ -714,7 +759,7 @@ export class GameEngine {
               timestamp: now
             });
           } else if (b.shell?.kind !== 'DUD') {
-            this.map[gridR][gridC] = 'EMPTY'; // Destroy single brick
+            this.setTile(gridR, gridC, 'EMPTY'); // Destroy single brick
             this.listeners.onGameEvent({
               type: 'TANK_HIT',
               message: 'กำแพงอิฐถูกทำลาย!',
@@ -869,6 +914,7 @@ export class GameEngine {
                 message: `💥 ${shooterName} ยิงทำลายรถถังของ ${targetTank.playerName}!${contributorBadge}`,
                 sound: 'EXPLOSION',
                 tankId: targetTank.id,
+                teamId: targetTank.teamId,
                 timestamp: now
               });
 
@@ -951,31 +997,28 @@ export class GameEngine {
     const allTanks = Array.from(this.tanks.values());
     const aliveTanks = allTanks.filter(t => !t.isDead && t.hp > 0);
 
+    // How many contestants this match ever had, not just who is still on the
+    // map. A player who quits or drops out must not keep the match alive.
+    const startedWith = this.participants.size;
+
     let isGameOver = false;
     if (timeUp) {
       isGameOver = true;
-    } else if (allTanks.length === 0) {
+    } else if (startedWith === 0) {
       isGameOver = false;
     } else if (this.mode === 'SQUAD') {
-      const allTeams = new Set(allTanks.map(t => t.teamId).filter(Boolean));
       const aliveTeams = new Set(aliveTanks.map(t => t.teamId).filter(Boolean));
-      if (allTeams.size <= 1) {
-        if (aliveTeams.size === 0) {
-          isGameOver = true;
-        }
-      } else if (aliveTeams.size <= 1) {
-        // If a defeated team still has unused Ghost Revival, don't instantly end match
-        const hasUnusedRevival = allTanks.some(t => t.isDead && !t.hasUsedRevival);
-        if (!hasUnusedRevival) {
-          isGameOver = true;
-        }
+      const teamsThatPlayed = new Set(allTanks.map(t => t.teamId).filter(Boolean));
+      if (aliveTeams.size === 0 && startedWith > 0) {
+        isGameOver = true;
+      } else if (aliveTeams.size <= 1 && (teamsThatPlayed.size > 1 || startedWith > 1)) {
+        // Only an actually-open Ghost Revival challenge may delay the result
+        isGameOver = this.revivalPendingTeams.size === 0;
       }
     } else {
-      if (allTanks.length === 1) {
-        if (aliveTanks.length === 0) {
-          isGameOver = true;
-        }
-      } else if (aliveTanks.length <= 1) {
+      if (aliveTanks.length === 0) {
+        isGameOver = true;
+      } else if (aliveTanks.length <= 1 && startedWith > 1) {
         isGameOver = true;
       }
     }
@@ -1067,7 +1110,7 @@ export class GameEngine {
     for (let r = minR; r <= maxR; r++) {
       for (let c = minC; c <= maxC; c++) {
         if (this.map[r][c] === 'BRICK') {
-          this.map[r][c] = 'EMPTY';
+          this.setTile(r, c, 'EMPTY');
         }
       }
     }
@@ -1163,6 +1206,8 @@ export class GameEngine {
         timestamp: now
       });
     } else if (supplyType === 'REPAIR') {
+      // Don't burn the team's 25s drone cooldown on a tank that is already full
+      if (tank.hp >= tank.maxHp) return false;
       tank.hp = Math.min(tank.maxHp, tank.hp + 1);
       this.listeners.onGameEvent({
         type: 'AIRDROP_SUPPLY',
@@ -1184,7 +1229,8 @@ export class GameEngine {
     tank.isDead = false;
     tank.hasUsedRevival = true;
     tank.hp = 2;
-    tank.ammo = Math.max(3, tank.maxAmmo - 2);
+    tank.shells = [];
+    this.grantShells(tank, 'STD', 1, Math.min(tank.maxAmmo, 3), undefined, 'หน่วยชุบชีวิต');
     tank.shieldEndTime = now + 4000;
     tank.stunEndTime = 0;
     tank.jammedUntil = 0;
@@ -1206,17 +1252,31 @@ export class GameEngine {
     return true;
   }
 
+  /**
+   * Per-tick snapshot. The full 28x28 map is NOT included — it used to be 59%
+   * of every packet (2.5 Mbit/s per player). Clients get the map once in
+   * `getFullState()` and then apply `mapDelta` for the few tiles that change.
+   */
   public getSnapshot() {
     const now = Date.now();
     this.laserBeams = this.laserBeams.filter(l => now < l.expiresAt);
 
+    const mapDelta = this.dirtyTiles;
+    this.dirtyTiles = [];
+
     return {
       roundTimeRemaining: Math.ceil(this.roundTimeRemaining),
-      tanks: Array.from(this.tanks.values()),
-      bullets: this.bullets,
+      tanks: Array.from(this.tanks.values()).map(t => ({ ...t, x: Math.round(t.x * 10) / 10, y: Math.round(t.y * 10) / 10 })),
+      bullets: this.bullets.map(b => ({ ...b, x: Math.round(b.x), y: Math.round(b.y) })),
       crates: this.crates,
       laserBeams: this.laserBeams,
-      map: this.map
+      mapDelta,
+      serverNow: now
     };
+  }
+
+  /** Full state for game_start and for players who (re)join a running match. */
+  public getFullState() {
+    return { ...this.getSnapshot(), map: this.map, mapDelta: [] };
   }
 }

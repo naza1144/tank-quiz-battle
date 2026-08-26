@@ -40,6 +40,33 @@ interface GhostRevivalSession {
   currentQ?: QuizQuestion;
 }
 
+/** A quiz handed to one FFA driver. Answers are only accepted against this. */
+interface FfaQuizSession {
+  questionId: string;
+  crateId: string;
+  tankId: string;
+  expiresAt: number;
+  timer?: NodeJS.Timeout;
+}
+
+/** A player who dropped out mid-match and may still reclaim their tank. */
+interface PendingReclaim {
+  player: Player;
+  tankId?: string;
+  expiresAt: number;
+  timer?: NodeJS.Timeout;
+}
+
+const RECLAIM_GRACE_MS = 60_000;
+const EMPTY_ROOM_TTL_MS = 120_000;
+const ROOM_STATE_THROTTLE_MS = 250;
+const PING_COOLDOWN_MS = 5_000;
+const PING_MAX_PER_MATCH = 6;
+const VALID_DIRECTIONS = new Set(['UP', 'DOWN', 'LEFT', 'RIGHT']);
+const VALID_ARCHETYPES = new Set(['STANDARD', 'SCOUT', 'HEAVY', 'SNIPER']);
+const VALID_ROLES = new Set(['DRIVER', 'SUPPORT', 'GHOST']);
+const VALID_TEAM_IDS = new Set(['team-1', 'team-2', 'team-3', 'team-4', 'team-5', 'team-6']);
+
 export class RoomManager {
   private io: Server;
   private quizManager: QuizManager;
@@ -51,8 +78,13 @@ export class RoomManager {
     teamStreaks: Map<string, number>;
     teamAirdropCooldowns: Map<string, number>;
     teamRevivalState: Map<string, GhostRevivalSession>;
+    activeFfaQuizzes: Map<string, FfaQuizSession>;   // socketId -> open quiz
+    pendingReclaims: Map<string, PendingReclaim>;    // user id -> dropped player
+    pingUsage: Map<string, { count: number; lastAt: number }>;
     engine?: GameEngine;
     intervalId?: NodeJS.Timeout;
+    stateTimer?: NodeJS.Timeout;
+    emptyTimer?: NodeJS.Timeout;
     state: 'LOBBY' | 'STARTING' | 'IN_GAME' | 'GAME_OVER';
   }> = new Map();
 
@@ -92,9 +124,70 @@ export class RoomManager {
       teamStreaks: new Map(),
       teamAirdropCooldowns: new Map(),
       teamRevivalState: new Map(),
+      activeFfaQuizzes: new Map(),
+      pendingReclaims: new Map(),
+      pingUsage: new Map(),
       state: 'LOBBY'
     });
     return roomId;
+  }
+
+  /** Stops the physics loop and every timer a match may have left behind. */
+  private disposeEngine(roomId: string) {
+    const room = this.rooms.get(roomId);
+    if (!room) return;
+    if (room.intervalId) {
+      clearInterval(room.intervalId);
+      room.intervalId = undefined;
+    }
+    for (const session of room.activeSquadQuizzes.values()) {
+      if (session.timer) clearTimeout(session.timer);
+    }
+    for (const q of room.activeFfaQuizzes.values()) {
+      if (q.timer) clearTimeout(q.timer);
+    }
+    for (const r of room.pendingReclaims.values()) {
+      if (r.timer) clearTimeout(r.timer);
+    }
+    room.activeSquadQuizzes.clear();
+    room.squadQuizQueues.clear();
+    room.activeFfaQuizzes.clear();
+    room.pendingReclaims.clear();
+    room.pingUsage.clear();
+    room.teamStreaks.clear();
+    room.teamAirdropCooldowns.clear();
+    room.teamRevivalState.clear();
+    room.engine = undefined;
+  }
+
+  /**
+   * Called whenever a room loses its last player. An abandoned match used to
+   * keep a 30Hz loop running forever until a teacher deleted the room by hand.
+   */
+  private handleRoomEmpty(roomId: string) {
+    const room = this.rooms.get(roomId);
+    if (!room || room.players.size > 0) return;
+
+    if (room.engine || room.intervalId) {
+      console.log(`[Room ${roomId}] last player left — stopping game loop`);
+      this.disposeEngine(roomId);
+    }
+    room.state = 'LOBBY';
+
+    // Auto-created default rooms stay; ad-hoc rooms are collected after a TTL
+    if (room.emptyTimer) clearTimeout(room.emptyTimer);
+    if (roomId !== 'arena-1' && roomId !== 'squad-1') {
+      room.emptyTimer = setTimeout(() => {
+        const r = this.rooms.get(roomId);
+        if (r && r.players.size === 0) {
+          this.disposeEngine(roomId);
+          this.rooms.delete(roomId);
+          this.io.emit('room_list', this.getRoomList());
+          console.log(`[Room ${roomId}] removed after being empty for 2 minutes`);
+        }
+      }, EMPTY_ROOM_TTL_MS);
+    }
+    this.io.emit('room_list', this.getRoomList());
   }
 
   public getRoomList() {
@@ -134,11 +227,58 @@ export class RoomManager {
     // Leave any prior room
     this.leaveRoom(socket);
 
+    if (room.emptyTimer) {
+      clearTimeout(room.emptyTimer);
+      room.emptyTimer = undefined;
+    }
+
+    // ── Reconnect: the same human coming back after a dropped connection ──
+    const pending = room.pendingReclaims.get(playerInfo.id);
+    if (pending) {
+      if (pending.timer) clearTimeout(pending.timer);
+      room.pendingReclaims.delete(playerInfo.id);
+
+      const restored: Player = { ...pending.player, socketId: socket.id, name: playerInfo.name || pending.player.name };
+      room.players.set(socket.id, restored);
+      this.playerRooms.set(socket.id, roomId);
+      socket.join(roomId);
+
+      if (room.engine && pending.tankId) {
+        const tank = room.engine.rekeyTank(pending.tankId, socket.id);
+        if (tank) restored.tankId = tank.id;
+      }
+
+      // Hand them the running match so they aren't stranded on the lobby screen
+      if (room.engine && room.state === 'IN_GAME') {
+        socket.emit('game_start', {
+          mode: room.config.mode,
+          map: room.engine.map,
+          initialState: room.engine.getFullState(),
+          rejoined: true
+        });
+      }
+
+      socket.emit('reclaimed', {
+        role: restored.role,
+        teamId: restored.teamId,
+        tankRestored: !!restored.tankId
+      });
+      this.io.to(roomId).emit('game_event', {
+        type: 'PLAYER_RECONNECTED',
+        message: `🔌 ${restored.name} กลับเข้าสู่สนามรบแล้ว${restored.tankId ? ' (ได้รถถังคันเดิมคืน)' : ''}`,
+        sound: 'START',
+        teamId: restored.teamId,
+        timestamp: Date.now()
+      });
+      this.broadcastRoomState(roomId);
+      return;
+    }
+
     const isFirst = room.players.size === 0;
     
     // In SQUAD mode, auto-assign to the team with lowest count for balance
-    let assignedTeam = playerInfo.teamId;
-    let assignedRole = playerInfo.role || 'SUPPORT';
+    let assignedTeam = playerInfo.teamId && VALID_TEAM_IDS.has(playerInfo.teamId) ? playerInfo.teamId : undefined;
+    let assignedRole: PlayerRole = playerInfo.role && VALID_ROLES.has(playerInfo.role) ? playerInfo.role : 'SUPPORT';
     const numTeams = Math.min(6, Math.max(2, room.config.maxTanks || 4));
     
     if (room.config.mode === 'SQUAD' && !assignedTeam) {
@@ -184,7 +324,9 @@ export class RoomManager {
       avatar: playerInfo.avatar,
       role: assignedRole,
       teamId: isSquad ? (assignedTeam || `team-${(room.players.size % numTeams) + 1}`) : '',
-      tankArchetype: playerInfo.tankArchetype || 'STANDARD',
+      tankArchetype: playerInfo.tankArchetype && VALID_ARCHETYPES.has(playerInfo.tankArchetype)
+        ? playerInfo.tankArchetype
+        : 'STANDARD',
       tankColor: playerInfo.tankColor || (assignedTeam ? teamColorMap[assignedTeam] : this.getRandomColor(room.players.size)),
       isHost: isFirst,
       isReady: isFirst, // Host is automatically ready
