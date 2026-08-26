@@ -197,6 +197,9 @@ export class GameEngine {
     tank.id = newId;
     tank.isMoving = false;
     this.tanks.set(newId, tank);
+    // คนเดิม socket ใหม่ — ต้องแทนที่ id เก่า ไม่ใช่เพิ่มเป็นผู้เล่นคนที่สอง
+    // (ไม่งั้น participants โตขึ้นแล้ว checkWinCondition ประกาศจบเกมทันทีที่ต่อกลับ)
+    this.participants.delete(oldId);
     this.participants.add(newId);
     // Bullets already in flight keep firing on behalf of the reclaimed tank
     this.bullets.forEach(b => { if (b.tankId === oldId) b.tankId = newId; });
@@ -244,6 +247,38 @@ export class GameEngine {
       tank.direction = direction;
     }
     tank.isMoving = isMoving;
+  }
+
+  /**
+   * ทำเครื่องหมายว่าเจ้าของรถหลุดการเชื่อมต่อ รถยังอยู่บนแผนที่ให้กลับมาขับต่อได้
+   * แต่ใน FFA จะไม่ถูกนับเป็นผู้แข่งขัน — ไม่งั้นคนที่เหลือคนเดียวจะไม่ชนะสักที
+   */
+  public setTankDisconnected(tankId: string, value: boolean) {
+    const tank = this.tanks.get(tankId);
+    if (!tank) return;
+    tank.isDisconnected = value;
+    if (value) tank.isMoving = false;
+  }
+
+  /**
+   * เติมกระสุนธรรมดาให้รถถังผ่านทาง shells ซึ่งเป็นแหล่งความจริงเดียว
+   * (ตั้ง `tank.ammo` ตรง ๆ จะไม่มีนัดให้ยิงจริง — เป็นที่มาของ desync เดิม)
+   */
+  public grantAmmo(tankId: string, count: number): number {
+    const tank = this.tanks.get(tankId);
+    if (!tank) return 0;
+    return this.grantShells(tank, 'STD', 1, count, tank.playerId, tank.playerName);
+  }
+
+  /**
+   * ปลดล็อกกล่องคำถามเมื่อผู้เล่นปล่อยให้หมดเวลา — ถ้าไม่เคลียร์
+   * `answeringQuizId` รถถังคันนั้นจะเก็บกล่องใหม่ไม่ได้ตลอดทั้งแมตช์
+   */
+  public expireQuiz(tankId: string, crateId: string) {
+    const tank = this.tanks.get(tankId);
+    if (tank && tank.answeringQuizId === crateId) {
+      tank.answeringQuizId = undefined;
+    }
   }
 
   private getSpecialAmmoFromCategory(category: string): { kind: SpecialAmmoKind; nameTh: string } {
@@ -1016,9 +1051,11 @@ export class GameEngine {
         isGameOver = this.revivalPendingTeams.size === 0;
       }
     } else {
-      if (aliveTanks.length === 0) {
+      // FFA: รถของคนที่เน็ตหลุดยังจอดอยู่บนแผนที่รอ reclaim แต่ไม่นับเป็นคู่แข่ง
+      const contenders = aliveTanks.filter(t => !t.isDisconnected);
+      if (contenders.length === 0) {
         isGameOver = true;
-      } else if (aliveTanks.length <= 1 && startedWith > 1) {
+      } else if (contenders.length <= 1 && startedWith > 1) {
         isGameOver = true;
       }
     }
@@ -1026,7 +1063,8 @@ export class GameEngine {
     if (isGameOver) {
       this.isRunning = false;
       const sortedTanks = [...allTanks].sort((a, b) => b.score - a.score);
-      const winner = aliveTanks[0] || sortedTanks[0];
+      // คนที่ยังต่ออยู่มาก่อนคนที่หลุดไปแล้ว
+      const winner = aliveTanks.find(t => !t.isDisconnected) || aliveTanks[0] || sortedTanks[0];
       
       let winnerDisplayName = winner ? winner.playerName : 'ทุกคนเก่งมาก!';
       if (this.mode === 'SQUAD' && winner?.teamId) {

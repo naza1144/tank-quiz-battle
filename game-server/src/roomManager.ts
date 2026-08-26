@@ -38,7 +38,12 @@ interface GhostRevivalSession {
   hasUsed: boolean;
   streak: number;
   currentQ?: QuizQuestion;
+  /** หมดเวลาแล้วต้องปลดล็อกให้แมตช์จบได้ ไม่ปล่อยค้าง */
+  timer?: NodeJS.Timeout;
 }
+
+/** ให้ทีมที่รถถังพังมีเวลาเท่านี้ในการตอบให้ครบ 2 ข้อติด */
+const GHOST_REVIVAL_WINDOW_MS = 30_000;
 
 /** A quiz handed to one FFA driver. Answers are only accepted against this. */
 interface FfaQuizSession {
@@ -62,10 +67,11 @@ const EMPTY_ROOM_TTL_MS = 120_000;
 const ROOM_STATE_THROTTLE_MS = 250;
 const PING_COOLDOWN_MS = 5_000;
 const PING_MAX_PER_MATCH = 6;
-const VALID_DIRECTIONS = new Set(['UP', 'DOWN', 'LEFT', 'RIGHT']);
-const VALID_ARCHETYPES = new Set(['STANDARD', 'SCOUT', 'HEAVY', 'SNIPER']);
-const VALID_ROLES = new Set(['DRIVER', 'SUPPORT', 'GHOST']);
-const VALID_TEAM_IDS = new Set(['team-1', 'team-2', 'team-3', 'team-4', 'team-5', 'team-6']);
+export const VALID_DIRECTIONS = new Set(['UP', 'DOWN', 'LEFT', 'RIGHT']);
+export const VALID_ARCHETYPES = new Set(['STANDARD', 'SCOUT', 'HEAVY', 'SNIPER']);
+export const VALID_ROLES = new Set(['DRIVER', 'SUPPORT', 'GHOST']);
+export const VALID_TEAM_IDS = new Set(['team-1', 'team-2', 'team-3', 'team-4', 'team-5', 'team-6']);
+export const VALID_SUPPLY_TYPES = new Set(['SHIELD', 'REPAIR']);
 
 export class RoomManager {
   private io: Server;
@@ -148,6 +154,9 @@ export class RoomManager {
     }
     for (const r of room.pendingReclaims.values()) {
       if (r.timer) clearTimeout(r.timer);
+    }
+    for (const rev of room.teamRevivalState.values()) {
+      if (rev.timer) clearTimeout(rev.timer);
     }
     room.activeSquadQuizzes.clear();
     room.squadQuizQueues.clear();
@@ -245,7 +254,10 @@ export class RoomManager {
 
       if (room.engine && pending.tankId) {
         const tank = room.engine.rekeyTank(pending.tankId, socket.id);
-        if (tank) restored.tankId = tank.id;
+        if (tank) {
+          restored.tankId = tank.id;
+          room.engine.setTankDisconnected(tank.id, false);
+        }
       }
 
       // Hand them the running match so they aren't stranded on the lobby screen
@@ -339,6 +351,19 @@ export class RoomManager {
     this.playerRooms.set(socket.id, roomId);
     socket.join(roomId);
 
+    // เข้ามากลางแมตช์ (ไม่ใช่เคส reclaim): เข้าเป็นฝ่ายสนับสนุน ไม่แจกรถถังกลางคัน
+    // เดิมค้างอยู่หน้าล็อบบี้ทั้งที่รับ snapshot 30 Hz อยู่แล้ว
+    if (room.engine && room.state === 'IN_GAME') {
+      player.role = 'SUPPORT';
+      socket.emit('game_start', {
+        mode: room.config.mode,
+        map: room.engine.map,
+        initialState: room.engine.getFullState(),
+        joinedMidMatch: true
+      });
+      socket.emit('error_message', 'แมตช์เริ่มไปแล้ว — เข้าร่วมในบทบาทฝ่ายสนับสนุน');
+    }
+
     this.broadcastRoomState(roomId);
   }
 
@@ -358,13 +383,59 @@ export class RoomManager {
         if (nextHost) nextHost.isHost = true;
       }
 
-      // If game running, remove tank and check win condition immediately
+      // เคลียร์โจทย์ที่ค้างอยู่ของ socket นี้ ไม่งั้น timer ค้างจนจบแมตช์
+      const openQuiz = room.activeFfaQuizzes.get(socket.id);
+      if (openQuiz) {
+        if (openQuiz.timer) clearTimeout(openQuiz.timer);
+        room.activeFfaQuizzes.delete(socket.id);
+      }
+
       if (room.engine && leavingPlayer) {
-        room.engine.removeTank(socket.id);
-        room.engine.checkWinCondition();
+        if (room.state === 'IN_GAME') {
+          // เน็ตหลุดกลางแมตช์: จอดรถไว้เฉย ๆ ให้เจ้าของกลับมาเอาคืนได้ใน 60 วิ
+          // (ถ้าลบทันทีแบบเดิม ฝั่ง joinRoom จะไม่เหลืออะไรให้ reclaim)
+          room.engine.setTankInput(socket.id, null, false);
+          room.engine.setTankDisconnected(socket.id, true);
+          room.engine.checkWinCondition(); // FFA: คนที่เหลือคนเดียวต้องชนะทันที
+          const existing = room.pendingReclaims.get(leavingPlayer.id);
+          if (existing?.timer) clearTimeout(existing.timer);
+
+          const timer = setTimeout(() => {
+            const r = this.rooms.get(roomId);
+            const entry = r?.pendingReclaims.get(leavingPlayer.id);
+            if (!r || !entry) return;
+            r.pendingReclaims.delete(leavingPlayer.id);
+            if (entry.tankId && r.engine) {
+              r.engine.removeTank(entry.tankId);
+              r.engine.checkWinCondition();
+            }
+          }, RECLAIM_GRACE_MS);
+
+          room.pendingReclaims.set(leavingPlayer.id, {
+            player: leavingPlayer,
+            tankId: leavingPlayer.tankId ?? socket.id,
+            expiresAt: Date.now() + RECLAIM_GRACE_MS,
+            timer
+          });
+
+          this.io.to(roomId).emit('game_event', {
+            type: 'PLAYER_DISCONNECTED',
+            message: `📴 ${leavingPlayer.name} หลุดการเชื่อมต่อ — รอกลับมาได้อีก ${RECLAIM_GRACE_MS / 1000} วินาที`,
+            sound: 'ALERT',
+            teamId: leavingPlayer.teamId,
+            timestamp: Date.now()
+          });
+        } else {
+          room.engine.removeTank(socket.id);
+          room.engine.checkWinCondition();
+        }
       }
 
       this.broadcastRoomState(roomId);
+
+      if (room.players.size === 0) {
+        this.handleRoomEmpty(roomId);
+      }
     }
 
     this.playerRooms.delete(socket.id);
@@ -526,16 +597,18 @@ export class RoomManager {
       {
         onGameEvent: (event: GameEvent) => {
           this.io.to(roomId).emit('game_event', event);
+
+          // รถถังทีมไหนพัง = เปิด Ghost Revival ให้ทีมนั้น
+          // (เดิม triggerGhostRevivalChallenge() ไม่เคยถูกเรียกจากโค้ดจริงเลย)
+          if (event.type === 'TANK_DESTROYED' && room.config.mode === 'SQUAD' && event.teamId) {
+            this.beginGhostRevival(roomId, event.teamId);
+          }
         },
         onQuizTrigger: (tankId: string, playerId: string, question: QuizQuestion, crateId: string) => {
           // Send quiz modal to specific player
           const targetPlayer = Array.from(room.players.values()).find(p => p.id === playerId || p.socketId === tankId);
           if (targetPlayer) {
-            this.io.to(targetPlayer.socketId).emit('quiz_popup', {
-              tankId,
-              crateId,
-              question
-            });
+            this.openFfaQuizSession(roomId, targetPlayer.socketId, tankId, crateId, question);
           }
         },
         onTeamQuizTrigger: (teamId: string, question: QuizQuestion, crateId: string, tankId: string) => {
@@ -573,11 +646,7 @@ export class RoomManager {
             // If no support player on this team, driver answers as fallback
             const driver = Array.from(room.players.values()).find(p => p.teamId === teamId && p.role === 'DRIVER');
             if (driver) {
-              this.io.to(driver.socketId).emit('quiz_popup', {
-                tankId,
-                crateId,
-                question
-              });
+              this.openFfaQuizSession(roomId, driver.socketId, tankId, crateId, question);
             }
           }
         },
@@ -680,7 +749,9 @@ export class RoomManager {
     const room = this.rooms.get(roomId);
     if (!room?.engine) return;
 
-    room.engine.setTankInput(socket.id, data.direction, data.isMoving);
+    // payload อาจเป็น undefined/ชนิดผิดได้ (client ปลอม) — เคยทำ pod ตายทั้งเครื่อง
+    const direction = data && VALID_DIRECTIONS.has(data.direction) ? data.direction : null;
+    room.engine.setTankInput(socket.id, direction, !!data?.isMoving && direction !== null);
   }
 
   public handleTankShoot(socket: Socket) {
@@ -690,6 +761,47 @@ export class RoomManager {
     if (!room?.engine) return;
 
     room.engine.tankShoot(socket.id);
+  }
+
+  /**
+   * เปิดคำถามให้ผู้เล่นคนเดียว แล้วจดไว้ว่ากำลังเปิดโจทย์ข้อไหนอยู่
+   * `handleQuizAnswer()` จะรับคำตอบเฉพาะที่ตรงกับ session นี้เท่านั้น —
+   * เดิมไม่มีการจดเลย ทำให้ยิง `answer_quiz` รัว ๆ โดยไม่แตะกล่องก็ได้กระสุนเต็ม
+   */
+  private openFfaQuizSession(
+    roomId: string,
+    socketId: string,
+    tankId: string,
+    crateId: string,
+    question: QuizQuestion
+  ) {
+    const room = this.rooms.get(roomId);
+    if (!room) return;
+
+    const previous = room.activeFfaQuizzes.get(socketId);
+    if (previous?.timer) clearTimeout(previous.timer);
+
+    const timeLimitSeconds = getTimeLimitForDifficulty(question.difficulty, question.timeLimitSeconds);
+    // เผื่อ latency 1.5 วิ ตอบเลยจากนี้ถือว่าหมดเวลา
+    const graceMs = timeLimitSeconds * 1000 + 1500;
+
+    const timer = setTimeout(() => {
+      const current = room.activeFfaQuizzes.get(socketId);
+      if (!current || current.crateId !== crateId) return;
+      room.activeFfaQuizzes.delete(socketId);
+      room.engine?.expireQuiz(tankId, crateId);
+      this.io.to(socketId).emit('quiz_expired', { crateId, questionId: question.id });
+    }, graceMs);
+
+    room.activeFfaQuizzes.set(socketId, {
+      questionId: question.id,
+      crateId,
+      tankId,
+      expiresAt: Date.now() + graceMs,
+      timer
+    });
+
+    this.io.to(socketId).emit('quiz_popup', { tankId, crateId, question });
   }
 
   public handleQuizAnswer(socket: Socket, data: {
@@ -704,10 +816,29 @@ export class RoomManager {
     const room = this.rooms.get(roomId);
     if (!room?.engine) return;
 
+    const session = room.activeFfaQuizzes.get(socket.id);
+    if (
+      !session ||
+      session.questionId !== data.questionId ||
+      session.crateId !== data.crateId ||
+      Date.now() > session.expiresAt
+    ) {
+      // ไม่มีโจทย์ที่เปิดค้างอยู่ / ตอบผิดข้อ / ตอบช้าเกินกำหนด → ไม่ให้รางวัลใด ๆ
+      if (session?.timer) clearTimeout(session.timer);
+      room.activeFfaQuizzes.delete(socket.id);
+      if (session) room.engine.expireQuiz(session.tankId, session.crateId);
+      socket.emit('quiz_expired', { crateId: data.crateId, questionId: data.questionId });
+      return;
+    }
+
+    // ตอบได้ครั้งเดียวต่อกล่อง — ลบ session ทิ้งก่อนคิดรางวัลเพื่อกันตอบซ้ำ
+    if (session.timer) clearTimeout(session.timer);
+    room.activeFfaQuizzes.delete(socket.id);
+
     const result = room.engine.handleQuizAnswer(
-      data.tankId,
-      data.crateId,
-      data.questionId,
+      session.tankId, // ใช้รถถังจาก session เสมอ ไม่เชื่อ tankId ที่ client ส่งมา
+      session.crateId,
+      session.questionId,
       data.selectedIndex,
       data.confident
     );
@@ -764,6 +895,16 @@ export class RoomManager {
     if (!room || room.state !== 'IN_GAME') return;
     const player = room.players.get(socket.id);
     if (!player || !player.teamId) return;
+
+    // จำกัดโควตาปักหมุด ไม่ให้สแปมใส่เพื่อนร่วมทีม
+    const now = Date.now();
+    const usage = room.pingUsage.get(socket.id) ?? { count: 0, lastAt: 0 };
+    if (usage.count >= PING_MAX_PER_MATCH) {
+      socket.emit('error_message', `ปักหมุดได้สูงสุด ${PING_MAX_PER_MATCH} ครั้งต่อแมตช์`);
+      return;
+    }
+    if (now - usage.lastAt < PING_COOLDOWN_MS) return;
+    room.pingUsage.set(socket.id, { count: usage.count + 1, lastAt: now });
 
     const ping: TacticalPing = {
       id: `ping-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
@@ -1050,6 +1191,72 @@ export class RoomManager {
     }
   }
 
+  /**
+   * เปิดโหมด Ghost ให้ทั้งทีมที่รถถังเพิ่งพัง: ทุกคนกลายเป็น GHOST, กันไม่ให้แมตช์
+   * ประกาศผู้ชนะจนกว่าจะรู้ผล และตั้งนาฬิกาไว้กันแมตช์ค้างถ้าไม่มีใครตอบ
+   */
+  private beginGhostRevival(roomId: string, teamId: string) {
+    const room = this.rooms.get(roomId);
+    if (!room?.engine || room.state !== 'IN_GAME') return;
+
+    const existing = room.teamRevivalState.get(teamId);
+    if (existing?.hasUsed) return;       // ทีมนี้ใช้สิทธิ์ไปแล้ว
+    if (room.engine.revivalPendingTeams.has(teamId)) return; // เปิดค้างอยู่แล้ว
+
+    // ชุบได้ทีมละครั้งต่อแมตช์ — ถ้าใช้ไปแล้วปล่อยให้ checkWinCondition ประกาศผลได้เลย
+    const teamTank = Array.from(room.engine.tanks.values()).find(t => t.teamId === teamId);
+    if (!teamTank || teamTank.hasUsedRevival) return;
+
+    for (const p of room.players.values()) {
+      if (p.teamId === teamId && p.role !== 'GHOST') {
+        p.previousRole = p.role;
+        p.role = 'GHOST';
+      }
+    }
+
+    this.triggerGhostRevivalChallenge(roomId, teamId);
+    this.broadcastRoomState(roomId);
+  }
+
+  /**
+   * ปิดฉาก Ghost Revival ไม่ว่าจะสำเร็จหรือหมดเวลา — ต้องปลด `revivalPendingTeams`
+   * เสมอ ไม่งั้น `checkWinCondition()` จะไม่มีวันประกาศผู้ชนะ
+   */
+  private endGhostRevival(roomId: string, teamId: string, success: boolean) {
+    const room = this.rooms.get(roomId);
+    if (!room) return;
+
+    const session = room.teamRevivalState.get(teamId);
+    if (session?.timer) {
+      clearTimeout(session.timer);
+      session.timer = undefined;
+    }
+    if (session) {
+      session.hasUsed = true;
+      session.currentQ = undefined;
+    }
+
+    room.engine?.revivalPendingTeams.delete(teamId);
+
+    if (!success) {
+      // ชุบไม่สำเร็จ = ทีมนี้ตกรอบ คงสถานะ GHOST ไว้ให้ดูเกมต่อ แล้วแจ้งผล
+      const teamMembers = Array.from(room.players.values()).filter(p => p.teamId === teamId);
+      teamMembers.forEach(g => {
+        this.io.to(g.socketId).emit('ghost_revival_failed', { teamId });
+      });
+    } else {
+      for (const p of room.players.values()) {
+        if (p.teamId === teamId && p.role === 'GHOST' && p.previousRole) {
+          p.role = p.previousRole;
+          p.previousRole = undefined;
+        }
+      }
+    }
+
+    this.broadcastRoomState(roomId);
+    room.engine?.checkWinCondition();
+  }
+
   public triggerGhostRevivalChallenge(roomId: string, teamId: string) {
     const room = this.rooms.get(roomId);
     if (!room || !room.engine || room.state !== 'IN_GAME') return;
@@ -1060,6 +1267,14 @@ export class RoomManager {
       room.teamRevivalState.set(teamId, revival);
     }
     if (revival.hasUsed) return;
+
+    // กันไม่ให้ checkWinCondition() ประกาศผู้ชนะระหว่างที่ทีมนี้ยังตอบไม่จบ
+    // (เดิมแมตช์จบตั้งแต่ตอบข้อแรกเสร็จ คำตอบข้อสองเลยถูกทิ้ง)
+    room.engine.revivalPendingTeams.add(teamId);
+    if (revival.timer) clearTimeout(revival.timer);
+    revival.timer = setTimeout(() => {
+      this.endGhostRevival(roomId, teamId, false);
+    }, GHOST_REVIVAL_WINDOW_MS);
 
     const q = this.quizManager.getRandomQuestion('GENERAL');
     revival.currentQ = q;
@@ -1093,13 +1308,15 @@ export class RoomManager {
     if (isCorrect) {
       revival.streak++;
       if (revival.streak >= 2) {
-        revival.hasUsed = true;
         room.engine.reviveTeamTank(teamId);
 
         const teamGhosts = Array.from(room.players.values()).filter(p => p.teamId === teamId);
         teamGhosts.forEach(g => {
           this.io.to(g.socketId).emit('ghost_revival_success', { teamId });
         });
+
+        // ปลด revivalPendingTeams + คืน role เดิม (hasUsed ถูกตั้งข้างใน)
+        this.endGhostRevival(roomId, teamId, true);
       } else {
         // Issue question 2
         const q2 = this.quizManager.getRandomQuestion('SCIENCE');
@@ -1304,14 +1521,45 @@ export class RoomManager {
     };
   }
 
+  /**
+   * รวบการ broadcast ให้เหลือ 4 ครั้ง/วินาที — ล็อบบี้ 60 คนกดเลือกรถถังพร้อมกัน
+   * เคยยิงออกไป 53 MB ใน 4 วินาที (~106 Mbit/s) เพราะทุก action ส่งรายชื่อทั้งห้อง
+   */
   private broadcastRoomState(roomId: string) {
+    const room = this.rooms.get(roomId);
+    if (!room) return;
+    if (room.stateTimer) return; // มีคิวรออยู่แล้ว เดี๋ยวรอบนั้นส่งสถานะล่าสุดเอง
+
+    room.stateTimer = setTimeout(() => {
+      const r = this.rooms.get(roomId);
+      if (!r) return;
+      r.stateTimer = undefined;
+      this.emitRoomState(roomId);
+    }, ROOM_STATE_THROTTLE_MS);
+
+    this.emitRoomState(roomId);
+  }
+
+  private emitRoomState(roomId: string) {
     const room = this.rooms.get(roomId);
     if (!room) return;
 
     this.io.to(roomId).emit('room_state', {
       config: room.config,
       state: room.state,
-      players: Array.from(room.players.values())
+      // ส่งเฉพาะฟิลด์ที่หน้าล็อบบี้ใช้จริง — คะแนน/กระสุนมากับ game_tick อยู่แล้ว
+      players: Array.from(room.players.values()).map(p => ({
+        id: p.id,
+        socketId: p.socketId,
+        name: p.name,
+        avatar: p.avatar,
+        role: p.role,
+        teamId: p.teamId,
+        tankArchetype: p.tankArchetype,
+        tankColor: p.tankColor,
+        isHost: p.isHost,
+        isReady: p.isReady
+      }))
     });
   }
 

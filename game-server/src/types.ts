@@ -121,6 +121,8 @@ export interface Tank {
   isBot?: boolean;
   botDifficulty?: 'EASY' | 'MEDIUM' | 'HARD';
   lastShootTime: number;
+  /** เจ้าของหลุดการเชื่อมต่ออยู่ — รถจอดรอ reclaim ไม่นับเป็นผู้แข่งขันใน FFA */
+  isDisconnected?: boolean;
   answeringQuizId?: string;
   synergyStreak?: number; // 0 to 3
   isUltimateReady?: boolean;
@@ -236,6 +238,8 @@ export interface Player {
   correctAnswers: number;
   hasUsedRevival?: boolean;
   ghostRevivalStreak?: number;
+  /** role ก่อนถูกเปลี่ยนเป็น GHOST — ใช้คืนค่าเมื่อ Ghost Revival จบ */
+  previousRole?: PlayerRole;
 }
 
 export interface TeamState {

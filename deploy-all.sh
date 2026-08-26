@@ -42,8 +42,16 @@ if [[ "$MODE" == "--terraform" ]]; then
   docker save tank-game-server:latest -o /tmp/tank-game-server.tar
 
   echo -e "\n${PURPLE}[TERRAFORM PIPELINE] Transferring images to K8s node...${NC}"
-  sshpass -p Dssi_server scp -o StrictHostKeyChecking=no /tmp/tank-game-client.tar /tmp/tank-game-server.tar dssi-2026@192.168.50.96:/tmp/
-  sshpass -p Dssi_server ssh -o StrictHostKeyChecking=no dssi-2026@192.168.50.96 "echo Dssi_server | sudo -S k3s ctr images import /tmp/tank-game-client.tar && echo Dssi_server | sudo -S k3s ctr images import /tmp/tank-game-server.tar"
+  # โหนด k3s เปิดรับเฉพาะ publickey (sshpass ใช้ไม่ได้จริง: allowed types: ['publickey'])
+  # เปลี่ยนปลายทาง/คีย์ได้ผ่าน env: K3S_SSH_HOST, K3S_SSH_KEY
+  K3S_SSH_HOST="${K3S_SSH_HOST:-dssi-2026@192.168.50.96}"
+  K3S_SSH_KEY="${K3S_SSH_KEY:-$HOME/.ssh/id_dssi2026}"
+  if [[ ! -f "$K3S_SSH_KEY" ]]; then
+    echo -e "${RED}Error: ไม่พบ SSH key ที่ $K3S_SSH_KEY (ตั้ง env K3S_SSH_KEY ให้ชี้ไฟล์ที่ถูกต้อง)${NC}"
+    exit 1
+  fi
+  scp -i "$K3S_SSH_KEY" -o StrictHostKeyChecking=no /tmp/tank-game-client.tar /tmp/tank-game-server.tar "$K3S_SSH_HOST:/tmp/"
+  ssh -i "$K3S_SSH_KEY" -o StrictHostKeyChecking=no "$K3S_SSH_HOST" "sudo k3s ctr images import /tmp/tank-game-client.tar && sudo k3s ctr images import /tmp/tank-game-server.tar"
 
   echo -e "\n${PURPLE}[TERRAFORM PIPELINE] Applying Terraform Infrastructure...${NC}"
   cd "$ROOT_DIR/terraform"

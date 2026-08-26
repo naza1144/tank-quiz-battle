@@ -92,7 +92,7 @@ console.log('✅ Physics Loop Simulation Passed!\n');
   combatTankA.shieldEndTime = 0;
   combatTankB.shieldEndTime = 0;
   combatTankB.hp = 1;
-  combatTankA.ammo = 5;
+  combatEngine.grantAmmo(combatTankA.id, 5);
 
   // Position combatTankB directly above combatTankA
   combatTankA.x = 100;

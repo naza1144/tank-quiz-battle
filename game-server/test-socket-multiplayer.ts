@@ -127,7 +127,7 @@ async function runMultiplayerTest() {
   const tank1 = Array.from(room.engine.tanks.values())[0];
   const tank2 = Array.from(room.engine.tanks.values())[1];
 
-  tank1.ammo = 5;
+  room.engine.grantAmmo(tank1.id, 5);
   tank1.shieldEndTime = 0;
   tank2.shieldEndTime = 0;
   tank2.hp = 1; // 1 HP so single shot destroys it

@@ -40,7 +40,7 @@ async function runBrutalFullRoomStressTest() {
   app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
   app.get('/api/quiz/categories', (req, res) => res.json(quizManager.getCategories()));
   app.get('/api/quiz/questions', (req, res) => {
-    const list = quizManager.getQuestions({});
+    const list = quizManager.getAllQuestions({});
     res.json({ total: list.length, questions: list });
   });
 
@@ -395,7 +395,7 @@ async function runBrutalFullRoomStressTest() {
       const tankId = `bench-tank-${i % 6}`;
       const t = benchEngine.tanks.get(tankId);
       if (t) {
-        t.ammo = 10;
+        benchEngine.grantAmmo(tankId, 10);
         benchEngine.tankShoot(tankId);
       }
     }

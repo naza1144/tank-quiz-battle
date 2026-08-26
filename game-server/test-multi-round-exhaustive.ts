@@ -32,7 +32,7 @@ async function runMultiRoundExhaustiveTest() {
   });
   app.get('/api/quiz/categories', (req, res) => res.json(quizManager.getCategories()));
   app.get('/api/quiz/questions', (req, res) => {
-    const list = quizManager.getQuestions({
+    const list = quizManager.getAllQuestions({
       category: req.query.category as string,
       difficulty: req.query.difficulty as string,
       search: req.query.search as string

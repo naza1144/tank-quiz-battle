@@ -37,6 +37,8 @@ interface SquadSupportViewProps {
   voteUpdate?: TeamQuizVoteUpdate | null;
   finalResult?: TeamQuizFinalResult | null;
   isGhost?: boolean;
+  /** serverNow - Date.now() : ชดเชยนาฬิกาเครื่องผู้เล่นที่ตั้งเวลาเพี้ยน */
+  serverClockOffsetMs?: number;
   airdropCooldownSeconds?: number;
   ghostRevivalData?: {
     question: QuizQuestion;
@@ -60,6 +62,7 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
   voteUpdate,
   finalResult,
   isGhost = false,
+  serverClockOffsetMs = 0,
   airdropCooldownSeconds = 0,
   ghostRevivalData,
   onVote,
@@ -75,6 +78,11 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
 
   const endTimeRef = React.useRef<number>(0);
   const durationRef = React.useRef<number>(12);
+  const offsetRef = React.useRef<number>(0);
+  offsetRef.current = serverClockOffsetMs;
+
+  // endTime มาจากนาฬิกาเซิร์ฟเวอร์ จึงต้องเทียบกับเวลาเซิร์ฟเวอร์ ไม่ใช่ Date.now() ของเครื่องผู้เล่น
+  const serverNow = () => Date.now() + offsetRef.current;
 
   // When a new question arrives, lock in endTime and duration ONCE (immune to 30fps game_tick re-renders!)
   useEffect(() => {
@@ -92,13 +100,13 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
         quizSession?.endTime || 
         quizSession?.expireAt || 
         quizSessionData?.endTime || 
-        (Date.now() + dur * 1000);
+        (serverNow() + dur * 1000);
 
       endTimeRef.current = end;
       durationRef.current = dur;
       setDuration(dur);
 
-      const initialRemaining = Math.max(0, (end - Date.now()) / 1000);
+      const initialRemaining = Math.max(0, (end - serverNow()) / 1000);
       setTimeLeft(initialRemaining);
     }
   }, [currentQuestion?.id, quizSession?.startTime, quizSession?.endTime]);
@@ -110,7 +118,7 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
     let lastTickSecond = -1;
 
     const interval = setInterval(() => {
-      const remainingMs = endTimeRef.current - Date.now();
+      const remainingMs = endTimeRef.current - serverNow();
       const remainingSec = Math.max(0, remainingMs / 1000);
       setTimeLeft(remainingSec);
 
