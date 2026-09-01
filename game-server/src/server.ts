@@ -4,6 +4,7 @@ import { Server, Socket } from 'socket.io';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { QuizManager } from './quizBank.js';
+import { QuizClient, quizClient } from './quizClient.js';
 import {
   RoomManager,
   VALID_DIRECTIONS,
@@ -36,7 +37,7 @@ const io = new Server(httpServer, {
 });
 
 const quizManager = new QuizManager();
-const roomManager = new RoomManager(io, quizManager);
+const roomManager = new RoomManager(io, quizClient as any);
 
 // ── Payload guards ────────────────────────────────────────────────────────
 // client ที่ส่ง payload เปล่า/ชนิดผิดเคยทำให้ pod ตายทั้งเครื่อง (RESTARTS 0→1)
@@ -129,10 +130,29 @@ app.post('/api/rooms', (req, res) => {
 // 📚 OPEN QUIZ REST APIS (สำหรับอาจารย์/ผู้ดูแลระบบ ในการดึงและจัดการโจทย์คำถาม)
 // ══════════════════════════════════════════════════════════════════════════════
 
+// 0. Health check & Random Endpoint
+app.get('/api/quiz/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'tank-quiz-game-server',
+    quizServiceConnected: quizClient.isServiceOnline(),
+    totalQuestions: quizClient.getAllQuestions().length
+  });
+});
+
+app.get('/api/quiz/random', (req, res) => {
+  const { category, difficulty } = req.query;
+  const question = quizClient.getRandomQuestion(
+    category ? String(category) : undefined,
+    difficulty ? String(difficulty) : undefined
+  );
+  res.json({ success: true, question });
+});
+
 // 1. ดึงรายการโจทย์คำถามทั้งหมด (รองรับ filter category, difficulty, search)
 app.get(['/api/quiz/questions', '/api/quizzes'], (req, res) => {
   const { category, difficulty, search } = req.query;
-  const questions = quizManager.getAllQuestions({
+  const questions = quizClient.getAllQuestions({
     category: category ? String(category) : undefined,
     difficulty: difficulty ? String(difficulty) : undefined,
     search: search ? String(search) : undefined

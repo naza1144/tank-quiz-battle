@@ -3,6 +3,147 @@ kind: Namespace
 metadata:
   name: game
 ---
+# ─────────────────────────────────────────────────────────────
+# 1. QUIZ SERVICE (Microservice Port 4001)
+# ─────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quiz-service
+  namespace: game
+  labels:
+    app: quiz-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quiz-service
+  template:
+    metadata:
+      labels:
+        app: quiz-service
+    spec:
+      containers:
+        - name: quiz
+          image: docker.io/library/tank-quiz-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4001
+              name: http
+          env:
+            - name: PORT
+              value: "4001"
+            - name: QUIZ_SERVICE_API_KEY
+              value: "tank-quiz-api-key-2026"
+          readinessProbe:
+            httpGet:
+              path: /api/quiz/health
+              port: 4001
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /api/quiz/health
+              port: 4001
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quiz-service
+  namespace: game
+spec:
+  selector:
+    app: quiz-service
+  ports:
+    - name: http
+      port: 4001
+      targetPort: 4001
+---
+# ─────────────────────────────────────────────────────────────
+# 2. ACCOUNT & RBAC SERVICE (Microservice Port 4005)
+# ─────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: account-service
+  namespace: game
+  labels:
+    app: account-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: account-service
+  template:
+    metadata:
+      labels:
+        app: account-service
+    spec:
+      containers:
+        - name: account
+          image: docker.io/library/tank-quiz-account-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4005
+              name: http
+          env:
+            - name: PORT
+              value: "4005"
+            - name: JWT_SECRET
+              value: "tank-battle-quiz-secret-2026"
+          readinessProbe:
+            httpGet:
+              path: /api/account/health
+              port: 4005
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /api/account/health
+              port: 4005
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: account-service
+  namespace: game
+spec:
+  selector:
+    app: account-service
+  ports:
+    - name: http
+      port: 4005
+      targetPort: 4005
+---
+# ─────────────────────────────────────────────────────────────
+# 3. REALTIME GAME COMBAT SERVER (Port 4000)
+# ─────────────────────────────────────────────────────────────
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -30,26 +171,17 @@ spec:
           env:
             - name: PORT
               value: "4000"
+            - name: QUIZ_SERVICE_URL
+              value: "http://quiz-service.game.svc.cluster.local:4001"
+            - name: ACCOUNT_SERVICE_URL
+              value: "http://account-service.game.svc.cluster.local:4005"
             - name: JWT_SECRET
               value: "tank-battle-quiz-secret-2026"
-            - name: GOOGLE_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: sudhood-secrets
-                  key: GOOGLE_CLIENT_ID
-                  optional: true
-            - name: GOOGLE_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: sudhood-secrets
-                  key: GOOGLE_CLIENT_SECRET
-                  optional: true
-          # ไม่มี probe เลย = pod ที่ค้างจะไม่ถูกรีสตาร์ต (เจอตอนทดสอบโหลด)
           readinessProbe:
             httpGet:
               path: /api/health
               port: 4000
-            initialDelaySeconds: 3
+            initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 3
@@ -82,6 +214,9 @@ spec:
       port: 4000
       targetPort: 4000
 ---
+# ─────────────────────────────────────────────────────────────
+# 4. GAME CLIENT FRONTEND (React 18 SPA on Nginx Port 80)
+# ─────────────────────────────────────────────────────────────
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -139,6 +274,45 @@ spec:
       port: 80
       targetPort: 80
 ---
+# ─────────────────────────────────────────────────────────────
+# 5. TRAEFIK INGRESS ROUTES (Single Gateway Port 80/443 Exclusivity)
+# ─────────────────────────────────────────────────────────────
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: quiz-backend
+  namespace: game
+spec:
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    - match: (Host(`tank.192-168-50-96.sslip.io`) || Host(`game.192-168-50-96.sslip.io`)) && PathPrefix(`/api/quiz`)
+      kind: Rule
+      priority: 250
+      services:
+        - name: quiz-service
+          port: 4001
+  tls: {}
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: account-backend
+  namespace: game
+spec:
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    - match: (Host(`tank.192-168-50-96.sslip.io`) || Host(`game.192-168-50-96.sslip.io`)) && PathPrefix(`/api/account`)
+      kind: Rule
+      priority: 248
+      services:
+        - name: account-service
+          port: 4005
+  tls: {}
+---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
@@ -151,9 +325,11 @@ spec:
   routes:
     - match: (Host(`tank.192-168-50-96.sslip.io`) || Host(`game.192-168-50-96.sslip.io`)) && (PathPrefix(`/api`) || PathPrefix(`/auth`) || PathPrefix(`/socket.io`))
       kind: Rule
+      priority: 240
       services:
         - name: game-server
           port: 4000
+  tls: {}
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
@@ -167,36 +343,8 @@ spec:
   routes:
     - match: Host(`tank.192-168-50-96.sslip.io`) || Host(`game.192-168-50-96.sslip.io`)
       kind: Rule
+      priority: 230
       services:
         - name: game-client
           port: 80
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: game-client-nodeport
-  namespace: game
-spec:
-  type: NodePort
-  selector:
-    app: game-client
-  ports:
-    - name: http
-      port: 80
-      targetPort: 80
-      nodePort: 30080
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: game-server-nodeport
-  namespace: game
-spec:
-  type: NodePort
-  selector:
-    app: game-server
-  ports:
-    - name: http
-      port: 4000
-      targetPort: 4000
-      nodePort: 30400
+  tls: {}

@@ -92,14 +92,15 @@ ansible-playbook -i inventory.ini playbook.yml
 
 ---
 
-## 🌐 4. จุดเข้าใช้งานหลังการติดตั้ง (Access Endpoints)
+## 🌐 4. จุดเข้าใช้งานหลังการติดตั้งผ่าน Traefik Gateway (Access Endpoints)
 
-| บริการ | URL / Port | รายละเอียด |
+| บริการ | URL / Path (Traefik Gateway :80 / :443) | รายละเอียด |
 | :--- | :--- | :--- |
-| **🎮 Game Application** | `http://192.168.50.96:30080` | หน้าเว็บแอปพลิเคชันเกมยิงรถถัง (PC / Mobile) |
-| **🔒 Teacher Portal (PIN: 1990)** | `http://192.168.50.96:30080/#teacher` | แดชบอร์ดอาจารย์ จัดการห้องและคลังข้อสอบ |
-| **📚 Open Quiz REST API** | `http://192.168.50.96:30080/api/quiz/categories` | API คลังข้อสอบสำหรับอาจารย์ |
-| **🌐 Ingress Host** | `http://tank.192-168-50-96.sslip.io` | เข้าใช้งานผ่าน Traefik IngressRoute |
+| **🎮 Game Application** | `http://tank.192-168-50-96.sslip.io` หรือ `http://192.168.50.96` | หน้าเว็บแอปพลิเคชันเกมยิงรถถัง (PC / Mobile) |
+| **🔒 Teacher Portal (PIN: 1990)** | `http://tank.192-168-50-96.sslip.io/teacher` | แดชบอร์ดอาจารย์ จัดการห้องและคลังข้อสอบ |
+| **📚 Open Quiz REST API** | `http://tank.192-168-50-96.sslip.io/api/quiz/categories` | API คลังข้อสอบสำหรับอาจารย์ |
+| **🩺 Quiz Service Health Probe** | `http://tank.192-168-50-96.sslip.io/api/quiz/health` | ตรวจสอบสถานะ Standalone Quiz Microservice |
+| **🔑 External LMS Sync API** | `POST http://tank.192-168-50-96.sslip.io/api/quiz/sync` | API สำหรับดึงข้อสอบจากระบบโรงเรียนภายนอก (Header `X-API-Key`) |
 
 ---
 
@@ -109,12 +110,19 @@ ansible-playbook -i inventory.ini playbook.yml
 # ตรวจสอบสถานะ Pods ทั้งหมดใน Namespace game
 kubectl get pods -n game -o wide
 
-# ตรวจสอบ Services และ NodePort
-kubectl get svc -n game
+# ตรวจสอบ Traefik IngressRoutes
+kubectl get ingressroutes -n game
 
-# ทดสอบยิง API คลังข้อสอบ
-curl -s http://192.168.50.96:30080/api/quiz/categories
+# ทดสอบยิง API คลังข้อสอบผ่าน Traefik Gateway
+curl -s http://tank.192-168-50-96.sslip.io/api/quiz/categories
+
+# ทดสอบซิงค์ข้อสอบจาก External LMS (Teacher API)
+curl -X POST http://tank.192-168-50-96.sslip.io/api/quiz/sync \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: tank-quiz-api-key-2026" \
+  -d '{"providerId":"LMS","questions":[{"questionTh":"1+1=?","options":["1","2","3","4"],"correctIndex":1}]}'
 ```
 
 ---
-*จัดทำขึ้นเพื่อให้การนำระบบขึ้นเซิร์ฟเวอร์ด้วย Kubernetes, Terraform และ Ansible เป็นไปอย่างสะดวก รวดเร็ว และเป็นมาตรฐานสากล*
+*จัดทำขึ้นเพื่อให้การนำระบบขึ้นเซิร์ฟเวอร์ด้วย Kubernetes, Terraform, Ansible และ Traefik Ingress เป็นไปอย่างสะดวก ปลอดภัย และเป็นมาตรฐานสากล*
+

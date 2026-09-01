@@ -36,8 +36,10 @@ echo -e "${GREEN}✓ All CLI prerequisites verified!${NC}"
 
 if [[ "$MODE" == "--terraform" ]]; then
   echo -e "\n${PURPLE}[TERRAFORM PIPELINE] Building & Packaging Containers...${NC}"
+  docker build -t tank-quiz-service:latest "$ROOT_DIR/quiz-service"
   docker build -t tank-game-client:latest "$ROOT_DIR/game-client"
   docker build -t tank-game-server:latest "$ROOT_DIR/game-server"
+  docker save tank-quiz-service:latest -o /tmp/tank-quiz-service.tar
   docker save tank-game-client:latest -o /tmp/tank-game-client.tar
   docker save tank-game-server:latest -o /tmp/tank-game-server.tar
 
@@ -50,8 +52,8 @@ if [[ "$MODE" == "--terraform" ]]; then
     echo -e "${RED}Error: ไม่พบ SSH key ที่ $K3S_SSH_KEY (ตั้ง env K3S_SSH_KEY ให้ชี้ไฟล์ที่ถูกต้อง)${NC}"
     exit 1
   fi
-  scp -i "$K3S_SSH_KEY" -o StrictHostKeyChecking=no /tmp/tank-game-client.tar /tmp/tank-game-server.tar "$K3S_SSH_HOST:/tmp/"
-  ssh -i "$K3S_SSH_KEY" -o StrictHostKeyChecking=no "$K3S_SSH_HOST" "sudo k3s ctr images import /tmp/tank-game-client.tar && sudo k3s ctr images import /tmp/tank-game-server.tar"
+  scp -i "$K3S_SSH_KEY" -o StrictHostKeyChecking=no /tmp/tank-quiz-service.tar /tmp/tank-game-client.tar /tmp/tank-game-server.tar "$K3S_SSH_HOST:/tmp/"
+  ssh -i "$K3S_SSH_KEY" -o StrictHostKeyChecking=no "$K3S_SSH_HOST" "sudo k3s ctr images import /tmp/tank-quiz-service.tar && sudo k3s ctr images import /tmp/tank-game-client.tar && sudo k3s ctr images import /tmp/tank-game-server.tar"
 
   echo -e "\n${PURPLE}[TERRAFORM PIPELINE] Applying Terraform Infrastructure...${NC}"
   cd "$ROOT_DIR/terraform"
@@ -70,8 +72,10 @@ echo -e "\n${PURPLE}[FINAL VERIFICATION] Verifying Pods & REST APIs...${NC}"
 kubectl get pods -n game --kubeconfig ~/.kube/config || true
 
 echo -e "\n${CYAN}===================================================================${NC}"
-echo -e "${GREEN}🎉 ALL SYSTEMS DEPLOYED & OPERATIONAL!${NC}"
-echo -e "${YELLOW}  🎮 Game URL        : http://192.168.50.96:30080${NC}"
-echo -e "${YELLOW}  📚 Open REST API   : http://192.168.50.96:30080/api/quiz/categories${NC}"
-echo -e "${YELLOW}  🌐 Traefik Ingress : http://tank.192-168-50-96.sslip.io (if configured)${NC}"
+echo -e "${GREEN}🎉 ALL SYSTEMS DEPLOYED & OPERATIONAL (TRAEFIK GATEWAY)!${NC}"
+echo -e "${YELLOW}  🎮 Game URL        : http://tank.192-168-50-96.sslip.io${NC}"
+echo -e "${YELLOW}  🔒 Teacher Portal  : http://tank.192-168-50-96.sslip.io/teacher${NC}"
+echo -e "${YELLOW}  📚 Open REST API   : http://tank.192-168-50-96.sslip.io/api/quiz/categories${NC}"
+echo -e "${YELLOW}  🩺 Quiz Health     : http://tank.192-168-50-96.sslip.io/api/quiz/health${NC}"
 echo -e "${CYAN}===================================================================${NC}"
+

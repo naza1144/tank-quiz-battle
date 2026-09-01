@@ -91,7 +91,7 @@
 
 ```text
 tank-quiz-battle/
-├── game-client/                     # Frontend Application (React 18 + Vite + Tailwind)
+├── game-client/                     # Frontend Application (React 18 + Vite + Tailwind + Canvas)
 │   ├── src/
 │   │   ├── audio/soundFx.ts         # 8-Bit Multi-channel Chiptune Synthesizer
 │   │   ├── components/
@@ -112,15 +112,24 @@ tank-quiz-battle/
 │   ├── Dockerfile
 │   └── nginx.conf
 │
-├── game-server/                     # Backend Server (Node.js + Express + Socket.io)
+├── quiz-service/                    # Standalone Quiz Microservice & External LMS Ingestion (Port 4001)
 │   ├── src/
+│   │   ├── quizBank.ts              # Quiz CRUD, Category Counter, Difficulty Calculation
+│   │   ├── externalAdapter.ts       # External School LMS Adapter & Score Webhook Reporter
+│   │   ├── server.ts                # REST API Server, Health Probe & API Key Ingestion
+│   │   └── types.ts                 # Shared Quiz & External Provider Types
+│   ├── test-quiz-service.ts         # Standalone Unit & Integration Tests
+│   └── Dockerfile
+│
+├── game-server/                     # Core Game Physics & Realtime Socket Engine (Port 4000)
+│   ├── src/
+│   │   ├── quizClient.ts            # Internal Quiz Client + Memory Cache (TTL 5m) + Fallback
 │   │   ├── auth.ts                  # Authentication & Guest Token Handler
 │   │   ├── googleAuth.ts            # Google OAuth & Identity Provider Integration
 │   │   ├── gameEngine.ts            # Authoritative 2D Physics, Mega Laser & Ghost Revival Logic
 │   │   ├── mapTemplates.ts          # 28x28 Procedural & Thematic Map Generators
-│   │   ├── quizBank.ts              # Quiz CRUD Manager, Category Counter & Bulk Importer
 │   │   ├── roomManager.ts           # 6-Team Lifecycle, Sequential Queues & Auto-balance
-│   │   ├── server.ts                # HTTP Server, Open Quiz REST APIs & WebSockets
+│   │   ├── server.ts                # HTTP Server, Game Hub & WebSockets
 │   │   └── types.ts                 # Shared Server Types & Protocols
 │   ├── test-google-auth.ts          # Google OAuth Flow & Token Verification Tests
 │   ├── test-brutal-full-room-coop.ts# 60-Player Full-Room 6-Squad Brutal Stress Test
@@ -137,7 +146,7 @@ tank-quiz-battle/
 │
 ├── terraform/                       # Infrastructure as Code (Terraform for Kubernetes)
 ├── ansible/                         # Configuration Management & Automation Playbook
-├── k8s/                             # Kubernetes Manifests
+├── k8s/                             # Kubernetes Manifests (Traefik IngressRoutes & Deployments)
 ├── DOCS_PROJECT_MANUAL.md           # คู่มือโครงการและสถาปัตยกรรมระบบอย่างละเอียด
 └── DOCS_IAC_DEPLOYMENT.md           # คู่มือการติดตั้งระบบอัตโนมัติด้วย Terraform & Ansible
 ```
@@ -164,30 +173,28 @@ npx tsx test-game.ts
 
 ## 🚀 วิธีการติดตั้งและรันระบบ (Quick Start)
 
-### 1. ติดตั้งแบบคำสั่งเดียวขึ้น K8s Server (Automated Pipeline)
+### 1. ติดตั้งแบบคำสั่งเดียวขึ้น K8s Server ผ่าน Traefik Gateway (Automated Pipeline)
 ```bash
 # รันคำสั่งเดียว ทำงานอัตโนมัติครบทุกขั้นตอน (Build, Export, Ansible, K8s Rollout)
 ./deploy-all.sh
 ```
 
-### 2. รันแบบ Local Development
+### 2. รันแบบ Local Development ผ่าน Docker Compose (Traefik Gateway :80)
 ```bash
-# Terminal 1: Backend Server
-cd game-server
-npm install
-npm run dev
-
-# Terminal 2: Frontend Client
-cd game-client
-npm install
-npm run dev
+docker compose up -d --build
 ```
 
 ---
 
-## 🌐 การเข้าใช้งานระบบ (Access Endpoints)
-- **🎮 Game Client (หลัก)**: `http://192.168.50.96:30080` หรือ `https://tank.192-168-50-96.sslip.io`
-- **🔒 Teacher Portal (PIN: 1990)**: `http://192.168.50.96:30080/#teacher`
-- **📚 Open REST API Categories**: `http://192.168.50.96:30080/api/quiz/categories`
-- **📚 Open REST API Questions**: `http://192.168.50.96:30080/api/quiz/questions`
-- **🩺 Health Check**: `http://192.168.50.96:30080/api/health`
+## 🌐 การเข้าใช้งานระบบผ่าน Traefik Gateway (Production Endpoints)
+
+ทุก Request เข้าใช้งานผ่าน **Traefik Gateway (Port :80 / :443)** โดยตรง:
+
+- **🎮 Game Client (หน้าเว็บเกมหลัก)**: [http://tank.192-168-50-96.sslip.io](http://tank.192-168-50-96.sslip.io) หรือ `http://192.168.50.96`
+- **🔒 Teacher Portal (PIN: 1990)**: [http://tank.192-168-50-96.sslip.io/teacher](http://tank.192-168-50-96.sslip.io/teacher)
+- **📚 Open Quiz REST API (Categories)**: [http://tank.192-168-50-96.sslip.io/api/quiz/categories](http://tank.192-168-50-96.sslip.io/api/quiz/categories)
+- **📚 Open Quiz REST API (Questions)**: [http://tank.192-168-50-96.sslip.io/api/quiz/questions](http://tank.192-168-50-96.sslip.io/api/quiz/questions)
+- **🩺 Quiz Service Health Probe**: [http://tank.192-168-50-96.sslip.io/api/quiz/health](http://tank.192-168-50-96.sslip.io/api/quiz/health)
+- **🩺 Game Server Health Probe**: [http://tank.192-168-50-96.sslip.io/api/health](http://tank.192-168-50-96.sslip.io/api/health)
+- **🔑 External LMS Sync API**: `POST http://tank.192-168-50-96.sslip.io/api/quiz/sync` (Header `X-API-Key: tank-quiz-api-key-2026`)
+
