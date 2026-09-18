@@ -1,0 +1,4 @@
+# สคริปต์ที่รันบน Linux ต้องเป็น LF เสมอ ไม่งั้น autocrlf บน Windows ทำให้พัง
+*.sh text eol=lf
+*.mjs text eol=lf
+*.pem -text

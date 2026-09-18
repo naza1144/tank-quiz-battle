@@ -44,7 +44,9 @@ tank-quiz-battle/
 │           └── vars/main.yml   # ตัวแปรประจำ Role (Ports, Paths, Namespaces)
 │
 └── k8s/
-    └── game-deployment.yaml    # Kubernetes Workload Manifests
+    ├── game-deployment.yaml    # Workloads ใน Namespace game (game-client, game-server)
+    ├── quiz-platform.yaml      # Workloads ใน Namespace quiz (quiz-service, quiz-manager-portal)
+    └── identity-platform.yaml  # Workloads ใน Namespace identity (account-service)
 ```
 
 ---
@@ -53,7 +55,7 @@ tank-quiz-battle/
 
 ### 🅰️ Terraform Pipeline (`terraform/`)
 
-Terraform ทำหน้าที่จัดการ State และ Lifecycle ของทรัพยากรบน Kubernetes:
+Terraform ทำหน้าที่จัดการ State และ Lifecycle ของทรัพยากรหลักบน Kubernetes:
 - `kubernetes_namespace.game`: สร้าง Namespace `game` แบบ Isolated
 - `kubernetes_deployment_v1.game_server`: Deploy เซิร์ฟเวอร์ Node.js + Socket.io พร้อม Env JWT
 - `kubernetes_deployment_v1.game_client`: Deploy Nginx React Client (2 Replicas สำหรับ High Availability)
@@ -75,14 +77,14 @@ terraform apply -auto-approve
 
 Ansible ทำหน้าที่ประสานงานระหว่างเครื่อง Local และคลัสเตอร์ Server แบบ Zero-Touch:
 1. **Phase 1 (Localhost)**:
-   - สั่ง Build Docker Images (`tank-game-client` และ `tank-game-server`)
+   - สั่ง Build Docker Images สำหรับทุก Microservices
    - บันทึกเป็นไฟล์ Archive `.tar` เพื่อเตรียมส่งขึ้นคลัสเตอร์
 2. **Phase 2 (Remote K3s Node: 192.168.50.96)**:
    - ถ่ายโอนไฟล์ Image Tarball ไปยัง Server ผ่าน SSH
    - สั่ง `k3s ctr images import` นำเข้า Image สู่ Container Runtime โดยตรง
-   - Apply Kubernetes Manifests และสั่ง `rollout restart`
+   - Apply Kubernetes Manifests ทั้ง 3 แพลตฟอร์ม (`game-deployment.yaml`, `quiz-platform.yaml`, `identity-platform.yaml`)
    - รอจนกระทั่ง Pods ทุกตัวอยู่ในสถานะ `Running 1/1`
-   - ทดสอบ Health Check ของ Open REST API ที่ `http://127.0.0.1:30080/api/quiz/categories`
+   - รัน Automated Smoke Tests ตรวจสอบ Health Check ครบทุก Service
 
 **คำสั่งรันแบบ Manual:**
 ```bash
@@ -92,29 +94,49 @@ ansible-playbook -i inventory.ini playbook.yml
 
 ---
 
-## 🌐 4. จุดเข้าใช้งานหลังการติดตั้ง (Access Endpoints)
+## 🌐 4. จุดเข้าใช้งานจริงบน Production Cluster ผ่าน Traefik Ingress Gateway
 
-| บริการ | URL / Port | รายละเอียด |
-| :--- | :--- | :--- |
-| **🎮 Game Application** | `http://192.168.50.96:30080` | หน้าเว็บแอปพลิเคชันเกมยิงรถถัง (PC / Mobile) |
-| **🔒 Teacher Portal (PIN: 1990)** | `http://192.168.50.96:30080/#teacher` | แดชบอร์ดอาจารย์ จัดการห้องและคลังข้อสอบ |
-| **📚 Open Quiz REST API** | `http://192.168.50.96:30080/api/quiz/categories` | API คลังข้อสอบสำหรับอาจารย์ |
-| **🌐 Ingress Host** | `http://tank.192-168-50-96.sslip.io` | เข้าใช้งานผ่าน Traefik IngressRoute |
+ทุก Service ให้บริการผ่าน Traefik Gateway เดียวกันบนพอร์ต 80 และ 443 (HTTPS) โดยอัตโนมัติ:
+
+| บริการ / Microservice | Production URL / Endpoint | Namespace | Priority | รายละเอียด |
+| :--- | :--- | :---: | :---: | :--- |
+| **🎮 Game Application** | `https://tank.192-168-50-96.sslip.io/` | `game` | 230 | React 18 SPA (2 Replicas, Nginx) |
+| **🕹️ Realtime Combat Engine** | `https://tank.192-168-50-96.sslip.io/socket.io/` | `game` | 240 | WebSocket 2D Physics Engine |
+| **🩺 Game Server Health** | `https://tank.192-168-50-96.sslip.io/api/health` | `game` | 240 | Health Check ของ Game Server |
+| **📚 Open Quiz REST API** | `https://tank.192-168-50-96.sslip.io/api/quiz/questions` | `quiz` | 250 | ดึง/จัดการคลังข้อสอบ |
+| **🩺 Quiz Service Health** | `https://tank.192-168-50-96.sslip.io/api/quiz/health` | `quiz` | 250 | Health Check ของ Quiz Service |
+| **🔑 External LMS Sync API** | `POST .../api/quiz/sync` | `quiz` | 250 | API ซิงค์ข้อสอบ (Header `X-API-Key`) |
+| **📝 Quiz Manager Portal** | `https://tank.192-168-50-96.sslip.io/quiz-portal/` | `quiz` | 235 | Standalone Portal สำหรับอาจารย์ (Google OAuth RBAC) |
+| **👤 Identity & RBAC Service** | `https://tank.192-168-50-96.sslip.io/api/account/` | `identity` | 248 | Google SSO, 3NF Academic Directory |
+| **🩺 Account Service Health** | `https://tank.192-168-50-96.sslip.io/api/account/health` | `identity` | 248 | Health Check ของ Account Service |
 
 ---
 
-## 🧪 5. การตรวจสอบสถานะระบบ (Health Check & Verification)
+## 🧪 5. การตรวจสอบสถานะระบบบนเครื่อง Server (Cluster Verification)
 
 ```bash
-# ตรวจสอบสถานะ Pods ทั้งหมดใน Namespace game
-kubectl get pods -n game -o wide
+# ตรวจสอบสถานะ Pods ครบทั้ง 3 Namespaces (game, quiz, identity)
+sudo k3s kubectl get pods -n game
+sudo k3s kubectl get pods -n quiz
+sudo k3s kubectl get pods -n identity
 
-# ตรวจสอบ Services และ NodePort
-kubectl get svc -n game
+# ตรวจสอบ IngressRoutes ทั้งหมดที่ Traefik ควบคุม
+sudo k3s kubectl get ingressroutes -A
 
-# ทดสอบยิง API คลังข้อสอบ
-curl -s http://192.168.50.96:30080/api/quiz/categories
+# ทดสอบยิง Health Check ผ่าน Traefik Gateway ทุก Services
+curl -k -s https://tank.192-168-50-96.sslip.io/api/health
+curl -k -s https://tank.192-168-50-96.sslip.io/api/quiz/health
+curl -k -s https://tank.192-168-50-96.sslip.io/api/account/health
+curl -k -s -I https://tank.192-168-50-96.sslip.io/quiz-portal/
+curl -k -s -I https://tank.192-168-50-96.sslip.io/
+
+# ทดสอบซิงค์ข้อสอบจาก External LMS (Teacher API)
+curl -k -X POST https://tank.192-168-50-96.sslip.io/api/quiz/sync \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: tank-quiz-api-key-2026" \
+  -d '{"providerId":"LMS","questions":[{"questionTh":"1+1=?","options":["1","2","3","4"],"correctIndex":1}]}'
 ```
 
 ---
-*จัดทำขึ้นเพื่อให้การนำระบบขึ้นเซิร์ฟเวอร์ด้วย Kubernetes, Terraform และ Ansible เป็นไปอย่างสะดวก รวดเร็ว และเป็นมาตรฐานสากล*
+*จัดทำขึ้นเพื่อให้การนำระบบขึ้นเซิร์ฟเวอร์ด้วย Kubernetes Multi-Namespace Architecture และ Traefik Ingress เป็นไปอย่างถูกต้อง มีเสถียรภาพ และตรงตามระบบจริงใน Production 100%*
+

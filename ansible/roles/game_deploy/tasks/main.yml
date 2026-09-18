@@ -11,8 +11,16 @@
     dest: "{{ item.dest }}"
     mode: '0644'
   loop:
+    - { src: "{{ tar_quiz_path }}", dest: "{{ tar_quiz_path }}" }
     - { src: "{{ tar_client_path }}", dest: "{{ tar_client_path }}" }
     - { src: "{{ tar_server_path }}", dest: "{{ tar_server_path }}" }
+
+- name: Import Quiz Service image into k3s containerd runtime
+  ansible.builtin.command:
+    cmd: k3s ctr images import {{ tar_quiz_path }}
+  become: true
+  register: import_quiz
+  changed_when: "'unpacking' in import_quiz.stdout or 'saved' in import_quiz.stdout"
 
 - name: Import Game Client image into k3s containerd runtime
   ansible.builtin.command:
@@ -60,9 +68,16 @@
     cmd: kubectl rollout restart deployment/{{ item }} -n {{ k8s_namespace }}
   become: true
   loop:
-    - game-client
+    - quiz-service
     - game-server
+    - game-client
   changed_when: true
+
+- name: Wait for Quiz Service pod to be ready
+  ansible.builtin.command:
+    cmd: kubectl rollout status deployment/quiz-service -n {{ k8s_namespace }} --timeout=60s
+  become: true
+  changed_when: false
 
 - name: Wait for Game Server pods to be ready
   ansible.builtin.command:
@@ -76,9 +91,11 @@
   become: true
   changed_when: false
 
-- name: Verify Open REST API Categories endpoint
+- name: Verify Open REST API Categories endpoint via Traefik Ingress
   ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ game_port }}/api/quiz/categories"
+    url: "http://127.0.0.1/api/quiz/categories"
+    headers:
+      Host: "{{ domain_host }}"
     method: GET
     return_content: true
     status_code: 200
@@ -91,7 +108,9 @@
   ansible.builtin.debug:
     msg:
       - "=========================================================="
-      - "🎉 TANK QUIZ BATTLE 1990 DEPLOYED TO K8S SUCCESSFULLY!"
-      - "🎮 Game Client URL : http://{{ ansible_host }}:{{ game_port }}"
-      - "📚 Open REST API   : http://{{ ansible_host }}:{{ game_port }}/api/quiz/categories"
+      - "🎉 TANK QUIZ BATTLE 1990 DEPLOYED VIA TRAEFIK GATEWAY!"
+      - "🎮 Game Client URL : http://{{ domain_host }}"
+      - "🔒 Teacher Portal  : http://{{ domain_host }}/teacher"
+      - "📚 Open REST API   : http://{{ domain_host }}/api/quiz/categories"
+      - "🩺 Quiz Health     : http://{{ domain_host }}/api/quiz/health"
       - "=========================================================="

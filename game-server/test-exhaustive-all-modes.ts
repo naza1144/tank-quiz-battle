@@ -157,7 +157,7 @@ async function runExhaustiveTestSuite() {
     durationSeconds: 15,
     shotsLeft: 4
   };
-  heavyTank.ammo = 5;
+  engine.grantAmmo('tank-heavy', 5);
   const shotSuccess = engine.tankShoot('tank-heavy');
   if (!shotSuccess) {
     throw new Error('❌ heavy tank failed to shoot explosive bullet!');

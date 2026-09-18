@@ -3,6 +3,9 @@ kind: Namespace
 metadata:
   name: game
 ---
+# ─────────────────────────────────────────────────────────────
+# 1. REALTIME GAME COMBAT SERVER (Namespace: game | Port 4000)
+# ─────────────────────────────────────────────────────────────
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -10,6 +13,7 @@ metadata:
   namespace: game
   labels:
     app: game-server
+    tier: game-combat
 spec:
   replicas: 1
   selector:
@@ -19,6 +23,7 @@ spec:
     metadata:
       labels:
         app: game-server
+        tier: game-combat
     spec:
       containers:
         - name: server
@@ -30,26 +35,34 @@ spec:
           env:
             - name: PORT
               value: "4000"
+            - name: QUIZ_SERVICE_URL
+              value: "http://quiz-service.quiz.svc.cluster.local:4001"
+            - name: ACCOUNT_SERVICE_URL
+              value: "http://account-service.identity.svc.cluster.local:4005"
             - name: JWT_SECRET
               value: "tank-battle-quiz-secret-2026"
-            - name: GOOGLE_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: sudhood-secrets
-                  key: GOOGLE_CLIENT_ID
-                  optional: true
-            - name: GOOGLE_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: sudhood-secrets
-                  key: GOOGLE_CLIENT_SECRET
-                  optional: true
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 4000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 4000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
           resources:
             requests:
               cpu: 100m
               memory: 128Mi
             limits:
-              cpu: 500m
+              cpu: 1000m
               memory: 512Mi
 ---
 apiVersion: v1
@@ -65,6 +78,9 @@ spec:
       port: 4000
       targetPort: 4000
 ---
+# ─────────────────────────────────────────────────────────────
+# 2. GAME CLIENT FRONTEND (React 18 SPA on Nginx Port 80)
+# ─────────────────────────────────────────────────────────────
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -72,6 +88,7 @@ metadata:
   namespace: game
   labels:
     app: game-client
+    tier: game-frontend
 spec:
   replicas: 2
   selector:
@@ -81,6 +98,7 @@ spec:
     metadata:
       labels:
         app: game-client
+        tier: game-frontend
     spec:
       containers:
         - name: client
@@ -89,6 +107,18 @@ spec:
           ports:
             - containerPort: 80
               name: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 20
           resources:
             requests:
               cpu: 50m
@@ -110,6 +140,9 @@ spec:
       port: 80
       targetPort: 80
 ---
+# ─────────────────────────────────────────────────────────────
+# 3. TRAEFIK INGRESS ROUTES (Combat Engine Priority 240 & SPA Priority 230)
+# ─────────────────────────────────────────────────────────────
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
@@ -122,9 +155,11 @@ spec:
   routes:
     - match: (Host(`tank.192-168-50-96.sslip.io`) || Host(`game.192-168-50-96.sslip.io`)) && (PathPrefix(`/api`) || PathPrefix(`/auth`) || PathPrefix(`/socket.io`))
       kind: Rule
+      priority: 240
       services:
         - name: game-server
           port: 4000
+  tls: {}
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
@@ -138,36 +173,8 @@ spec:
   routes:
     - match: Host(`tank.192-168-50-96.sslip.io`) || Host(`game.192-168-50-96.sslip.io`)
       kind: Rule
+      priority: 230
       services:
         - name: game-client
           port: 80
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: game-client-nodeport
-  namespace: game
-spec:
-  type: NodePort
-  selector:
-    app: game-client
-  ports:
-    - name: http
-      port: 80
-      targetPort: 80
-      nodePort: 30080
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: game-server-nodeport
-  namespace: game
-spec:
-  type: NodePort
-  selector:
-    app: game-server
-  ports:
-    - name: http
-      port: 4000
-      targetPort: 4000
-      nodePort: 30400
+  tls: {}

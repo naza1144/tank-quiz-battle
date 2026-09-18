@@ -3,7 +3,6 @@ WORKDIR /app
 COPY package*.json tsconfig*.json vite.config.ts tailwind.config.js postcss.config.js index.html ./
 RUN npm ci
 COPY src ./src
-COPY public ./public
 RUN npm run build
 
 FROM nginx:alpine AS runner

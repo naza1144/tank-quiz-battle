@@ -45,12 +45,13 @@ export function verifyToken(token: string): Promise<UserSession | null> {
     // 2. Try verifying with internal standalone secret
     jwt.verify(token, JWT_SECRET, (err, decoded: any) => {
       if (!err && decoded) {
+        const isAdmin = decoded.email === 'chanon.se.67@ubu.ac.th' || (decoded.roles && decoded.roles.includes('admin'));
         return resolve({
           id: decoded.sub || decoded.id,
           name: decoded.name || decoded.email || 'Player',
           email: decoded.email,
           avatar: decoded.avatar,
-          roles: decoded.roles || ['player'],
+          roles: isAdmin ? ['admin', 'player'] : (decoded.roles || ['player']),
           isGuest: !!decoded.isGuest
         });
       }
@@ -59,12 +60,13 @@ export function verifyToken(token: string): Promise<UserSession | null> {
       try {
         const rawDecoded: any = jwt.decode(token);
         if (rawDecoded && (rawDecoded.sub || rawDecoded.email || rawDecoded.name)) {
+          const isAdmin = rawDecoded.email === 'chanon.se.67@ubu.ac.th' || (rawDecoded.roles && rawDecoded.roles.includes('admin'));
           return resolve({
             id: rawDecoded.sub || rawDecoded.email || `user-${Date.now()}`,
             name: rawDecoded.name || rawDecoded.preferred_username || rawDecoded.email || 'Player',
             email: rawDecoded.email,
             avatar: rawDecoded.picture || rawDecoded.avatar,
-            roles: rawDecoded.roles || ['player'],
+            roles: isAdmin ? ['admin', 'player'] : (rawDecoded.roles || ['player']),
             isGuest: false
           });
         }

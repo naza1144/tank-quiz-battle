@@ -1,0 +1,173 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: quiz
+---
+# ─────────────────────────────────────────────────────────────
+# 1. QUIZ BANK & LMS INGESTION SERVICE (Namespace: quiz | Port 4001)
+# ─────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quiz-service
+  namespace: quiz
+  labels:
+    app: quiz-service
+    platform: core-quiz
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quiz-service
+  template:
+    metadata:
+      labels:
+        app: quiz-service
+        platform: core-quiz
+    spec:
+      containers:
+        - name: quiz
+          image: docker.io/library/tank-quiz-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4001
+              name: http
+          env:
+            - name: PORT
+              value: "4001"
+            - name: QUIZ_SERVICE_API_KEY
+              value: "tank-quiz-api-key-2026"
+          readinessProbe:
+            httpGet:
+              path: /api/quiz/health
+              port: 4001
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /api/quiz/health
+              port: 4001
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+---
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quiz-service
+  namespace: quiz
+spec:
+  selector:
+    app: quiz-service
+  ports:
+    - name: http
+      port: 4001
+      targetPort: 4001
+---
+# ─────────────────────────────────────────────────────────────
+# 2. QUIZ MANAGER PORTAL (Teacher & Admin Web UI | Port 4008)
+# ─────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quiz-manager-portal
+  namespace: quiz
+  labels:
+    app: quiz-manager-portal
+    platform: core-quiz
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quiz-manager-portal
+  template:
+    metadata:
+      labels:
+        app: quiz-manager-portal
+        platform: core-quiz
+    spec:
+      containers:
+        - name: portal
+          image: docker.io/library/tank-quiz-portal:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4008
+              name: http
+          env:
+            - name: PORT
+              value: "4008"
+          readinessProbe:
+            httpGet:
+              path: /quiz-portal/health
+              port: 4008
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /quiz-portal/health
+              port: 4008
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quiz-manager-portal
+  namespace: quiz
+spec:
+  selector:
+    app: quiz-manager-portal
+  ports:
+    - name: http
+      port: 4008
+      targetPort: 4008
+---
+# ─────────────────────────────────────────────────────────────
+# 3. TRAEFIK INGRESS ROUTES FOR QUIZ PLATFORM (Priority 250 & 235)
+# ─────────────────────────────────────────────────────────────
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: quiz-backend
+  namespace: quiz
+spec:
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    - match: (Host(`tank.192-168-50-96.sslip.io`) || Host(`game.192-168-50-96.sslip.io`) || Host(`quiz.192-168-50-96.sslip.io`)) && PathPrefix(`/api/quiz`)
+      kind: Rule
+      priority: 250
+      services:
+        - name: quiz-service
+          port: 4001
+    - match: (Host(`tank.192-168-50-96.sslip.io`) || Host(`game.192-168-50-96.sslip.io`) || Host(`quiz.192-168-50-96.sslip.io`)) && PathPrefix(`/quiz-portal`)
+      kind: Rule
+      priority: 235
+      services:
+        - name: quiz-manager-portal
+          port: 4008
+  tls: {}
+

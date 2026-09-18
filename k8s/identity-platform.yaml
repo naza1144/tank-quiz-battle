@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: identity
+---
+# ─────────────────────────────────────────────────────────────
+# 1. IDENTITY & RBAC SERVICE (Namespace: identity | Port 4005)
+# ─────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: account-service
+  namespace: identity
+  labels:
+    app: account-service
+    platform: core-identity
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: account-service
+  template:
+    metadata:
+      labels:
+        app: account-service
+        platform: core-identity
+    spec:
+      containers:
+        - name: account
+          image: docker.io/library/tank-quiz-account-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4005
+              name: http
+          env:
+            - name: PORT
+              value: "4005"
+            - name: JWT_SECRET
+              value: "tank-battle-quiz-secret-2026"
+          readinessProbe:
+            httpGet:
+              path: /api/account/health
+              port: 4005
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /api/account/health
+              port: 4005
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: account-service
+  namespace: identity
+spec:
+  selector:
+    app: account-service
+  ports:
+    - name: http
+      port: 4005
+      targetPort: 4005
+---
+# ─────────────────────────────────────────────────────────────
+# 2. TRAEFIK INGRESS ROUTE FOR IDENTITY PLATFORM (Priority 248)
+# ─────────────────────────────────────────────────────────────
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: account-backend
+  namespace: identity
+spec:
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    - match: (Host(`tank.192-168-50-96.sslip.io`) || Host(`game.192-168-50-96.sslip.io`) || Host(`identity.192-168-50-96.sslip.io`)) && PathPrefix(`/api/account`)
+      kind: Rule
+      priority: 248
+      services:
+        - name: account-service
+          port: 4005
+  tls: {}

@@ -197,6 +197,10 @@ export const App: React.FC = () => {
 
   const socketRef = useRef<Socket | null>(null);
   const myPlayerIdRef = useRef<string>('');
+  /** ห้องที่เข้าอยู่ล่าสุด — ใช้ re-join อัตโนมัติเมื่อเน็ตหลุดแล้วต่อกลับ */
+  const joinedRoomIdRef = useRef<string>('');
+  /** ส่วนต่างนาฬิกาเครื่องเรากับเซิร์ฟเวอร์ (ms) — มือถือที่ตั้งเวลาเพี้ยนจะโหวตไม่ทัน */
+  const serverClockOffsetRef = useRef<number>(0);
 
   const gameStateRef = useRef<GameStateSnapshot>({
     map: [],
@@ -213,16 +217,36 @@ export const App: React.FC = () => {
       return;
     }
 
+    // id คงที่สำหรับผู้เล่นที่ยังไม่ล็อกอิน เพื่อให้ขอรถถังคืนได้เมื่อเน็ตหลุด
+    let guestId = localStorage.getItem('tank_guest_id');
+    if (!guestId) {
+      guestId = `guest-${Math.random().toString(36).slice(2, 10)}`;
+      localStorage.setItem('tank_guest_id', guestId);
+    }
+
     const socket = io(SOCKET_SERVER_URL, {
-      auth: { token },
-      transports: ['websocket', 'polling']
+      auth: { token, guestId },
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 500,
+      reconnectionDelayMax: 5000
     });
 
     socketRef.current = socket;
 
     socket.on('connect', () => {
       myPlayerIdRef.current = socket.id || '';
+      // ต่อกลับหลังเน็ตหลุด: เข้าห้องเดิมทันทีเพื่อขอรถถังคืน (เซิร์ฟเวอร์เก็บไว้ให้ 60 วิ)
+      if (joinedRoomIdRef.current) {
+        socket.emit('join_room', { roomId: joinedRoomIdRef.current });
+        return;
+      }
       setView('ROOMS');
+    });
+
+    socket.on('reclaimed', (data: { role: string; teamId?: string; tankRestored: boolean }) => {
+      console.log('[reclaim] กลับเข้าสู่สนามรบแล้ว', data);
     });
 
     socket.on('room_list', (list: any[]) => {
@@ -266,8 +290,21 @@ export const App: React.FC = () => {
     });
 
     socket.on('game_tick', (snapshot: any) => {
+      if (typeof snapshot.serverNow === 'number') {
+        serverClockOffsetRef.current = snapshot.serverNow - Date.now();
+      }
+      // เซิร์ฟเวอร์เลิกส่งแผนที่ทั้งผืนทุก tick แล้ว (กินแบนด์วิดท์ 59% ของแพ็กเก็ต)
+      // ส่งมาเฉพาะช่องที่เปลี่ยน — ต้องแปะทับลงบนแผนที่เดิมเอง
+      let nextMap = snapshot.map || gameStateRef.current.map;
+      if (!snapshot.map && snapshot.mapDelta?.length && nextMap.length) {
+        nextMap = nextMap.map((row: TileType[]) => row.slice());
+        for (const tile of snapshot.mapDelta) {
+          if (nextMap[tile.r]) nextMap[tile.r][tile.c] = tile.t;
+        }
+      }
+
       gameStateRef.current = {
-        map: snapshot.map || gameStateRef.current.map,
+        map: nextMap,
         tanks: snapshot.tanks || [],
         bullets: snapshot.bullets || [],
         crates: snapshot.crates || [],
@@ -367,6 +404,11 @@ export const App: React.FC = () => {
     socket.on('ghost_revival_success', () => {
       setGhostRevivalData(null);
       soundFx.playRevivalFanfare();
+    });
+
+    // เซิร์ฟเวอร์ปฏิเสธคำตอบ (หมดเวลา / ไม่มีโจทย์เปิดค้างอยู่) — ปิดกล่องคำถามทิ้ง
+    socket.on('quiz_expired', () => {
+      setActiveQuiz(null);
     });
 
     socket.on('quiz_result', () => {
@@ -478,6 +520,7 @@ export const App: React.FC = () => {
 
   // Lobby actions
   const handleJoinRoom = (roomId: string) => {
+    joinedRoomIdRef.current = roomId;
     socketRef.current?.emit('join_room', { roomId });
     setView('LOBBY');
   };
@@ -748,6 +791,7 @@ export const App: React.FC = () => {
                 voteUpdate={squadVoteUpdate}
                 finalResult={squadFinalResult}
                 isGhost={myPlayer?.role === 'GHOST'}
+                serverClockOffsetMs={serverClockOffsetRef.current}
                 airdropCooldownSeconds={airdropCooldownSeconds}
                 ghostRevivalData={ghostRevivalData}
                 onVote={handleSquadVote}

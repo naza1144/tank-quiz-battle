@@ -1,0 +1,50 @@
+http:
+  routers:
+    quiz-api:
+      rule: "PathPrefix(`/api/quiz`)"
+      service: "quiz-service"
+      priority: 250
+      entryPoints:
+        - "web"
+
+    account-api:
+      rule: "PathPrefix(`/api/account`)"
+      service: "account-service"
+      priority: 248
+      entryPoints:
+        - "web"
+
+    game-api:
+      rule: "PathPrefix(`/api`) || PathPrefix(`/socket.io`) || PathPrefix(`/auth`)"
+      service: "game-server"
+      priority: 240
+      entryPoints:
+        - "web"
+
+    frontend:
+      rule: "PathPrefix(`/`)"
+      service: "game-client"
+      priority: 230
+      entryPoints:
+        - "web"
+
+  services:
+    quiz-service:
+      loadBalancer:
+        servers:
+          - url: "http://quiz-service:4001"
+
+    account-service:
+      loadBalancer:
+        servers:
+          - url: "http://account-service:4005"
+
+    game-server:
+      loadBalancer:
+        servers:
+          - url: "http://game-server:4000"
+
+    game-client:
+      loadBalancer:
+        servers:
+          - url: "http://game-client:80"

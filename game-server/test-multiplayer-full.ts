@@ -106,7 +106,7 @@ async function runMultiplayerTest() {
   const tank1 = tanks[0];
   const tank2 = tanks[1];
 
-  tank1.ammo = 5;
+  room.engine.grantAmmo(tank1.id, 5);
   tank1.shieldEndTime = 0;
   tank2.shieldEndTime = 0;
   tank2.hp = 1;
@@ -182,7 +182,7 @@ async function runMultiplayerTest() {
   const tA = sqTanks[0];
   const tB = sqTanks[1];
 
-  tA.ammo = 5;
+  squadRoom.engine.grantAmmo(tA.id, 5);
   tA.shieldEndTime = 0;
   tB.shieldEndTime = 0;
   tB.hp = 1;
