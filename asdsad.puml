@@ -38,30 +38,30 @@ skinparam component {
     FontSize 10
 }
 
-title **ENTERPRISE SYSTEM ARCHITECTURE — TANK QUIZ BATTLE 1990**\n<size:10><color:#5D6D7E>Decoupled Microservices with Standalone Identity/RBAC, Quiz Engine & Traefik Gateway</color></size>\n
+title **ENTERPRISE SYSTEM ARCHITECTURE — TANK QUIZ BATTLE 1990**\n<size:10><color:#5D6D7E>Fully Autonomous Decoupled Microservices with Traefik v3.7 Gateway (Dual Deployment: K3s Multi-Namespace & Docker)</color></size>\n
 
 ' ==============================================================================
 ' 1. CLIENT & CONSUMER TIER
 ' ==============================================================================
-package "Tier 1: Client & Consumer Presentation Tier (Public Network)" as PresentationTier {
-    node "🖥️ / 📱 **Player Client (SPA)**\n[Browser Runtime]\n--\n• React 18 + Canvas Engine (60 FPS)\n• Web Audio Synthesizer (Chiptune)\n• TouchControls (Slide D-Pad)\n• WebSocket Client (Socket.io v4)" as Client_Player #EBF5FB
+package "Tier 1: Client & External Consumer Tier (Public Network)" as PresentationTier {
+    node "🖥️ / 📱 **Player Web Client (SPA)**\n[Browser Runtime]\n--\n• React 18 + HTML5 Canvas Engine (60 FPS)\n• Web Audio Synthesizer (8-bit Chiptune)\n• TouchControls (Floating D-Pad)\n• WebSocket Client (Socket.io v4)" as Client_Player #EBF5FB
     
-    node "👨‍🏫 **Teacher Portal Admin**\n[Browser Runtime]\n--\n• Automatic RBAC Authentication\n• Quiz Bank & Difficulty Manager\n• Real-Time Room & Section Monitor" as Client_Teacher #EBF5FB
+    node "👨‍🏫 **Teacher Management Portal**\n[Browser Runtime]\n--\n• RBAC Protected (TEACHER Role)\n• Live Quiz Bank & Difficulty Editor\n• Student Roster & Real-Time Monitor" as Client_Teacher #EBF5FB
     
-    node "🏫 **External School LMS**\n[Third-Party Server]\n--\n• School Quiz Bank Repository\n• Student Score Receiver Webhook\n• Auth: X-API-Key Header" as External_LMS #FCF3CF
+    node "🏫 **External School LMS / Other Apps**\n[Third-Party Server & API Consumers]\n--\n• Centralized Quiz Bank Ingestion\n• Automated Grade Webhook Receiver\n• Auth: X-API-Key / Bearer Token" as External_LMS #FCF3CF
 }
 
 ' ==============================================================================
-' 2. EDGE INGRESS GATEWAY TIER
+' 2. EDGE INGRESS GATEWAY TIER (TRAEFIK v3.7)
 ' ==============================================================================
-package "Tier 2: Edge Gateway Tier (Traefik Ingress Controller — Port :80 / :443)" as GatewayTier #EBF5FB {
-    component "🛡️ **Traefik Ingress Controller (v2.10 LoadBalancer)**\n[Port 80 (HTTP 308 Redirect) • Port 443 (TLS 1.3 Termination)]\n--\n• Reverse Proxy & SSL Offloading\n• Path-Based Priority Routing Engine\n• Connection Keep-Alive & WebSocket Upgrade" as TraefikGateway #D4E6F1
+package "Tier 2: Edge Gateway Tier (Traefik v3.7 Ingress Controller — Port :80 / :443)" as GatewayTier #EBF5FB {
+    component "🛡️ **Traefik Proxy v3.7 (Official Release)**\n[Port 80 (HTTP) • Port 443 (TLS Termination) • Port 8081 (Dashboard)]\n--\n• SSL/TLS Offloading & Reverse Proxy\n• Declarative Priority-Based Path Routing Engine\n• Connection Keep-Alive & WebSocket Connection Upgrade" as TraefikGateway #D4E6F1
 
-    package "Traefik IngressRoute Definitions" as TraefikRoutes #FFFFFF {
+    package "Traefik IngressRoute Priority Engine" as TraefikRoutes #FFFFFF {
         component "Route: Frontend SPA\nPriority: 230 | Path: /" as Route_Frontend #F8FAFC
-        component "Route: Real-Time Combat\nPriority: 240 | Path: /api, /socket.io" as Route_Game #F8FAFC
+        component "Route: Real-Time Combat\nPriority: 240 | Path: /api, /socket.io, /auth" as Route_Game #F8FAFC
         component "Route: Identity & RBAC\nPriority: 248 | Path: /api/account" as Route_Account #F8FAFC
-        component "Route: Standalone Quiz\nPriority: 250 | Path: /api/quiz" as Route_Quiz #F8FAFC
+        component "Route: Central Quiz Bank\nPriority: 250 | Path: /api/quiz" as Route_Quiz #F8FAFC
     }
 
     TraefikGateway -down-> Route_Frontend : "Internal Dispatch"
@@ -70,40 +70,40 @@ package "Tier 2: Edge Gateway Tier (Traefik Ingress Controller — Port :80 / :4
     TraefikGateway -down-> Route_Quiz : "Internal Dispatch"
 }
 
-' Inbound Client Connections with Protocols
-Client_Player -down-> TraefikGateway : "1. HTTPS (Port 443) -> Initial Page Load\n2. WSS (Port 443) -> 60Hz Input/World State"
-Client_Teacher -down-> TraefikGateway : "HTTPS REST (Port 443)\n• Header: Bearer JWT (TEACHER Role)\n• Payloads: GET/POST /api/quiz/* & /api/account/*"
+' Inbound Client Connections with Detailed Protocols
+Client_Player -down-> TraefikGateway : "1. HTTPS (Port 443) -> Initial SPA Page Load\n2. WSS (Port 443) -> 60Hz Input & World State"
+Client_Teacher -down-> TraefikGateway : "HTTPS REST (Port 443)\n• Header: Bearer JWT (TEACHER Role)\n• Payloads: /api/quiz/* & /api/account/students"
 External_LMS -down-> TraefikGateway : "HTTPS REST API (Port 443)\n• Header: X-API-Key Ingestion\n• Payload: POST /api/quiz/sync"
 
 ' ==============================================================================
-' 3. APPLICATION MICROSERVICES TIER (KUBERNETES)
+' 3. AUTONOMOUS APPLICATION PLATFORMS TIER
 ' ==============================================================================
-package "Tier 3: Application Microservices Tier (Kubernetes Namespace: 'game')" as AppTier #FFFFFF {
+package "Tier 3: Autonomous Application Microservices Tier" as AppTier #FFFFFF {
 
     ' Service 1: Web Client Frontend
-    package "Pod: game-client (2 Replicas)\n[Nginx 1.25 • ClusterIP: 80]" as Pod_Client #FEFDE8 {
+    package "🎮 Game Frontend Platform\n[K3s ns: 'game' | Docker: tank-client]\n(Nginx Alpine • Port 80)" as Pod_Client #FEFDE8 {
         component "Nginx Web Server\n(Port 80 • Gzip/Brotli)" as Nginx_Engine #FFF9C4
-        component "Vite React SPA Bundle\n(Canvas • Chiptune • D-Pad)" as React_Bundle #FFF9C4
+        component "Vite React 18 SPA Bundle\n(Canvas • Audio Synth • D-Pad)" as React_Bundle #FFF9C4
         
-        Nginx_Engine -down-> React_Bundle : "Delivers Static SPA Bundles"
+        Nginx_Engine -down-> React_Bundle : "Delivers Static SPA Assets"
     }
 
     ' Service 2: Authoritative Real-Time Game Server
-    package "Pod: game-server (1 Replica)\n[Node.js 20 • ClusterIP: 4000]" as Pod_GameServer #E8F8F5 {
-        component "HTTP & WebSocket Hub\n[server.ts] (Port 4000)" as Game_Hub #D1F2EB
-        component "6-Team Room Manager\n[roomManager.ts] (Section Filter)" as Game_Rooms #D1F2EB
-        component "2D Physics & Combat Loop\n[gameEngine.ts] (30 Tick / AABB)" as Game_Physics #D1F2EB
-        component "Internal Quiz Fast Client\n[quizClient.ts] (Cache TTL 5m)" as Game_QuizClient #D1F2EB
+    package "⚔️ Game Combat Platform\n[K3s ns: 'game' | Docker: tank-server]\n(Node.js 20 • Port 4000)" as Pod_GameServer #E8F8F5 {
+        component "HTTP & Socket.io Hub\n[server.ts] (Port 4000)" as Game_Hub #D1F2EB
+        component "6-Team Matchmaker & Rooms\n[roomManager.ts] (Section Filter)" as Game_Rooms #D1F2EB
+        component "2D Physics & Combat Loop\n[gameEngine.ts] (30 Tick / AABB Collision)" as Game_Physics #D1F2EB
+        component "Internal Quiz Fast Client\n[quizClient.ts] (Cache TTL: 300s)" as Game_QuizClient #D1F2EB
         
         Game_Hub -down-> Game_Rooms : "Dispatches Player Packets"
         Game_Rooms -down-> Game_Physics : "Computes 33ms Tick Step"
         Game_Rooms -down-> Game_QuizClient : "Requests Question on Crate Hit [?]"
     }
 
-    ' Service 3: Account & RBAC Service
-    package "Pod: account-service (1 Replica)\n[Node.js 20 • ClusterIP: 4005]" as Pod_AccountService #F4ECF7 {
+    ' Service 3: Account & RBAC Service (Standalone)
+    package "🟢 Core Identity Platform\n[K3s ns: 'identity' | Docker: tank-account-service]\n(Node.js 20 • Port 4005)" as Pod_AccountService #F4ECF7 {
         component "Account REST Controller\n[server.ts] (Port 4005)" as Account_Controller #E8DAEF
-        component "Master Academic & Titles\n[3NF: Faculty, Dept, Sec, Title]" as Account_Academic #E8DAEF
+        component "3NF Master Academic Store\n[Faculty, Dept, Section, Title]" as Account_Academic #E8DAEF
         component "Google Login Sync Engine\n(Auto-Provisioning & Enriched JWT)" as Account_Sync #E8DAEF
         component "RBAC Permission Resolver\n(STUDENT vs TEACHER/ADMIN)" as Account_RBAC #E8DAEF
         
@@ -113,11 +113,11 @@ package "Tier 3: Application Microservices Tier (Kubernetes Namespace: 'game')" 
     }
 
     ' Service 4: Standalone Quiz Microservice
-    package "Pod: quiz-service (1 Replica)\n[Node.js 20 • ClusterIP: 4001]" as Pod_QuizService #E8F6F3 {
+    package "🔵 Core Quiz & Assessment Platform\n[K3s ns: 'quiz' | Docker: tank-quiz-service]\n(Node.js 20 • Port 4001)" as Pod_QuizService #E8F6F3 {
         component "Quiz REST Controller\n[server.ts] (Port 4001)" as Quiz_Controller #D0ECE7
-        component "Quiz Bank & Categories\n[quizBank.ts] (Option Rows)" as Quiz_Bank #D0ECE7
+        component "Quiz Bank & Categories (3NF)\n[quizBank.ts] (Question & Options)" as Quiz_Bank #D0ECE7
         component "Difficulty & Timing Engine\n(EASY: 2s | MED: 5s | HARD: 7s)" as Quiz_Difficulty #D0ECE7
-        component "External LMS Adapter\n[externalAdapter.ts] (API Key)" as Quiz_Adapter #D0ECE7
+        component "External LMS Adapter\n[externalAdapter.ts] (API Key & Webhook)" as Quiz_Adapter #D0ECE7
         
         Quiz_Controller -down-> Quiz_Bank
         Quiz_Controller -down-> Quiz_Adapter
@@ -126,15 +126,15 @@ package "Tier 3: Application Microservices Tier (Kubernetes Namespace: 'game')" 
 }
 
 ' Traefik Ingress Routes to Pods with Detailed Technical Metadata
-Route_Frontend -down-> Nginx_Engine : "HTTP/1.1 Proxy -> http://game-client.svc:80\n• Delivers Web Client Assets"
-Route_Game -down-> Game_Hub : "HTTP/1.1 & WSS -> http://game-server.svc:4000\n• Bi-directional 60Hz Combat & Room State"
-Route_Account -down-> Account_Controller : "HTTP/1.1 REST -> http://account-service.svc:4005\n• Identity, Master Academic & Enriched Tokens"
-Route_Quiz -down-> Quiz_Controller : "HTTP/1.1 REST -> http://quiz-service.svc:4001\n• Handles /api/quiz/* & LMS Ingest"
+Route_Frontend -down-> Nginx_Engine : "HTTP/1.1 Proxy -> game-client:80\n• Priority 230"
+Route_Game -down-> Game_Hub : "HTTP/1.1 & WSS -> game-server:4000\n• Priority 240 (Combat & Rooms)"
+Route_Account -down-> Account_Controller : "HTTP/1.1 REST -> account-service:4005\n• Priority 248 (Identity & RBAC)"
+Route_Quiz -down-> Quiz_Controller : "HTTP/1.1 REST -> quiz-service:4001\n• Priority 250 (Quiz Bank & LMS)"
 
 ' Inter-Service and Asynchronous Outbound Webhook Communication
-Game_QuizClient -right-> Quiz_Controller : "Internal Service-to-Service REST (HTTP/1.1)\n• URL: http://quiz-service:4001/api/quiz/random\n• In-Memory Cache (TTL: 300s, Auto-Sync: 30s)"
+Game_QuizClient -right-> Quiz_Controller : "Cross-Namespace / Cross-Container REST (HTTP/1.1)\n• K3s: http://quiz-service.quiz.svc.cluster.local:4001/api/quiz/random\n• Docker: http://quiz-service:4001/api/quiz/random\n• In-Memory Cache (TTL: 300s, Auto-Sync: 30s)"
 
-Quiz_Adapter .up.> External_LMS : "Asynchronous Grade Webhook (HTTPS POST)\n• URL: https://teacher-lms.edu/api/grades\n• Payload: Student Score, Accuracy & Metrics"
+Quiz_Adapter .up.> External_LMS : "Asynchronous Grade Webhook (HTTPS POST)\n• URL: https://teacher-lms.edu/api/grades\n• Payload: Student Score, Accuracy & Analytics"
 
 ' Visual alignment
 Pod_Client -[hidden]right- Pod_GameServer
@@ -142,19 +142,20 @@ Pod_GameServer -[hidden]right- Pod_AccountService
 Pod_AccountService -[hidden]right- Pod_QuizService
 
 ' ==============================================================================
-' 4. INFRASTRUCTURE AS CODE & PLATFORM TIER
+' 4. DUAL DEPLOYMENT & PLATFORM ORCHESTRATION TIER
 ' ==============================================================================
-package "Tier 4: Infrastructure as Code & Platform Tier" as InfraTier #F2F4F4 {
-    component "📜 **deploy-all.sh**\n(Master Pipeline Orchestrator)" as Script_Deploy #EAEDED
-    component "🏗️ **HashiCorp Terraform**\n(Kubernetes Resource State)" as Tool_Terraform #EAEDED
-    component "⚙️ **Ansible Automation**\n(Container Ingestion & Rollout)" as Tool_Ansible #EAEDED
-    component "☸️ **K3s Control Plane**\n(Containerd CRI / Flannel CNI)" as K3s_Platform #EAEDED
+package "Tier 4: Dual Deployment & Infrastructure as Code Tier" as InfraTier #F2F4F4 {
+    component "☸️ **Kubernetes (K3s on .96)**\n• Multi-Namespace (identity, quiz, game)\n• Traefik IngressRoute CRD\n• ClusterIP Internal DNS" as K3s_Platform #EAEDED
+    
+    component "🐳 **Docker Desktop / Compose Stack**\n• Traefik v3.7 File Provider (dynamic.yaml)\n• Zero Port Bypass (All behind :80)\n• Single-Stage Container Builds" as Docker_Platform #EAEDED
+    
+    component "📜 **CI/CD & Deployment Automation**\n• deploy-all.sh Master Orchestrator\n• Terraform K8s State\n• Ansible Ingestion & Rollout" as Script_Deploy #EAEDED
 
-    Script_Deploy -right-> Tool_Terraform : "1. Provisions K8s Resources"
-    Script_Deploy -right-> Tool_Ansible : "2. Builds Images & Tarballs"
-    Tool_Ansible -right-> K3s_Platform : "3. Ingests Images & Restarts Pods"
+    Script_Deploy -right-> K3s_Platform : "K8s Rollout"
+    Script_Deploy -right-> Docker_Platform : "Compose Stack"
 }
 
-K3s_Platform ..> AppTier : "Schedules, Monitors & Auto-heals Pods\n(Readiness: 3s, Liveness: 15s Probes)"
+K3s_Platform ..> AppTier : "Schedules, Auto-heals & Isolates Namespaces"
+Docker_Platform ..> AppTier : "Networks & Routes Containers (bridge: game-net)"
 
 @enduml

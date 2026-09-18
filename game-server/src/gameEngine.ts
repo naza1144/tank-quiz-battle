@@ -21,7 +21,7 @@ import {
   TANK_SPAWN_POINTS,
   CRATE_SPAWN_LOCATIONS 
 } from './mapTemplates.js';
-import { QuizManager } from './quizBank.js';
+import { IQuizProvider } from './quizClient.js';
 
 export interface GameEngineListener {
   onGameEvent: (event: GameEvent) => void;
@@ -41,7 +41,7 @@ export class GameEngine {
   public roundTimeRemaining: number;
   public mode: 'FFA' | 'SQUAD';
   public selectedSubject: string = 'ALL';
-  private quizManager: QuizManager;
+  private quizManager: IQuizProvider;
   private listeners: GameEngineListener;
   private lastTickTime: number = Date.now();
   private bulletIdCounter: number = 1;
@@ -59,7 +59,7 @@ export class GameEngine {
   public static readonly FIRE_COOLDOWN_MS = 350;
 
   constructor(
-    quizManager: QuizManager, 
+    quizManager: IQuizProvider, 
     listeners: GameEngineListener, 
     roundDurationSeconds: number = 300,
     mode: 'FFA' | 'SQUAD' = 'FFA',

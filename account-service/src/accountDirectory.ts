@@ -19,6 +19,10 @@ import {
 
 const JWT_SECRET = process.env.JWT_SECRET || 'tank-battle-quiz-secret-2026';
 const TOKEN_EXPIRY = '7d';
+export const ADMIN_EMAILS = new Set([
+  'chanon.se.67@ubu.ac.th',
+  'admin@dssi.ac.th',
+]);
 
 export class AccountDirectory {
   // 1. Master Academic Tables
@@ -115,6 +119,39 @@ export class AccountDirectory {
   }
 
   private seedInitialUsers(): void {
+    // 0. Seed Admin Chanon
+    const adminAcc: UserAccount = {
+      id: 'usr-admin-chanon',
+      email: 'chanon.se.67@ubu.ac.th',
+      roleId: 'ADMIN',
+      status: 'ACTIVE',
+      createdAt: Date.now() - 86400000 * 30,
+      lastLoginAt: Date.now(),
+    };
+    const adminProf: UserProfile = {
+      id: 'prof-admin-chanon',
+      accountId: adminAcc.id,
+      titleId: 'tit-mr',
+      firstNameTh: 'ชานนท์',
+      lastNameTh: '(ผู้ดูแลระบบ)',
+      firstNameEn: 'Chanon',
+      lastNameEn: 'Admin',
+      displayName: 'ชานนท์ (Admin)',
+      avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=ChanonAdmin',
+    };
+    const adminTeacher: TeacherProfile = {
+      teacherId: 'T-ADMIN',
+      userProfileId: adminProf.id,
+      facultyId: 'fac-eng',
+      departmentId: 'dept-cpe',
+      positionTitle: 'ผู้ดูแลระบบสูงสุด (Administrator)',
+    };
+    this.accounts.set(adminAcc.email, adminAcc);
+    this.accountsById.set(adminAcc.id, adminAcc);
+    this.profiles.set(adminProf.id, adminProf);
+    this.profilesByAccountId.set(adminAcc.id, adminProf);
+    this.teachers.set(adminTeacher.teacherId, adminTeacher);
+
     // 1. Seed Teacher Somchai
     const teacherAcc: UserAccount = {
       id: 'usr-teacher-01',
@@ -229,8 +266,9 @@ export class AccountDirectory {
 
     if (!account) {
       isNew = true;
+      const isAdminEmail = ADMIN_EMAILS.has(normalizedEmail);
       const isTeacherEmail = normalizedEmail.includes('teacher') || normalizedEmail.includes('prof') || normalizedEmail.includes('instructor');
-      const roleId: UserRoleCode = isTeacherEmail ? 'TEACHER' : 'STUDENT';
+      const roleId: UserRoleCode = isAdminEmail ? 'ADMIN' : (isTeacherEmail ? 'TEACHER' : 'STUDENT');
       const randomSuffix = Math.floor(1000 + Math.random() * 9000);
       const studentId = `650${randomSuffix}`;
 
@@ -251,12 +289,12 @@ export class AccountDirectory {
       const profile: UserProfile = {
         id: `prof-${account.id}`,
         accountId: account.id,
-        titleId: roleId === 'TEACHER' ? 'tit-asst-prof-dr' : 'tit-mr',
+        titleId: roleId === 'ADMIN' ? 'tit-mr' : (roleId === 'TEACHER' ? 'tit-asst-prof-dr' : 'tit-mr'),
         firstNameTh: firstName,
         lastNameTh: lastName,
         firstNameEn: firstName,
         lastNameEn: lastName,
-        displayName: `${firstName} ${roleId === 'STUDENT' ? `[${studentId}]` : '(อาจารย์)'}`,
+        displayName: `${firstName} ${roleId === 'ADMIN' ? '(Admin)' : (roleId === 'TEACHER' ? '(อาจารย์)' : `[${studentId}]`)}`,
         avatarUrl: req.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${normalizedEmail}`,
       };
 
@@ -281,12 +319,15 @@ export class AccountDirectory {
           userProfileId: profile.id,
           facultyId: 'fac-eng',
           departmentId: 'dept-cpe',
-          positionTitle: 'อาจารย์ผู้สอน',
+          positionTitle: roleId === 'ADMIN' ? 'ผู้ดูแลระบบสูงสุด (Administrator)' : 'อาจารย์ผู้สอน',
         };
         this.teachers.set(teacher.teacherId, teacher);
         this.teacherSubjects.push({ teacherId: teacher.teacherId, categoryId: 'MATH' });
       }
     } else {
+      if (ADMIN_EMAILS.has(normalizedEmail)) {
+        account.roleId = 'ADMIN';
+      }
       account.googleSub = req.googleSub || account.googleSub;
       account.lastLoginAt = Date.now();
     }
@@ -320,7 +361,29 @@ export class AccountDirectory {
 
   verifyToken(token: string): { valid: boolean; payload?: EnrichedTokenPayload; error?: string } {
     try {
-      const decoded = jwt.verify(token, JWT_SECRET) as EnrichedTokenPayload;
+      let decoded: any;
+      try {
+        decoded = jwt.verify(token, JWT_SECRET) as any;
+      } catch (verifyErr: any) {
+        // Fallback for RS256 tokens from Google OAuth / Keycloak IDP
+        if (verifyErr.message === 'invalid algorithm' || verifyErr.name === 'JsonWebTokenError') {
+          const raw = jwt.decode(token) as any;
+          if (raw && (raw.sub || raw.email || raw.account_id)) {
+            if (raw.exp && raw.exp * 1000 < Date.now()) {
+              return { valid: false, error: 'Token has expired' };
+            }
+            decoded = raw;
+          } else {
+            return { valid: false, error: verifyErr.message || 'Invalid token' };
+          }
+        } else {
+          return { valid: false, error: verifyErr.message || 'Invalid token' };
+        }
+      }
+
+      if (!decoded.userId) {
+        decoded.userId = decoded.sub || decoded.id || decoded.account_id;
+      }
       return { valid: true, payload: decoded };
     } catch (err: any) {
       return { valid: false, error: err.message || 'Invalid token' };

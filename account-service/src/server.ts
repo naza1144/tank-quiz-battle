@@ -84,15 +84,33 @@ app.post('/api/account/sync-google', (req: Request, res: Response) => {
 // -------------------------------------------------------------
 app.get('/api/account/profile', authenticateToken, (req: Request, res: Response) => {
   const tokenUser = (req as any).user;
-  const userDetail = accountDirectory.getFullUserDetail(tokenUser.userId);
+  const targetId = tokenUser.userId || tokenUser.sub || tokenUser.id;
+  let userDetail = targetId ? accountDirectory.getFullUserDetail(targetId) : undefined;
+
+  if (!userDetail && tokenUser.email) {
+    const acc = accountDirectory.accounts.get(tokenUser.email.trim().toLowerCase());
+    if (acc) {
+      userDetail = accountDirectory.getFullUserDetail(acc.id);
+    } else {
+      const syncResult = accountDirectory.syncGoogleLogin({
+        email: tokenUser.email,
+        name: tokenUser.name || 'Google User',
+        googleSub: tokenUser.sub,
+      });
+      userDetail = syncResult.userDetail;
+    }
+  }
 
   if (!userDetail) {
     return res.status(404).json({ success: false, error: 'User profile not found' });
   }
 
+  const sessionToken = accountDirectory.generateToken(userDetail);
+
   res.json({
     success: true,
     user: userDetail,
+    token: sessionToken,
   });
 });
 

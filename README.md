@@ -57,15 +57,16 @@
   4. *Desert Labyrinth*: เขาวงกตอิฐและลานประลองกลาง
   5. *Procedural Symmetric Warzone*: ระบบสุ่มสิ่งกีดขวางแบบ 4-Way Mirroring สดใหม่ทุกรอบ
 
-### 8. 🔒 หน้าจอจัดการห้องและคลังข้อสอบสำหรับอาจารย์ (Teacher Portal: `/teacher`)
-- เข้าใช้งานได้ผ่าน URL `/teacher` หรือคลิกปุ่ม "ระบบอาจารย์" (ป้องกันด้วย PIN: `1990`)
-- **Dashboard จัดการห้องแข่งขัน**: ตรวจสอบสถานะห้อง ลบห้องที่ไม่ได้ใช้งาน และดูจำนวนผู้เล่นแบบสด
-- **คลังข้อสอบครบวงจร**: ค้นหา, กรองหมวดหมู่วิชา, เพิ่ม, แก้ไข, ลบข้อสอบ, และนำเข้าไฟล์ JSON Bulk Import
+### 8. 🔒 ระบบจัดการคลังข้อสอบสำหรับอาจารย์ (Standalone Teacher Portal: `/quiz-portal`)
+- เข้าใช้งานได้ผ่าน URL `/quiz-portal` หรือคลิกปุ่มเข้าสู่ระบบอาจารย์ (ยืนยันตัวตนผ่าน Google OAuth SSO)
+- **ระบบสิทธิ์ RBAC (Role-Based Access Control)**: ตรวจสอบสิทธิ์ผ่าน `account-service` เฉพาะบัญชีบทบาท `TEACHER` หรือ `ADMIN` เท่านั้น
+- **Offline Resilience Queue**: เมื่อเน็ตเวิร์กระหว่างไมโครเซอร์วิสสะดุด ระบบจะพักคำสั่งเพิ่ม/แก้ไข/ลบข้อสอบไว้ในคิว LocalStorage อัตโนมัติ พร้อมแสดง Badge สถานะรอซิงก์ และมี Background Heartbeat ตรวจสอบและ Flush ส่งข้อมูลทันทีที่เซอร์วิสกลับมาทำงาน
+- **คลังข้อสอบครบวงจร**: ค้นหา, กรองหมวดหมู่วิชา, กำหนดระดับความยาก (EASY/MEDIUM/HARD), ตั้งค่าเวลาและรางวัลกระสุน, พร้อมรองรับ JSON Bulk Import
 - **Open REST API Endpoints**:
   - `GET /api/quiz/questions`: ดึงรายการข้อสอบทั้งหมด (รองรับ `?category=...&difficulty=...&search=...`)
   - `GET /api/quiz/categories`: ดึงรายชื่อหมวดหมู่วิชาทั้งหมดพร้อมจำนวนข้อ
   - `GET /api/quiz/questions/:id`: ดึงข้อสอบรายข้อ
-  - `POST /api/quiz/questions`: เพิ่มโจทย์ข้อสอบใหม่
+  - `POST /api/quiz/questions`: เพิ่มโจทย์ข้อสอบใหม่ (ต้องมีสิทธิ์ Teacher/Admin)
   - `PUT /api/quiz/questions/:id`: แก้ไขโจทย์ข้อสอบ
   - `DELETE /api/quiz/questions/:id`: ลบโจทย์ข้อสอบ
   - `POST /api/quiz/import`: นำเข้าข้อสอบแบบชุด (JSON Array)
@@ -81,17 +82,18 @@
 - คลิกปุ่ม **`[📖 คู่มือการเล่น]`** ได้จากทุกหน้าจอ (Lobby, Room Select, Game HUD)
 - อธิบายครบทุกระบบ: วิธีควบคุม, คลาสรถถัง 4 สาย, กระสุนพิเศษ 4 ธาตุ, ไม้ตายเลเซอร์, โดรนเสบียง, ระบบวิญญาณชุบชีวิต และเทคนิคการรบ
 
-### 11. 🔐 ระบบยืนยันตัวตน Google OAuth & Standalone Guest Mode
-- **เข้าสู่ระบบด้วย Google**: ล็อกอินผ่านบัญชี Google จริงได้อย่างราบรื่นผ่าน Identity Provider
-- **Guest Mode**: เข้าเล่นได้ทันที 1-Click โดยไม่ต้องลงทะเบียน
+### 11. 🔐 ระบบยืนยันตัวตน Google OAuth SSO & 3NF Academic Directory
+- **Google OAuth 2.0 (RS256 JWT)**: รองรับการล็อกอินด้วยบัญชี Google ทางการศึกษา (@ubu.ac.th หรือองค์กร)
+- **3NF Master Academic Directory (`account-service`)**: โครงสร้างฐานข้อมูลมาตรฐานแบบ 3NF จัดเก็บข้อมูลคณะ (Faculties), ภาควิชา (Departments), กลุ่มเรียน (Sections), คำนำหน้า (Titles), และบทบาท (Roles)
+- **Guest Mode**: เข้าเล่นแบบทดลองเล่นได้ทันที 1-Click โดยไม่ต้องลงทะเบียน
 
 ---
 
-## 📂 โครงสร้างโปรเจกต์ (Project Architecture)
+## 📂 โครงสร้างโปรเจกต์และไมโครเซอร์วิส (Microservices Architecture)
 
 ```text
 tank-quiz-battle/
-├── game-client/                     # Frontend Application (React 18 + Vite + Tailwind + Canvas)
+├── game-client/                     # [Microservice 1] Student Canvas Web SPA (React 18 + Nginx Port 80)
 │   ├── src/
 │   │   ├── audio/soundFx.ts         # 8-Bit Multi-channel Chiptune Synthesizer
 │   │   ├── components/
@@ -102,8 +104,6 @@ tank-quiz-battle/
 │   │   │   ├── LobbyView.tsx        # 6-Team Arcade Squad Formation & Role Picker
 │   │   │   ├── RoomSelectView.tsx   # Mission Select & Subject Selection
 │   │   │   ├── GameGuideModal.tsx   # Interactive In-Game Field Manual (7 Tabs)
-│   │   │   ├── TeacherPortalView.tsx# PIN-Protected Teacher Dashboard & Room Manager
-│   │   │   ├── TeacherQuizModal.tsx # Quiz Bank Management Modal
 │   │   │   ├── QuizModal.tsx        # Single-player FFA Quiz Popup
 │   │   │   ├── AuthModal.tsx        # Player Login & Guest Mode
 │   │   │   └── GameOverModal.tsx    # Global Podium Victory Screen
@@ -112,18 +112,9 @@ tank-quiz-battle/
 │   ├── Dockerfile
 │   └── nginx.conf
 │
-├── quiz-service/                    # Standalone Quiz Microservice & External LMS Ingestion (Port 4001)
+├── game-server/                     # [Microservice 2] Authoritative 2D Combat Engine (Port 4000)
 │   ├── src/
-│   │   ├── quizBank.ts              # Quiz CRUD, Category Counter, Difficulty Calculation
-│   │   ├── externalAdapter.ts       # External School LMS Adapter & Score Webhook Reporter
-│   │   ├── server.ts                # REST API Server, Health Probe & API Key Ingestion
-│   │   └── types.ts                 # Shared Quiz & External Provider Types
-│   ├── test-quiz-service.ts         # Standalone Unit & Integration Tests
-│   └── Dockerfile
-│
-├── game-server/                     # Core Game Physics & Realtime Socket Engine (Port 4000)
-│   ├── src/
-│   │   ├── quizClient.ts            # Internal Quiz Client + Memory Cache (TTL 5m) + Fallback
+│   │   ├── quizClient.ts            # Cross-Container Quiz Client + Fallback Memory Cache
 │   │   ├── auth.ts                  # Authentication & Guest Token Handler
 │   │   ├── googleAuth.ts            # Google OAuth & Identity Provider Integration
 │   │   ├── gameEngine.ts            # Authoritative 2D Physics, Mega Laser & Ghost Revival Logic
@@ -131,22 +122,39 @@ tank-quiz-battle/
 │   │   ├── roomManager.ts           # 6-Team Lifecycle, Sequential Queues & Auto-balance
 │   │   ├── server.ts                # HTTP Server, Game Hub & WebSockets
 │   │   └── types.ts                 # Shared Server Types & Protocols
-│   ├── test-google-auth.ts          # Google OAuth Flow & Token Verification Tests
-│   ├── test-brutal-full-room-coop.ts# 60-Player Full-Room 6-Squad Brutal Stress Test
-│   ├── test-multi-round-exhaustive.ts # Master 4-Phase Multi-Round Stress Test Suite
-│   ├── test-exhaustive-all-modes.ts # Archetypes, Ammo Types, Friendly Fire & Scoring Tests
-│   ├── test-multiplayer-full.ts     # Real Socket.IO FFA & Squad Multiplayer E2E Tests
-│   ├── test-socket-multiplayer.ts   # Room Lifecycle & Combat Resolution Tests
-│   ├── test-spec-features.ts        # Tactical Ping, Confidence Betting & Ricochet Tests
-│   ├── test-game.ts                 # Core Map Generation & Physics Engine Tests
 │   ├── Dockerfile
 │   └── package.json
 │
-├── deploy-all.sh                    # Single-Command Automated Deployment Pipeline
+├── quiz-service/                    # [Microservice 3] Quiz Bank & Assessment Engine (Port 4001)
+│   ├── src/
+│   │   ├── quizBank.ts              # Quiz CRUD, Category Counter, Difficulty Calculation
+│   │   ├── externalAdapter.ts       # External School LMS Adapter & Score Webhook Reporter
+│   │   ├── server.ts                # REST API Server, Health Probe & API Key Ingestion
+│   │   └── types.ts                 # Shared Quiz & External Provider Types
+│   └── Dockerfile
 │
+├── account-service/                 # [Microservice 4] 3NF Identity, Directory & RBAC Engine (Port 4005)
+│   ├── src/
+│   │   ├── accountDirectory.ts      # 3NF Master Academic Directory (Faculties, Depts, Roles)
+│   │   ├── server.ts                # REST API Server, Google Token Verifier, Profile Hydration
+│   │   └── types.ts                 # Identity & Academic Directory Types
+│   └── Dockerfile
+│
+├── quiz-manager-portal/             # [Microservice 5] Standalone Teacher & Admin Portal (Port 4008/5000)
+│   ├── src/
+│   │   ├── public/index.html        # Responsive Teacher SPA with Offline Resilience Queue
+│   │   └── server.ts                # Standalone Static Web Server & Health Check
+│   └── Dockerfile
+│
+├── deploy-all.sh                    # Automated Kubernetes Deployment Script
+├── traefik-dynamic.yaml             # Traefik Gateway Priority Routing Configuration
+├── docker-compose.yml               # Local Development 6-Container Decoupled Stack
 ├── terraform/                       # Infrastructure as Code (Terraform for Kubernetes)
 ├── ansible/                         # Configuration Management & Automation Playbook
-├── k8s/                             # Kubernetes Manifests (Traefik IngressRoutes & Deployments)
+├── k8s/                             # Kubernetes Manifests for Production K3s Node
+│   ├── game-deployment.yaml         # game-server & game-client (Namespace: game)
+│   ├── quiz-platform.yaml           # quiz-service & quiz-manager-portal (Namespace: quiz)
+│   └── identity-platform.yaml       # account-service (Namespace: identity)
 ├── DOCS_PROJECT_MANUAL.md           # คู่มือโครงการและสถาปัตยกรรมระบบอย่างละเอียด
 └── DOCS_IAC_DEPLOYMENT.md           # คู่มือการติดตั้งระบบอัตโนมัติด้วย Terraform & Ansible
 ```
@@ -173,7 +181,7 @@ npx tsx test-game.ts
 
 ## 🚀 วิธีการติดตั้งและรันระบบ (Quick Start)
 
-### 1. ติดตั้งแบบคำสั่งเดียวขึ้น K8s Server ผ่าน Traefik Gateway (Automated Pipeline)
+### 1. ติดตั้งขึ้น Production K8s Server ผ่าน Traefik Gateway (Automated Pipeline)
 ```bash
 # รันคำสั่งเดียว ทำงานอัตโนมัติครบทุกขั้นตอน (Build, Export, Ansible, K8s Rollout)
 ./deploy-all.sh
@@ -186,14 +194,15 @@ docker compose up -d --build
 
 ---
 
-## 🌐 การเข้าใช้งานระบบผ่าน Traefik Gateway (Production Endpoints)
+## 🌐 จุดเข้าใช้งานจริงบนเซิร์ฟเวอร์ (Production Endpoints: 192.168.50.96)
 
-ทุก Request เข้าใช้งานผ่าน **Traefik Gateway (Port :80 / :443)** โดยตรง:
+ทุก Request เข้าใช้งานผ่าน **Traefik Ingress Gateway (Port :80 / :443)** บนคลัสเตอร์ Kubernetes จริง:
 
-- **🎮 Game Client (หน้าเว็บเกมหลัก)**: [http://tank.192-168-50-96.sslip.io](http://tank.192-168-50-96.sslip.io) หรือ `http://192.168.50.96`
-- **🔒 Teacher Portal (PIN: 1990)**: [http://tank.192-168-50-96.sslip.io/teacher](http://tank.192-168-50-96.sslip.io/teacher)
+- **🎮 Game Client (หน้าเว็บเกมหลัก)**: [http://tank.192-168-50-96.sslip.io](http://tank.192-168-50-96.sslip.io) หรือ `https://tank.192-168-50-96.sslip.io`
+- **🔒 Teacher Quiz Portal (ระบบอาจารย์)**: [http://tank.192-168-50-96.sslip.io/quiz-portal/](http://tank.192-168-50-96.sslip.io/quiz-portal/)
 - **📚 Open Quiz REST API (Categories)**: [http://tank.192-168-50-96.sslip.io/api/quiz/categories](http://tank.192-168-50-96.sslip.io/api/quiz/categories)
 - **📚 Open Quiz REST API (Questions)**: [http://tank.192-168-50-96.sslip.io/api/quiz/questions](http://tank.192-168-50-96.sslip.io/api/quiz/questions)
+- **👤 Account & Directory Health**: [http://tank.192-168-50-96.sslip.io/api/account/health](http://tank.192-168-50-96.sslip.io/api/account/health)
 - **🩺 Quiz Service Health Probe**: [http://tank.192-168-50-96.sslip.io/api/quiz/health](http://tank.192-168-50-96.sslip.io/api/quiz/health)
 - **🩺 Game Server Health Probe**: [http://tank.192-168-50-96.sslip.io/api/health](http://tank.192-168-50-96.sslip.io/api/health)
 - **🔑 External LMS Sync API**: `POST http://tank.192-168-50-96.sslip.io/api/quiz/sync` (Header `X-API-Key: tank-quiz-api-key-2026`)

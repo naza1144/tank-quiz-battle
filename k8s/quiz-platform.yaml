@@ -1,180 +1,173 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: game
+  name: quiz
 ---
 # ─────────────────────────────────────────────────────────────
-# 1. REALTIME GAME COMBAT SERVER (Namespace: game | Port 4000)
+# 1. QUIZ BANK & LMS INGESTION SERVICE (Namespace: quiz | Port 4001)
 # ─────────────────────────────────────────────────────────────
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: game-server
-  namespace: game
+  name: quiz-service
+  namespace: quiz
   labels:
-    app: game-server
-    tier: game-combat
+    app: quiz-service
+    platform: core-quiz
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: game-server
+      app: quiz-service
   template:
     metadata:
       labels:
-        app: game-server
-        tier: game-combat
+        app: quiz-service
+        platform: core-quiz
     spec:
       containers:
-        - name: server
-          image: docker.io/library/tank-game-server:latest
+        - name: quiz
+          image: docker.io/library/tank-quiz-service:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 4000
+            - containerPort: 4001
               name: http
           env:
             - name: PORT
-              value: "4000"
-            - name: QUIZ_SERVICE_URL
-              value: "http://quiz-service.quiz.svc.cluster.local:4001"
-            - name: ACCOUNT_SERVICE_URL
-              value: "http://account-service.identity.svc.cluster.local:4005"
-            - name: JWT_SECRET
-              value: "tank-battle-quiz-secret-2026"
+              value: "4001"
+            - name: QUIZ_SERVICE_API_KEY
+              value: "tank-quiz-api-key-2026"
           readinessProbe:
             httpGet:
-              path: /api/health
-              port: 4000
-            initialDelaySeconds: 5
+              path: /api/quiz/health
+              port: 4001
+            initialDelaySeconds: 3
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 3
           livenessProbe:
             httpGet:
-              path: /api/health
-              port: 4000
+              path: /api/quiz/health
+              port: 4001
             initialDelaySeconds: 15
             periodSeconds: 20
             timeoutSeconds: 5
             failureThreshold: 3
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 50m
+              memory: 64Mi
             limits:
-              cpu: 1000m
-              memory: 512Mi
+              cpu: 500m
+              memory: 256Mi
+---
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: game-server
-  namespace: game
+  name: quiz-service
+  namespace: quiz
 spec:
   selector:
-    app: game-server
+    app: quiz-service
   ports:
     - name: http
-      port: 4000
-      targetPort: 4000
+      port: 4001
+      targetPort: 4001
 ---
 # ─────────────────────────────────────────────────────────────
-# 2. GAME CLIENT FRONTEND (React 18 SPA on Nginx Port 80)
+# 2. QUIZ MANAGER PORTAL (Teacher & Admin Web UI | Port 4008)
 # ─────────────────────────────────────────────────────────────
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: game-client
-  namespace: game
+  name: quiz-manager-portal
+  namespace: quiz
   labels:
-    app: game-client
-    tier: game-frontend
+    app: quiz-manager-portal
+    platform: core-quiz
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: game-client
+      app: quiz-manager-portal
   template:
     metadata:
       labels:
-        app: game-client
-        tier: game-frontend
+        app: quiz-manager-portal
+        platform: core-quiz
     spec:
       containers:
-        - name: client
-          image: docker.io/library/tank-game-client:latest
+        - name: portal
+          image: docker.io/library/tank-quiz-portal:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 80
+            - containerPort: 4008
               name: http
+          env:
+            - name: PORT
+              value: "4008"
           readinessProbe:
             httpGet:
-              path: /
-              port: 80
+              path: /quiz-portal/health
+              port: 4008
             initialDelaySeconds: 3
             periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
           livenessProbe:
             httpGet:
-              path: /
-              port: 80
-            initialDelaySeconds: 15
+              path: /quiz-portal/health
+              port: 4008
+            initialDelaySeconds: 10
             periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
           resources:
             requests:
               cpu: 50m
               memory: 64Mi
             limits:
-              cpu: 250m
+              cpu: 500m
               memory: 256Mi
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: game-client
-  namespace: game
+  name: quiz-manager-portal
+  namespace: quiz
 spec:
   selector:
-    app: game-client
+    app: quiz-manager-portal
   ports:
     - name: http
-      port: 80
-      targetPort: 80
+      port: 4008
+      targetPort: 4008
 ---
 # ─────────────────────────────────────────────────────────────
-# 3. TRAEFIK INGRESS ROUTES (Combat Engine Priority 240 & SPA Priority 230)
+# 3. TRAEFIK INGRESS ROUTES FOR QUIZ PLATFORM (Priority 250 & 235)
 # ─────────────────────────────────────────────────────────────
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: game-backend
-  namespace: game
+  name: quiz-backend
+  namespace: quiz
 spec:
   entryPoints:
     - web
     - websecure
   routes:
-    - match: (Host(`tank.192-168-50-96.sslip.io`) || Host(`game.192-168-50-96.sslip.io`)) && (PathPrefix(`/api`) || PathPrefix(`/auth`) || PathPrefix(`/socket.io`))
+    - match: (Host(`tank.192-168-50-96.sslip.io`) || Host(`game.192-168-50-96.sslip.io`) || Host(`quiz.192-168-50-96.sslip.io`)) && PathPrefix(`/api/quiz`)
       kind: Rule
-      priority: 240
+      priority: 250
       services:
-        - name: game-server
-          port: 4000
-  tls: {}
----
-apiVersion: traefik.io/v1alpha1
-kind: IngressRoute
-metadata:
-  name: game-frontend
-  namespace: game
-spec:
-  entryPoints:
-    - web
-    - websecure
-  routes:
-    - match: Host(`tank.192-168-50-96.sslip.io`) || Host(`game.192-168-50-96.sslip.io`)
+        - name: quiz-service
+          port: 4001
+    - match: (Host(`tank.192-168-50-96.sslip.io`) || Host(`game.192-168-50-96.sslip.io`) || Host(`quiz.192-168-50-96.sslip.io`)) && PathPrefix(`/quiz-portal`)
       kind: Rule
-      priority: 230
+      priority: 235
       services:
-        - name: game-client
-          port: 80
+        - name: quiz-manager-portal
+          port: 4008
   tls: {}
+

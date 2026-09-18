@@ -3,8 +3,7 @@ import { createServer } from 'http';
 import { Server, Socket } from 'socket.io';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { QuizManager } from './quizBank.js';
-import { QuizClient, quizClient } from './quizClient.js';
+import { quizClient } from './quizClient.js';
 import {
   RoomManager,
   VALID_DIRECTIONS,
@@ -36,8 +35,7 @@ const io = new Server(httpServer, {
   }
 });
 
-const quizManager = new QuizManager();
-const roomManager = new RoomManager(io, quizClient as any);
+const roomManager = new RoomManager(io, quizClient);
 
 // ── Payload guards ────────────────────────────────────────────────────────
 // client ที่ส่ง payload เปล่า/ชนิดผิดเคยทำให้ pod ตายทั้งเครื่อง (RESTARTS 0→1)
@@ -127,149 +125,6 @@ app.post('/api/rooms', (req, res) => {
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// 📚 OPEN QUIZ REST APIS (สำหรับอาจารย์/ผู้ดูแลระบบ ในการดึงและจัดการโจทย์คำถาม)
-// ══════════════════════════════════════════════════════════════════════════════
-
-// 0. Health check & Random Endpoint
-app.get('/api/quiz/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    service: 'tank-quiz-game-server',
-    quizServiceConnected: quizClient.isServiceOnline(),
-    totalQuestions: quizClient.getAllQuestions().length
-  });
-});
-
-app.get('/api/quiz/random', (req, res) => {
-  const { category, difficulty } = req.query;
-  const question = quizClient.getRandomQuestion(
-    category ? String(category) : undefined,
-    difficulty ? String(difficulty) : undefined
-  );
-  res.json({ success: true, question });
-});
-
-// 1. ดึงรายการโจทย์คำถามทั้งหมด (รองรับ filter category, difficulty, search)
-app.get(['/api/quiz/questions', '/api/quizzes'], (req, res) => {
-  const { category, difficulty, search } = req.query;
-  const questions = quizClient.getAllQuestions({
-    category: category ? String(category) : undefined,
-    difficulty: difficulty ? String(difficulty) : undefined,
-    search: search ? String(search) : undefined
-  });
-  res.json({
-    success: true,
-    total: questions.length,
-    questions
-  });
-});
-
-// 2. ดึงหมวดหมู่และรายวิชาที่มีทั้งหมดพร้อมจำนวนข้อ
-app.get('/api/quiz/categories', (req, res) => {
-  const categories = quizManager.getCategories();
-  res.json({
-    success: true,
-    categories
-  });
-});
-
-// 3. ดึงโจทย์คำถามรายข้อตาม ID
-app.get('/api/quiz/questions/:id', (req, res) => {
-  const question = quizManager.getQuestionById(req.params.id);
-  if (!question) {
-    return res.status(404).json({ success: false, error: 'ไม่พบโจทย์คำถามที่ระบุ' });
-  }
-  res.json({ success: true, question });
-});
-
-// 4. เพิ่มโจทย์คำถามใหม่
-app.post(['/api/quiz/questions', '/api/quizzes'], (req, res) => {
-  const q = req.body;
-  if (!q.questionTh || !Array.isArray(q.options) || q.options.length < 2) {
-    return res.status(400).json({ 
-      success: false, 
-      error: 'กรุณาระบุคำถาม (questionTh) และตัวเลือก (options) อย่างน้อย 2 ตัวเลือก' 
-    });
-  }
-
-  const correctIndex = Number(q.correctIndex);
-  if (isNaN(correctIndex) || correctIndex < 0 || correctIndex >= q.options.length) {
-    return res.status(400).json({ 
-      success: false, 
-      error: 'ตำแหน่งตัวเลือกที่ถูกต้อง (correctIndex) ไม่ถูกต้อง' 
-    });
-  }
-
-  const newQuestion = quizManager.addQuestion({
-    id: q.id || `quiz-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-    category: q.category ? String(q.category).toUpperCase() : 'GENERAL',
-    categoryTh: q.categoryTh || 'ความรู้ทั่วไป',
-    questionTh: q.questionTh.trim(),
-    questionEn: q.questionEn?.trim(),
-    options: q.options.map((opt: any) => String(opt).trim()),
-    correctIndex,
-    explanationTh: q.explanationTh ? q.explanationTh.trim() : 'คำตอบถูกต้อง!',
-    timeLimitSeconds: Number(q.timeLimitSeconds) || 5,
-    rewardAmmo: Number(q.rewardAmmo) || 3,
-    bonusPoints: Number(q.bonusPoints) || 100,
-    difficulty: q.difficulty || 'MEDIUM',
-    subjectCode: q.subjectCode
-  });
-
-  res.status(201).json({ 
-    success: true, 
-    message: 'เพิ่มโจทย์คำถามสำเร็จ', 
-    question: newQuestion 
-  });
-});
-
-// 5. แก้ไขโจทย์คำถาม
-app.put('/api/quiz/questions/:id', (req, res) => {
-  const { id } = req.params;
-  const updates = req.body;
-  const updated = quizManager.updateQuestion(id, updates);
-  if (!updated) {
-    return res.status(404).json({ success: false, error: 'ไม่พบโจทย์คำถามที่ต้องการแก้ไข' });
-  }
-  res.json({ success: true, message: 'แก้ไขคำถามเรียบร้อย', question: updated });
-});
-
-// 6. ลบโจทย์คำถาม
-app.delete('/api/quiz/questions/:id', (req, res) => {
-  const { id } = req.params;
-  const isDeleted = quizManager.deleteQuestion(id);
-  if (!isDeleted) {
-    return res.status(404).json({ success: false, error: 'ไม่พบโจทย์คำถามที่ต้องการลบ' });
-  }
-  res.json({ success: true, message: 'ลบโจทย์คำถามเรียบร้อย', deletedId: id });
-});
-
-// 7. นำเข้าโจทย์คำถามแบบกลุ่ม (Bulk Import JSON สำหรับอาจารย์)
-app.post('/api/quiz/import', (req, res) => {
-  const { questions, mode } = req.body;
-  if (!Array.isArray(questions) || questions.length === 0) {
-    return res.status(400).json({ success: false, error: 'กรุณาส่งอาร์เรย์ของโจทย์คำถาม (questions: [])' });
-  }
-
-  const result = quizManager.bulkImport(questions, mode === 'replace' ? 'replace' : 'append');
-  res.json({
-    success: true,
-    message: `นำเข้าโจทย์สำเร็จ ${result.added} ข้อ (มีโจทย์ในระบบรวม ${result.total} ข้อ)`,
-    ...result
-  });
-});
-
-// 8. รีเซ็ตโจทย์คำถามกลับเป็นโจทย์มาตรฐาน
-app.post('/api/quiz/reset', (req, res) => {
-  quizManager.resetToDefault();
-  res.json({
-    success: true,
-    message: 'รีเซ็ตคลังคำถามกลับเป็นโจทย์ตั้งต้นเรียบร้อย',
-    total: 15
-  });
-});
-
-// ══════════════════════════════════════════════════════════════════════════════
 // 🏰 ADMIN & ROOM MANAGEMENT REST APIS (จัดการและควบคุมห้องแข่งขันสำหรับอาจารย์)
 // ══════════════════════════════════════════════════════════════════════════════
 
@@ -320,7 +175,7 @@ app.get('/api/admin/stats', (req, res) => {
     success: true,
     stats: {
       ...roomManager.getSystemStats(),
-      totalQuestionsInBank: quizManager.getAllQuestions().length
+      totalQuestionsInBank: quizClient.getAllQuestions().length
     }
   });
 });

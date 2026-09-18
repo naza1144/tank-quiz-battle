@@ -12,7 +12,8 @@ import {
   AirdropSupplyType
 } from './types.js';
 import { GameEngine } from './gameEngine.js';
-import { QuizManager, getTimeLimitForDifficulty } from './quizBank.js';
+import { getTimeLimitForDifficulty } from './quizBank.js';
+import { IQuizProvider } from './quizClient.js';
 
 interface VoteRecord {
   choice: number;
@@ -75,7 +76,7 @@ export const VALID_SUPPLY_TYPES = new Set(['SHIELD', 'REPAIR']);
 
 export class RoomManager {
   private io: Server;
-  private quizManager: QuizManager;
+  private quizManager: IQuizProvider;
   private rooms: Map<string, {
     config: RoomConfig;
     players: Map<string, Player>;
@@ -96,7 +97,7 @@ export class RoomManager {
 
   private playerRooms: Map<string, string> = new Map(); // socketId -> roomId
 
-  constructor(io: Server, quizManager: QuizManager) {
+  constructor(io: Server, quizManager: IQuizProvider) {
     this.io = io;
     this.quizManager = quizManager;
 

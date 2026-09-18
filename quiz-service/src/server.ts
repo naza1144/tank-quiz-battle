@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import jwt from 'jsonwebtoken';
 import { QuizManager } from './quizBank.js';
 import { ExternalAdapter } from './externalAdapter.js';
 import { DifficultyLevel } from './types.js';
@@ -9,6 +10,7 @@ dotenv.config();
 
 const PORT = process.env.PORT || 4001;
 const API_SECRET_KEY = process.env.QUIZ_SERVICE_API_KEY || 'tank-quiz-api-key-2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'tank-battle-quiz-secret-2026';
 
 const app = express();
 app.use(cors({ origin: '*', credentials: true }));
@@ -17,6 +19,56 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 const quizManager = new QuizManager();
 const externalAdapter = new ExternalAdapter();
+
+// Middleware: Require Teacher or Admin role (or API Key) for Quiz Write operations
+function requireQuizWritePermission(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const authHeader = req.headers['authorization'] || req.headers['x-api-key'];
+  if (!authHeader) {
+    return res.status(401).json({ success: false, error: 'Authorization header required (Bearer JWT or API Key)' });
+  }
+
+  const tokenStr = typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '') : '';
+
+  // 1. Direct API Key Match
+  if (tokenStr === API_SECRET_KEY) {
+    return next();
+  }
+
+  // 2. JWT Verification from account-service or external IDP
+  try {
+    let decoded: any;
+    try {
+      decoded = jwt.verify(tokenStr, JWT_SECRET) as any;
+    } catch (err: any) {
+      if (err.message === 'invalid algorithm' || err.name === 'JsonWebTokenError') {
+        const raw = jwt.decode(tokenStr) as any;
+        if (raw && (raw.sub || raw.email || raw.account_id)) {
+          if (raw.exp && raw.exp * 1000 < Date.now()) {
+            return res.status(401).json({ success: false, error: 'Token has expired' });
+          }
+          decoded = raw;
+        } else {
+          return res.status(401).json({ success: false, error: err.message || 'Invalid token' });
+        }
+      } else {
+        return res.status(401).json({ success: false, error: err.message || 'Invalid token' });
+      }
+    }
+
+    const role = (decoded.role || decoded.roleId || (Array.isArray(decoded.roles) ? decoded.roles[0] : decoded.roles) || '').toString().toUpperCase();
+    if (
+      role === 'TEACHER' || 
+      role === 'ADMIN' || 
+      (Array.isArray(decoded.permissions) && decoded.permissions.includes('quiz:write'))
+    ) {
+      (req as any).user = decoded;
+      return next();
+    }
+    return res.status(403).json({ success: false, error: 'Access denied: Teacher or Admin role required' });
+  } catch (err: any) {
+    return res.status(401).json({ success: false, error: 'Invalid or expired token' });
+  }
+}
 
 // ── Health Check ─────────────────────────────────────────────────────────────
 app.get(['/api/quiz/health', '/health'], (req, res) => {
@@ -84,7 +136,8 @@ app.get('/api/quiz/random', async (req, res) => {
 
 // ── 4. ดึงโจทย์คำถามรายข้อตาม ID ─────────────────────────────────────────────
 app.get('/api/quiz/questions/:id', (req, res) => {
-  const question = quizManager.getQuestionById(req.params.id);
+  const qId = String(req.params.id);
+  const question = quizManager.getQuestionById(qId);
   if (!question) {
     return res.status(404).json({ success: false, error: 'ไม่พบโจทย์คำถามที่ระบุ' });
   }
@@ -92,7 +145,7 @@ app.get('/api/quiz/questions/:id', (req, res) => {
 });
 
 // ── 5. เพิ่มโจทย์คำถามใหม่ ───────────────────────────────────────────────────
-app.post(['/api/quiz/questions', '/api/quizzes'], (req, res) => {
+app.post(['/api/quiz/questions', '/api/quizzes'], requireQuizWritePermission, (req, res) => {
   const q = req.body;
   if (!q.questionTh || !Array.isArray(q.options) || q.options.length < 2) {
     return res.status(400).json({ 
@@ -134,8 +187,9 @@ app.post(['/api/quiz/questions', '/api/quizzes'], (req, res) => {
 });
 
 // ── 6. แก้ไขโจทย์คำถาม ──────────────────────────────────────────────────────
-app.put('/api/quiz/questions/:id', (req, res) => {
-  const updated = quizManager.updateQuestion(req.params.id, req.body);
+app.put('/api/quiz/questions/:id', requireQuizWritePermission, (req, res) => {
+  const qId = String(req.params.id);
+  const updated = quizManager.updateQuestion(qId, req.body);
   if (!updated) {
     return res.status(404).json({ success: false, error: 'ไม่พบโจทย์คำถามที่ต้องการแก้ไข' });
   }
@@ -143,8 +197,9 @@ app.put('/api/quiz/questions/:id', (req, res) => {
 });
 
 // ── 7. ลบโจทย์คำถาม ─────────────────────────────────────────────────────────
-app.delete('/api/quiz/questions/:id', (req, res) => {
-  const deleted = quizManager.deleteQuestion(req.params.id);
+app.delete('/api/quiz/questions/:id', requireQuizWritePermission, (req, res) => {
+  const qId = String(req.params.id);
+  const deleted = quizManager.deleteQuestion(qId);
   if (!deleted) {
     return res.status(404).json({ success: false, error: 'ไม่พบโจทย์คำถามที่ต้องการลบ' });
   }

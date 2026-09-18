@@ -1,40 +1,37 @@
 services:
-  # ── 1. Gateway (Traefik - Single Entrypoint for ALL Services) ─────
+  # ── 1. Gateway (Traefik Ingress - Single Entrypoint for ALL Services)
   gateway:
-    image: traefik:latest
+    image: traefik:v3.1
     container_name: tank-gateway
     restart: unless-stopped
     command:
       - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
+      - "--providers.file.filename=/etc/traefik/dynamic.yaml"
       - "--entrypoints.web.address=:80"
-    environment:
-      - DOCKER_API_VERSION=1.45
     ports:
       - "80:80"
       - "8081:8080" # Traefik Dashboard
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik-dynamic.yaml:/etc/traefik/dynamic.yaml:ro
     networks:
       - game-net
 
-  # ── 2. Game Client (React 2D Canvas) ────────────
-  game-client:
+  # ── 2. Independent Account & Identity Microservice ──────────────────
+  account-service:
     build:
-      context: ./game-client
+      context: ./account-service
       dockerfile: Dockerfile
-    container_name: tank-client
+    container_name: tank-account-service
     restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.client.rule=PathPrefix(`/`)"
-      - "traefik.http.routers.client.entrypoints=web"
-      - "traefik.http.routers.client.priority=1"
+    environment:
+      - PORT=4005
+      - JWT_SECRET=tank-battle-quiz-secret-2026
     networks:
-      - game-net
+      game-net:
+        aliases:
+          - account-service
 
-  # ── 3. Standalone Quiz Service (Microservice & External API) ──
+  # ── 3. Independent Quiz Bank & Assessment Microservice ──────────────
   quiz-service:
     build:
       context: ./quiz-service
@@ -44,15 +41,12 @@ services:
     environment:
       - PORT=4001
       - QUIZ_SERVICE_API_KEY=tank-quiz-api-key-2026
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.quiz-api.rule=PathPrefix(`/api/quiz`)"
-      - "traefik.http.routers.quiz-api.entrypoints=web"
-      - "traefik.http.routers.quiz-api.priority=30"
     networks:
-      - game-net
+      game-net:
+        aliases:
+          - quiz-service
 
-  # ── 4. Game Server (Realtime Socket.io & 2D Physics) ──
+  # ── 4. Independent Authoritative Game Server ────────────────────────
   game-server:
     build:
       context: ./game-server
@@ -62,108 +56,39 @@ services:
     environment:
       - PORT=4000
       - QUIZ_SERVICE_URL=http://quiz-service:4001
-      - TOKEN_SERVICE_JWKS_URL=http://token-service:8100/.well-known/jwks.json
-      - JWT_ISSUER=sudhood-token-service
-      - JWT_AUDIENCE=sudhood-services
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.game-api.rule=PathPrefix(`/api`) || PathPrefix(`/socket.io`)"
-      - "traefik.http.routers.game-api.entrypoints=web"
-      - "traefik.http.routers.game-api.priority=10"
+      - ACCOUNT_SERVICE_URL=http://account-service:4005
+      - JWT_SECRET=tank-battle-quiz-secret-2026
     networks:
-      - game-net
-    depends_on:
-      - redis
-      - quiz-service
+      game-net:
+        aliases:
+          - game-server
 
-  # ── 5. Token Service (Auth & Google OIDC) ────────
-  token-service:
+  # ── 5. Game Client Application (Student Canvas Web SPA) ─────────────
+  game-client:
     build:
-      context: ./DEMO/use-k3s/token-service
+      context: ./game-client
       dockerfile: Dockerfile
-    container_name: tank-token-service
+    container_name: tank-client
     restart: unless-stopped
-    environment:
-      - SERVICE_PORT=8100
-      - OIDC_ISSUER_URL=http://keycloak:8080/realms/sudhood
-      - OIDC_PUBLIC_ISSUER_URL=http://localhost:8080/realms/sudhood
-      - OIDC_CLIENT_ID=sudhood-token-service
-      - OIDC_CLIENT_SECRET=dev-token-secret
-      - OIDC_REDIRECT_URI=http://localhost/auth/callback
-      - ALLOWED_EMAIL_DOMAIN=ubu.ac.th
-      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:80,http://127.0.0.1:3000,http://127.0.0.1:80
-      - LOGIN_SUCCESS_REDIRECT=http://localhost:3000/#
-      - REDIS_URL=redis://redis:6379/0
-      - JWT_KEYS_DIR=/keys
-      - INTERNAL_API_KEY=dev-internal-key
-      - GAME_MODE=true
-    volumes:
-      - ./keys:/keys
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.auth.rule=PathPrefix(`/auth`) || PathPrefix(`/.well-known/jwks.json`)"
-      - "traefik.http.routers.auth.entrypoints=web"
-      - "traefik.http.routers.auth.priority=20"
     networks:
-      - game-net
-    depends_on:
-      - redis
-      - keycloak
+      game-net:
+        aliases:
+          - game-client
 
-  # ── 6. Keycloak (Identity Broker) ───────────────
-  keycloak:
-    image: quay.io/keycloak/keycloak:24.0
-    container_name: tank-keycloak
+  # ── 6. Quiz Manager Portal (Teacher & Admin Web Demo Client) ────────
+  quiz-portal:
+    build:
+      context: ./quiz-manager-portal
+      dockerfile: Dockerfile
+    container_name: tank-quiz-portal
     restart: unless-stopped
-    command: start-dev --import-realm
+    ports:
+      - "5000:5000"
     environment:
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=admin
-      - KC_DB=postgres
-      - KC_DB_URL=jdbc:postgresql://postgres:5432/keycloak
-      - KC_DB_USERNAME=sudhood
-      - KC_DB_PASSWORD=sudhood_db_password
-      - KC_HOSTNAME=localhost
-      - KC_HTTP_PORT=8080
-    volumes:
-      - ./DEMO/use-k3s/keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
-    networks:
-      - game-net
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  # ── 7. PostgreSQL (Internal Database) ───────────
-  postgres:
-    image: postgres:16-alpine
-    container_name: tank-postgres
-    restart: unless-stopped
-    environment:
-      - POSTGRES_USER=sudhood
-      - POSTGRES_PASSWORD=sudhood_db_password
-      - POSTGRES_DB=sudhood
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./DEMO/use-k3s/postgres/init:/docker-entrypoint-initdb.d:ro
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U sudhood"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - game-net
-
-  # ── 8. Redis (Session Cache) ─────────────────────
-  redis:
-    image: redis:7-alpine
-    container_name: tank-redis
-    restart: unless-stopped
+      - PORT=5000
     networks:
       - game-net
 
 networks:
   game-net:
     driver: bridge
-
-volumes:
-  postgres_data:

@@ -6,7 +6,14 @@ export interface QuizClientConfig {
   refreshIntervalMs?: number;
 }
 
-export class QuizClient {
+export interface IQuizProvider {
+  getRandomQuestion(category?: string, difficulty?: string): QuizQuestion;
+  getQuestionById(id: string): QuizQuestion | undefined;
+  getAllQuestions(filter?: { category?: string; difficulty?: string; search?: string }): QuizQuestion[];
+  getCategories(): { id: string; nameTh: string; count: number }[];
+}
+
+export class QuizClient implements IQuizProvider {
   private serviceUrl: string;
   private cachedQuestions: QuizQuestion[] = [...DEFAULT_QUESTIONS];
   private refreshTimer: NodeJS.Timeout | null = null;
@@ -57,6 +64,35 @@ export class QuizClient {
       this.isConnected = false;
     }
     return false;
+  }
+
+  /**
+   * ยิงขอคำถามแบบ On-Demand ข้ามคอนเทนเนอร์ตรงไปยัง quiz-service
+   */
+  public async fetchRandomQuestion(category?: string, difficulty?: string): Promise<QuizQuestion> {
+    try {
+      const url = new URL(`${this.serviceUrl}/api/quiz/random`);
+      if (category && category !== 'ALL') url.searchParams.set('category', category);
+      if (difficulty && difficulty !== 'ALL') url.searchParams.set('difficulty', difficulty);
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 2000);
+      const res = await fetch(url.toString(), {
+        signal: controller.signal,
+        headers: { 'Accept': 'application/json' }
+      });
+      clearTimeout(timeout);
+
+      if (res.ok) {
+        const data: any = await res.json();
+        if (data.success && data.question) {
+          return data.question;
+        }
+      }
+    } catch (err) {
+      // Degraded graceful fallback to memory cache
+    }
+    return this.getRandomQuestion(category, difficulty);
   }
 
   /**
