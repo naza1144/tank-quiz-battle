@@ -82,24 +82,31 @@ export const App: React.FC = () => {
     const params = new URLSearchParams(hash || window.location.search);
     const urlToken = params.get('access_token') || params.get('token');
     const urlName = params.get('name');
-
     if (urlName) {
       localStorage.setItem('tank_user_name', decodeURIComponent(urlName));
     }
 
+    const urlStudentId = params.get('student_id') || params.get('studentId');
+    if (urlStudentId) {
+      localStorage.setItem('tank_student_id', decodeURIComponent(urlStudentId));
+    }
+
     if (urlToken) {
       localStorage.setItem('tank_auth_token', urlToken);
-      if (!urlName) {
-        try {
-          const parts = urlToken.split('.');
-          if (parts.length >= 2) {
-            const payload = JSON.parse(atob(parts[1]));
-            if (payload && (payload.name || payload.preferred_username)) {
+      try {
+        const parts = urlToken.split('.');
+        if (parts.length >= 2) {
+          const payload = JSON.parse(atob(parts[1]));
+          if (payload) {
+            if (!urlName && (payload.name || payload.preferred_username)) {
               localStorage.setItem('tank_user_name', payload.name || payload.preferred_username);
             }
+            if (payload.studentId || payload.student_id) {
+              localStorage.setItem('tank_student_id', payload.studentId || payload.student_id);
+            }
           }
-        } catch (e) {}
-      }
+        }
+      } catch (e) {}
       window.history.replaceState(null, '', window.location.pathname);
       return urlToken;
     }
@@ -108,6 +115,10 @@ export const App: React.FC = () => {
 
   const [userName, setUserName] = useState<string>(() => {
     return localStorage.getItem('tank_user_name') || 'Tanker';
+  });
+
+  const [studentId, setStudentId] = useState<string>(() => {
+    return localStorage.getItem('tank_student_id') || '';
   });
 
   // Navigation / Game state

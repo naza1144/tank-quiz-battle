@@ -290,7 +290,16 @@ export class AccountDirectory {
       const isTeacherEmail = normalizedEmail.includes('teacher') || normalizedEmail.includes('prof') || normalizedEmail.includes('instructor');
       const roleId: UserRoleCode = isAdminEmail ? 'ADMIN' : (isTeacherEmail ? 'TEACHER' : 'STUDENT');
       const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-      const studentId = `650${randomSuffix}`;
+      
+      let studentId = req.studentId?.trim();
+      if (!studentId) {
+        const ubuMatch = normalizedEmail.match(/\.(\d{2})@ubu\.ac\.th/);
+        if (ubuMatch) {
+          studentId = `${ubuMatch[1]}145${randomSuffix}`;
+        } else {
+          studentId = `670${randomSuffix}`;
+        }
+      }
 
       account = {
         id: `usr-${Date.now()}-${randomSuffix}`,
@@ -324,13 +333,14 @@ export class AccountDirectory {
       this.profilesByAccountId.set(account.id, profile);
 
       if (roleId === 'STUDENT') {
+        const enrollYear = studentId.startsWith('67') ? 2567 : (studentId.startsWith('66') ? 2566 : (studentId.startsWith('65') ? 2565 : 2567));
         const student: StudentProfile = {
           studentId,
           userProfileId: profile.id,
           facultyId: 'fac-eng',
           departmentId: 'dept-cpe',
           sectionId: 'sec-cpe-2026-1',
-          enrollmentYear: 2565,
+          enrollmentYear: enrollYear,
         };
         this.students.set(student.studentId, student);
       } else {
@@ -350,6 +360,31 @@ export class AccountDirectory {
       }
       account.googleSub = req.googleSub || account.googleSub;
       account.lastLoginAt = Date.now();
+
+      if (req.studentId && account.roleId === 'STUDENT') {
+        const existingProfile = this.profilesByAccountId.get(account.id);
+        if (existingProfile) {
+          const cleanStudentId = req.studentId.trim();
+          let student = Array.from(this.students.values()).find(s => s.userProfileId === existingProfile.id);
+          if (student) {
+            this.students.delete(student.studentId);
+            student.studentId = cleanStudentId;
+            this.students.set(cleanStudentId, student);
+          } else {
+            const enrollYear = cleanStudentId.startsWith('67') ? 2567 : (cleanStudentId.startsWith('66') ? 2566 : 2567);
+            this.students.set(cleanStudentId, {
+              studentId: cleanStudentId,
+              userProfileId: existingProfile.id,
+              facultyId: 'fac-eng',
+              departmentId: 'dept-cpe',
+              sectionId: 'sec-cpe-2026-1',
+              enrollmentYear: enrollYear,
+            });
+          }
+          const baseName = existingProfile.firstNameTh || 'Player';
+          existingProfile.displayName = `${baseName} [${cleanStudentId}]`;
+        }
+      }
     }
 
     const userDetail = this.getFullUserDetail(account.id)!;

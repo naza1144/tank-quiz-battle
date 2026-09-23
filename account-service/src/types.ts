@@ -119,6 +119,7 @@ export interface GoogleSyncRequest {
   name: string;
   googleSub?: string;
   avatarUrl?: string;
+  studentId?: string;
 }
 
 export interface FullUserDetailResponse {

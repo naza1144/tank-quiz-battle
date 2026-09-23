@@ -42,6 +42,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin }) => {
       if (data.success && data.token) {
         localStorage.setItem('tank_auth_token', data.token);
         localStorage.setItem('tank_user_name', data.user?.profile?.displayName || finalName);
+        localStorage.setItem('tank_student_id', data.user?.student?.studentId || finalId);
         onLogin(data.token, data.user?.profile?.displayName || finalName);
         return;
       }
