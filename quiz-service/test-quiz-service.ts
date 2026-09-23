@@ -21,11 +21,11 @@ function assert(condition: boolean, testName: string) {
 
 // ── 1. Test Difficulty Time Limit Rules ──
 console.log('▶️ [Test Group 1] Difficulty Time Limit Rules');
-assert(getTimeLimitForDifficulty('EASY') === 2, 'EASY difficulty returns 2 seconds');
-assert(getTimeLimitForDifficulty('MEDIUM') === 5, 'MEDIUM difficulty returns 5 seconds');
-assert(getTimeLimitForDifficulty('HARD') === 7, 'HARD difficulty returns 7 seconds');
+assert(getTimeLimitForDifficulty('EASY') === 5, 'EASY difficulty returns 5 seconds');
+assert(getTimeLimitForDifficulty('MEDIUM') === 9, 'MEDIUM difficulty returns 9 seconds');
+assert(getTimeLimitForDifficulty('HARD') === 14, 'HARD difficulty returns 14 seconds');
 assert(getTimeLimitForDifficulty(undefined, 10) === 10, 'Explicit seconds override when provided');
-assert(getTimeLimitForDifficulty('UNKNOWN') === 5, 'Fallback is 5 seconds');
+assert(getTimeLimitForDifficulty('UNKNOWN') === 9, 'Fallback is 9 seconds');
 
 // ── 2. Test QuizManager CRUD & Filtering ──
 console.log('\n▶️ [Test Group 2] QuizManager CRUD & Query Operations');
@@ -54,7 +54,7 @@ const addedQ = manager.addQuestion({
   correctIndex: 1,
   difficulty: 'EASY'
 });
-assert(addedQ.id.length > 0 && addedQ.timeLimitSeconds === 2, 'Added new question with correct time limit 2s');
+assert(addedQ.id.length > 0 && addedQ.timeLimitSeconds === 5, 'Added new question with correct time limit 5s');
 
 const fetchedAdded = manager.getQuestionById(addedQ.id);
 assert(fetchedAdded !== undefined && fetchedAdded.questionTh === '1 + 1 เท่ากับเท่าใด?', 'Get question by ID works');
@@ -63,7 +63,7 @@ const updatedQ = manager.updateQuestion(addedQ.id, {
   questionTh: '1 + 1 = ? (แก้ไข)',
   difficulty: 'HARD'
 });
-assert(updatedQ !== null && updatedQ.difficulty === 'HARD' && updatedQ.timeLimitSeconds === 7, 'Update question & recalculate difficulty to 7s works');
+assert(updatedQ !== null && updatedQ.difficulty === 'HARD' && updatedQ.timeLimitSeconds === 14, 'Update question & recalculate difficulty to 14s works');
 
 const deleted = manager.deleteQuestion(addedQ.id);
 assert(deleted && manager.getQuestionById(addedQ.id) === undefined, 'Delete question works');

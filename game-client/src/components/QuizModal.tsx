@@ -18,10 +18,10 @@ export const QuizModal: React.FC<QuizModalProps> = ({
   onClose
 }) => {
   const getDuration = (q: QuizQuestion) => {
-    if (q.difficulty === 'HARD') return 7;
-    if (q.difficulty === 'EASY') return 2;
-    if (q.difficulty === 'MEDIUM') return 5;
-    return q.timeLimitSeconds || 5;
+    if (q.difficulty === 'HARD') return 14;
+    if (q.difficulty === 'EASY') return 5;
+    if (q.difficulty === 'MEDIUM') return 9;
+    return q.timeLimitSeconds || 9;
   };
   const totalDuration = getDuration(question);
   const [timeLeft, setTimeLeft] = useState<number>(totalDuration);

@@ -166,10 +166,10 @@ def main():
     converted = []
     diff_map = {
         1: ('EASY', 5, 3, 100),
-        2: ('MEDIUM', 5, 3, 100),
-        3: ('MEDIUM', 6, 4, 120),
-        4: ('HARD', 7, 4, 130),
-        5: ('HARD', 7, 5, 150)
+        2: ('MEDIUM', 9, 3, 100),
+        3: ('MEDIUM', 9, 4, 120),
+        4: ('HARD', 14, 4, 130),
+        5: ('HARD', 14, 5, 150)
     }
 
     for idx, q in enumerate(raw_questions):
@@ -178,7 +178,7 @@ def main():
         correct_ans = str(q['options'][0]['text']).strip()
         feedback = q.get('feedback', '')
         level = q.get('level', 1)
-        diff, time_limit, ammo, bonus = diff_map.get(level, ('MEDIUM', 5, 3, 100))
+        diff, time_limit, ammo, bonus = diff_map.get(level, ('MEDIUM', 9, 3, 100))
 
         distractors = generate_distractors(correct_ans, feedback, q_text, all_answers)
         
@@ -235,6 +235,15 @@ def main():
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(converted, f, ensure_ascii=False, indent=2)
     print(f"Saved to {output_path}")
+
+    # Also save TypeScript module
+    ts_output_path = 'D:/code/tank-quiz-battle/quiz-service/src/data/pythonQuestions.ts'
+    with open(ts_output_path, 'w', encoding='utf-8') as f:
+        f.write("import { QuizQuestion } from '../types.js';\n\n")
+        f.write("export const PYTHON_QUESTIONS: QuizQuestion[] = ")
+        json.dump(converted, f, ensure_ascii=False, indent=2)
+        f.write(";\n")
+    print(f"Saved to {ts_output_path}")
 
 if __name__ == '__main__':
     main()

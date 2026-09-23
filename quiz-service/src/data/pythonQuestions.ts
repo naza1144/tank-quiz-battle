@@ -9,9 +9,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `c` มีค่าเท่าใด\n\n```python\na = 20\nb = 5\nc = a * b\nprint(c)\n```",
     "options": [
       "101",
-      "200",
+      "102",
       "100",
-      "102"
+      "200"
     ],
     "correctIndex": 2,
     "explanationTh": "[นิพจน์คณิตศาสตร์เบื้องต้น] เฉลย: 100",
@@ -29,10 +29,10 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `x` มีค่าเท่าใด\n\n```python\nx = 32\nx = x + 9\nx = x * 2\nprint(x)\n```",
     "options": [
-      "80",
+      "84",
       "82",
-      "83",
-      "84"
+      "81",
+      "80"
     ],
     "correctIndex": 1,
     "explanationTh": "[การทับค่าตัวแปร (reassignment)] เฉลย: 82",
@@ -50,7 +50,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\np = 18\nq = 7\nprint(p // q)\n```",
     "options": [
-      "1",
+      "0",
       "12",
       "2",
       "4"
@@ -71,8 +71,8 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\np = 47\nq = 3\nprint(p % q)\n```",
     "options": [
+      "1",
       "3",
-      "0",
       "2",
       "12"
     ],
@@ -94,8 +94,8 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "100",
       "Dede",
-      "DEDE",
-      "2"
+      "82",
+      "dede"
     ],
     "correctIndex": 1,
     "explanationTh": "[String concatenation] เฉลย: Dede",
@@ -113,9 +113,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\ntext = \"Algorithm\"\nprint(len(text))\n```",
     "options": [
-      "18",
-      "7",
+      "11",
       "8",
+      "7",
       "9"
     ],
     "correctIndex": 3,
@@ -134,9 +134,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = 16\ny = 23\nprint(x > y)\n```",
     "options": [
-      "Error",
       "None",
       "True",
+      "Error",
       "False"
     ],
     "correctIndex": 3,
@@ -155,9 +155,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\na = 6\nb = 8\nresult = a + b * 2\nprint(result)\n```",
     "options": [
+      "23",
       "24",
       "21",
-      "20",
       "22"
     ],
     "correctIndex": 3,
@@ -176,10 +176,10 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\na = 5\nb = 4\nresult = (a + b) * 3\nprint(result)\n```",
     "options": [
-      "25",
+      "29",
       "27",
       "26",
-      "29"
+      "28"
     ],
     "correctIndex": 1,
     "explanationTh": "[ลำดับการดำเนินการ (วงเล็บ)] เฉลย: 27",
@@ -197,9 +197,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `b` มีค่าเท่าใด\n\n```python\na = 3\nb = a\na = a + 10\nprint(b)\n```",
     "options": [
-      "5",
       "2",
       "1",
+      "6",
       "3"
     ],
     "correctIndex": 3,
@@ -219,9 +219,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nn = 9\nresult = n ** 2\nprint(result)\n```",
     "options": [
       "83",
-      "80",
+      "79",
       "81",
-      "162"
+      "80"
     ],
     "correctIndex": 2,
     "explanationTh": "[เลขยกกำลัง **] เฉลย: 81",
@@ -260,9 +260,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `c` มีค่าเท่าใด\n\n```python\na = 8\nb = 9\nc = a - b\nprint(c)\n```",
     "options": [
-      "2",
-      "3",
+      "0",
       "-3",
+      "2",
       "-1"
     ],
     "correctIndex": 3,
@@ -281,7 +281,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `x` มีค่าเท่าใด\n\n```python\nx = 25\nx = x + 8\nx = x * 2\nprint(x)\n```",
     "options": [
-      "64",
+      "67",
       "66",
       "68",
       "65"
@@ -302,10 +302,10 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\np = 42\nq = 3\nprint(p // q)\n```",
     "options": [
-      "28",
-      "12",
+      "15",
+      "16",
       "14",
-      "15"
+      "12"
     ],
     "correctIndex": 2,
     "explanationTh": "[การหารปัดเศษทิ้ง //] เฉลย: 14",
@@ -324,9 +324,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\np = 19\nq = 5\nprint(p % q)\n```",
     "options": [
       "4",
-      "6",
-      "3",
-      "5"
+      "2",
+      "5",
+      "3"
     ],
     "correctIndex": 0,
     "explanationTh": "[การหารเอาเศษ %] เฉลย: 4",
@@ -347,7 +347,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
       "Aita",
       "AITA",
       "100",
-      "aita"
+      "82"
     ],
     "correctIndex": 0,
     "explanationTh": "[String concatenation] เฉลย: Aita",
@@ -365,8 +365,8 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\ntext = \"Computer\"\nprint(len(text))\n```",
     "options": [
-      "16",
       "7",
+      "16",
       "9",
       "8"
     ],
@@ -386,10 +386,10 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = 4\ny = 21\nprint(x == y)\n```",
     "options": [
-      "None",
+      "True",
       "False",
-      "Error",
-      "True"
+      "None",
+      "Error"
     ],
     "correctIndex": 1,
     "explanationTh": "[นิพจน์ boolean เบื้องต้น] เฉลย: False",
@@ -408,9 +408,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\na = 6\nb = 5\nresult = a + b * 7\nprint(result)\n```",
     "options": [
       "41",
-      "43",
       "39",
-      "82"
+      "42",
+      "43"
     ],
     "correctIndex": 0,
     "explanationTh": "[ลำดับการดำเนินการ (operator precedence)] เฉลย: 41",
@@ -428,9 +428,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\na = 7\nb = 4\nresult = (a + b) * 7\nprint(result)\n```",
     "options": [
-      "154",
-      "77",
       "78",
+      "77",
+      "79",
       "75"
     ],
     "correctIndex": 1,
@@ -450,7 +450,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nn = 8\nresult = n ** 2\nprint(result)\n```",
     "options": [
       "62",
-      "63",
+      "65",
       "128",
       "64"
     ],
@@ -470,10 +470,10 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nname = \"Fah\"\nage = 18\nmsg = f\"{name} is {age} years old\"\nprint(msg)\n```",
     "options": [
-      "Fah is 17 years old",
+      "Fah is 36 years old",
       "Fah is 19 years old",
       "Fah is 18 years old",
-      "Fah is 36 years old"
+      "Fah is 17 years old"
     ],
     "correctIndex": 2,
     "explanationTh": "[f-string เบื้องต้น] เฉลย: Fah is 18 years old",
@@ -491,10 +491,10 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `c` มีค่าเท่าใด\n\n```python\na = 16\nb = 5\nc = a * b\nprint(c)\n```",
     "options": [
-      "78",
+      "81",
       "80",
-      "160",
-      "82"
+      "82",
+      "160"
     ],
     "correctIndex": 1,
     "explanationTh": "[นิพจน์คณิตศาสตร์เบื้องต้น] เฉลย: 80",
@@ -512,10 +512,10 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `x` มีค่าเท่าใด\n\n```python\nx = 16\nx = x + 7\nx = x * 2\nprint(x)\n```",
     "options": [
-      "47",
+      "48",
       "45",
       "46",
-      "48"
+      "44"
     ],
     "correctIndex": 2,
     "explanationTh": "[การทับค่าตัวแปร (reassignment)] เฉลย: 46",
@@ -533,10 +533,10 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\np = 16\nq = 4\nprint(p // q)\n```",
     "options": [
-      "2",
+      "6",
       "4",
-      "5",
-      "6"
+      "3",
+      "2"
     ],
     "correctIndex": 1,
     "explanationTh": "[การหารปัดเศษทิ้ง //] เฉลย: 4",
@@ -554,10 +554,10 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\np = 60\nq = 4\nprint(p % q)\n```",
     "options": [
-      "2",
-      "3",
+      "4",
+      "1",
       "0",
-      "-1"
+      "2"
     ],
     "correctIndex": 2,
     "explanationTh": "[การหารเอาเศษ %] เฉลย: 0",
@@ -578,7 +578,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
       "100",
       "Pyta",
       "2",
-      "PYTA"
+      "82"
     ],
     "correctIndex": 1,
     "explanationTh": "[String concatenation] เฉลย: Pyta",
@@ -596,10 +596,10 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\ntext = \"Function\"\nprint(len(text))\n```",
     "options": [
-      "6",
+      "10",
       "8",
       "9",
-      "7"
+      "16"
     ],
     "correctIndex": 1,
     "explanationTh": "[ฟังก์ชัน len()] เฉลย: 8",
@@ -618,9 +618,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = 27\ny = 5\nprint(x > y)\n```",
     "options": [
       "True",
+      "None",
       "Error",
-      "False",
-      "None"
+      "False"
     ],
     "correctIndex": 0,
     "explanationTh": "[นิพจน์ boolean เบื้องต้น] เฉลย: True",
@@ -638,9 +638,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\na = 7\nb = 3\nresult = a + b * 5\nprint(result)\n```",
     "options": [
+      "44",
       "23",
-      "24",
-      "20",
+      "21",
       "22"
     ],
     "correctIndex": 3,
@@ -659,10 +659,10 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\na = 2\nb = 3\nresult = (a + b) * 7\nprint(result)\n```",
     "options": [
-      "70",
+      "33",
       "35",
-      "34",
-      "36"
+      "70",
+      "34"
     ],
     "correctIndex": 1,
     "explanationTh": "[ลำดับการดำเนินการ (วงเล็บ)] เฉลย: 35",
@@ -681,9 +681,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `b` มีค่าเท่าใด\n\n```python\na = 7\nb = a\na = a + 10\nprint(b)\n```",
     "options": [
       "7",
-      "9",
-      "14",
-      "8"
+      "8",
+      "5",
+      "14"
     ],
     "correctIndex": 0,
     "explanationTh": "[การคัดลอกค่า (ไม่ใช่การอ้างอิง)] เฉลย: 7",
@@ -702,9 +702,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nn = 12\nresult = n ** 2\nprint(result)\n```",
     "options": [
       "144",
-      "142",
       "145",
-      "143"
+      "146",
+      "142"
     ],
     "correctIndex": 0,
     "explanationTh": "[เลขยกกำลัง **] เฉลย: 144",
@@ -724,8 +724,8 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "Beam is 24 years old",
       "Beam is 25 years old",
-      "Beam is 26 years old",
-      "Beam is 50 years old"
+      "Beam is 50 years old",
+      "Beam is 26 years old"
     ],
     "correctIndex": 1,
     "explanationTh": "[f-string เบื้องต้น] เฉลย: Beam is 25 years old",
@@ -743,9 +743,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `c` มีค่าเท่าใด\n\n```python\na = 7\nb = 9\nc = a * b\nprint(c)\n```",
     "options": [
-      "61",
+      "64",
       "63",
-      "126",
+      "65",
       "62"
     ],
     "correctIndex": 1,
@@ -764,10 +764,10 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `x` มีค่าเท่าใด\n\n```python\nx = 29\nx = x + 4\nx = x * 2\nprint(x)\n```",
     "options": [
-      "67",
+      "132",
       "65",
       "66",
-      "132"
+      "64"
     ],
     "correctIndex": 2,
     "explanationTh": "[การทับค่าตัวแปร (reassignment)] เฉลย: 66",
@@ -785,9 +785,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\np = 59\nq = 6\nprint(p // q)\n```",
     "options": [
-      "7",
+      "8",
       "9",
-      "18",
+      "11",
       "10"
     ],
     "correctIndex": 1,
@@ -806,9 +806,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\np = 58\nq = 8\nprint(p % q)\n```",
     "options": [
-      "3",
-      "12",
       "1",
+      "12",
+      "0",
       "2"
     ],
     "correctIndex": 3,
@@ -827,9 +827,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\ns1 = \"Py\"\ns2 = \"thon\"\nprint(s1 + s2)\n```",
     "options": [
-      "100",
+      "82",
       "Python",
-      "2",
+      "100",
       "python"
     ],
     "correctIndex": 1,
@@ -849,9 +849,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\ntext = \"Python\"\nprint(len(text))\n```",
     "options": [
       "8",
-      "5",
+      "12",
       "6",
-      "7"
+      "4"
     ],
     "correctIndex": 2,
     "explanationTh": "[ฟังก์ชัน len()] เฉลย: 6",
@@ -870,9 +870,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = 2\ny = 19\nprint(x < y)\n```",
     "options": [
       "True",
-      "Error",
       "None",
-      "False"
+      "False",
+      "Error"
     ],
     "correctIndex": 0,
     "explanationTh": "[นิพจน์ boolean เบื้องต้น] เฉลย: True",
@@ -890,8 +890,8 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\na = 9\nb = 8\nresult = a + b * 2\nprint(result)\n```",
     "options": [
-      "26",
       "50",
+      "24",
       "25",
       "27"
     ],
@@ -911,10 +911,10 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\na = 8\nb = 3\nresult = (a + b) * 3\nprint(result)\n```",
     "options": [
-      "34",
+      "35",
       "33",
-      "66",
-      "35"
+      "32",
+      "34"
     ],
     "correctIndex": 1,
     "explanationTh": "[ลำดับการดำเนินการ (วงเล็บ)] เฉลย: 33",
@@ -933,9 +933,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `b` มีค่าเท่าใด\n\n```python\na = 5\nb = a\na = a + 10\nprint(b)\n```",
     "options": [
       "5",
-      "4",
-      "6",
-      "10"
+      "3",
+      "10",
+      "6"
     ],
     "correctIndex": 0,
     "explanationTh": "[การคัดลอกค่า (ไม่ใช่การอ้างอิง)] เฉลย: 5",
@@ -953,9 +953,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nn = 10\nresult = n ** 2\nprint(result)\n```",
     "options": [
-      "200",
-      "99",
       "102",
+      "98",
+      "200",
       "100"
     ],
     "correctIndex": 3,
@@ -975,9 +975,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nname = \"Fah\"\nage = 20\nmsg = f\"{name} is {age} years old\"\nprint(msg)\n```",
     "options": [
       "Fah is 20 years old",
-      "Fah is 21 years old",
+      "Fah is 19 years old",
       "Fah is 40 years old",
-      "Fah is 19 years old"
+      "Fah is 21 years old"
     ],
     "correctIndex": 0,
     "explanationTh": "[f-string เบื้องต้น] เฉลย: Fah is 20 years old",
@@ -996,9 +996,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `c` มีค่าเท่าใด\n\n```python\na = 4\nb = 4\nc = a - b\nprint(c)\n```",
     "options": [
       "0",
+      "4",
       "2",
-      "-1",
-      "4"
+      "-1"
     ],
     "correctIndex": 0,
     "explanationTh": "[นิพจน์คณิตศาสตร์เบื้องต้น] เฉลย: 0",
@@ -1017,9 +1017,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `x` มีค่าเท่าใด\n\n```python\nx = 31\nx = x + 8\nx = x * 2\nprint(x)\n```",
     "options": [
       "78",
-      "156",
+      "79",
       "77",
-      "80"
+      "76"
     ],
     "correctIndex": 0,
     "explanationTh": "[การทับค่าตัวแปร (reassignment)] เฉลย: 78",
@@ -1039,8 +1039,8 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "10",
       "9",
-      "11",
-      "18"
+      "18",
+      "11"
     ],
     "correctIndex": 1,
     "explanationTh": "[การหารปัดเศษทิ้ง //] เฉลย: 9",
@@ -1060,7 +1060,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "4",
       "12",
-      "3",
+      "1",
       "2"
     ],
     "correctIndex": 3,
@@ -1079,10 +1079,10 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\ns1 = \"Da\"\ns2 = \"lgo\"\nprint(s1 + s2)\n```",
     "options": [
-      "100",
+      "82",
       "DALGO",
       "Dalgo",
-      "dalgo"
+      "100"
     ],
     "correctIndex": 2,
     "explanationTh": "[String concatenation] เฉลย: Dalgo",
@@ -1100,10 +1100,10 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = 7\ny = 9\nprint(x == y)\n```",
     "options": [
-      "True",
       "Error",
+      "None",
       "False",
-      "None"
+      "True"
     ],
     "correctIndex": 2,
     "explanationTh": "[นิพจน์ boolean เบื้องต้น] เฉลย: False",
@@ -1123,8 +1123,8 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "16",
       "18",
-      "15",
-      "17"
+      "17",
+      "14"
     ],
     "correctIndex": 0,
     "explanationTh": "[ลำดับการดำเนินการ (operator precedence)] เฉลย: 16",
@@ -1142,7 +1142,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\na = 3\nb = 5\nresult = (a + b) * 8\nprint(result)\n```",
     "options": [
-      "63",
+      "65",
       "64",
       "128",
       "62"
@@ -1184,9 +1184,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `c` มีค่าเท่าใด\n\n```python\na = 9\nb = 3\nc = a - b\nprint(c)\n```",
     "options": [
-      "5",
-      "4",
       "12",
+      "5",
+      "7",
       "6"
     ],
     "correctIndex": 3,
@@ -1205,8 +1205,8 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `x` มีค่าเท่าใด\n\n```python\nx = 21\nx = x + 2\nx = x * 2\nprint(x)\n```",
     "options": [
+      "48",
       "47",
-      "92",
       "46",
       "45"
     ],
@@ -1228,7 +1228,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "12",
       "2",
-      "0",
+      "3",
       "4"
     ],
     "correctIndex": 1,
@@ -1248,9 +1248,9 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\np = 40\nq = 8\nprint(p % q)\n```",
     "options": [
       "0",
+      "2",
       "-1",
-      "4",
-      "1"
+      "3"
     ],
     "correctIndex": 0,
     "explanationTh": "[การหารเอาเศษ %] เฉลย: 0",
@@ -1268,15 +1268,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = 86\nif x >= 69:\n    result = \"PASS\"\nelse:\n    result = \"FAIL\"\nprint(result)\n```",
     "options": [
-      "Error",
-      "PASS",
       "FAIL",
-      "None"
+      "PASS",
+      "None",
+      "Error"
     ],
     "correctIndex": 1,
     "explanationTh": "[if / else พื้นฐาน] เฉลย: PASS",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1290,14 +1290,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nage = 22\nif age < 13:\n    category = \"เด็ก\"\nelif age < 20:\n    category = \"วัยรุ่น\"\nelse:\n    category = \"ผู้ใหญ่\"\nprint(category)\n```",
     "options": [
       "ผู้ใหญ่",
+      "82",
       "100",
-      "Dede",
       "9"
     ],
     "correctIndex": 0,
     "explanationTh": "[if/elif/else หลายชั้น] เฉลย: ผู้ใหญ่",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1310,15 +1310,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\na = 25\nb = 19\nif a > b:\n    if a - b > 10:\n        result = \"ต่างกันมาก\"\n    else:\n        result = \"ต่างกันนิดหน่อย\"\nelse:\n    result = \"a ไม่มากกว่า b\"\nprint(result)\n```",
     "options": [
-      "100",
+      "82",
       "ต่างกันนิดหน่อย",
-      "Dede",
+      "100",
       "9"
     ],
     "correctIndex": 1,
     "explanationTh": "[Nested if] เฉลย: ต่างกันนิดหน่อย",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1331,15 +1331,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nnumerator = 37\ndenominator = 0\nif denominator != 0:\n    result = numerator / denominator\nelse:\n    result = 0\nprint(result)\n```",
     "options": [
-      "2",
+      "4",
       "0",
-      "-1",
-      "1"
+      "2",
+      "3"
     ],
     "correctIndex": 1,
     "explanationTh": "[Guard pattern (กันหารศูนย์)] เฉลย: 0",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1354,13 +1354,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "คะแนนถูกต้อง",
       "9",
-      "Dede",
-      "100"
+      "100",
+      "82"
     ],
     "correctIndex": 0,
     "explanationTh": "[Chained comparison] เฉลย: คะแนนถูกต้อง",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1374,14 +1374,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = 32\ny = -6\nif 10 < x < 30 and y > 0:\n    result = \"A\"\nelse:\n    result = \"B\"\nprint(result)\n```",
     "options": [
       "9",
-      "Dede",
       "100",
+      "82",
       "B"
     ],
     "correctIndex": 3,
     "explanationTh": "[Chained Comparison + and/or ผสมกัน] เฉลย: B",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1395,14 +1395,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\na = 2\nb = 6\nc = 20\nd = 19\nif a > b and c > d:\n    result = 1\nelif a > b or c > d:\n    result = 2\nelse:\n    result = 3\nprint(result)\n```",
     "options": [
       "4",
-      "3",
+      "1",
       "12",
       "2"
     ],
     "correctIndex": 3,
     "explanationTh": "[and / or ผสมกัน] เฉลย: 2",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1415,15 +1415,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `x` มีค่าเท่าใด\n\n```python\nx = 33\nif x > 27:\n    x = x + 5\nif x > 8:\n    x = x - 3\nprint(x)\n```",
     "options": [
+      "36",
       "33",
-      "70",
       "35",
-      "34"
+      "70"
     ],
     "correctIndex": 2,
     "explanationTh": "[if หลายก้อนแยกกัน (ไม่ใช่ elif)] เฉลย: 35",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1436,15 +1436,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = 32\nif not (x % 3 == 0):\n    result = \"ไม่หารด้วย 3 ลงตัว\"\nelse:\n    result = \"หารด้วย 3 ลงตัว\"\nprint(result)\n```",
     "options": [
-      "100",
+      "82",
       "9",
       "ไม่หารด้วย 3 ลงตัว",
-      "Dede"
+      "100"
     ],
     "correctIndex": 2,
     "explanationTh": "[ตัวดำเนินการ not] เฉลย: ไม่หารด้วย 3 ลงตัว",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1457,15 +1457,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mn` มีค่าเท่าใด\n\n```python\na = 81\nb = 62\nc = 86\nif a <= b and a <= c:\n    mn = a\nelif b <= a and b <= c:\n    mn = b\nelse:\n    mn = c\nprint(mn)\n```",
     "options": [
-      "61",
+      "60",
       "62",
       "63",
-      "60"
+      "61"
     ],
     "correctIndex": 1,
     "explanationTh": "[หาค่ามาก/น้อยสุดด้วย if] เฉลย: 62",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1478,15 +1478,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = 31\nif x >= 69:\n    result = \"PASS\"\nelse:\n    result = \"FAIL\"\nprint(result)\n```",
     "options": [
-      "None",
-      "PASS",
       "Error",
+      "PASS",
+      "None",
       "FAIL"
     ],
     "correctIndex": 3,
     "explanationTh": "[if / else พื้นฐาน] เฉลย: FAIL",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1499,15 +1499,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nscore = 42\nif score >= 80:\n    grade = \"A\"\nelif score >= 70:\n    grade = \"B\"\nelif score >= 60:\n    grade = \"C\"\nelse:\n    grade = \"F\"\nprint(grade)\n```",
     "options": [
+      "82",
       "100",
-      "Dede",
       "F",
       "9"
     ],
     "correctIndex": 2,
     "explanationTh": "[if/elif/else หลายชั้น] เฉลย: F",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1520,15 +1520,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nyear = 31\nif year % 4 == 0:\n    if year % 100 == 0:\n        result = \"หาร 100 ลงตัว\"\n    else:\n        result = \"หาร 4 ลงตัวแต่ไม่หาร 100\"\nelse:\n    result = \"หาร 4 ไม่ลงตัว\"\nprint(result)\n```",
     "options": [
-      "Dede",
-      "หาร 4 ไม่ลงตัว",
       "100",
+      "หาร 4 ไม่ลงตัว",
+      "82",
       "9"
     ],
     "correctIndex": 1,
     "explanationTh": "[Nested if] เฉลย: หาร 4 ไม่ลงตัว",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1542,14 +1542,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nnumerator = 26\ndenominator = 0\nif denominator != 0:\n    result = numerator / denominator\nelse:\n    result = 0\nprint(result)\n```",
     "options": [
       "0",
-      "3",
       "1",
-      "2"
+      "3",
+      "4"
     ],
     "correctIndex": 0,
     "explanationTh": "[Guard pattern (กันหารศูนย์)] เฉลย: 0",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1564,13 +1564,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "9",
       "คะแนนถูกต้อง",
-      "100",
-      "Dede"
+      "82",
+      "100"
     ],
     "correctIndex": 1,
     "explanationTh": "[Chained comparison] เฉลย: คะแนนถูกต้อง",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1585,13 +1585,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "9",
       "B",
-      "100",
-      "Dede"
+      "82",
+      "100"
     ],
     "correctIndex": 1,
     "explanationTh": "[Chained Comparison + and/or ผสมกัน] เฉลย: B",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1604,15 +1604,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nscore = 55\nattendance = 16\nif score >= 50 and attendance >= 80:\n    passed = True\nelse:\n    passed = False\nprint(passed)\n```",
     "options": [
+      "Error",
       "True",
-      "None",
       "False",
-      "Error"
+      "None"
     ],
     "correctIndex": 2,
     "explanationTh": "[and / or ผสมกัน] เฉลย: False",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1625,15 +1625,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `x` มีค่าเท่าใด\n\n```python\nx = 43\nif x > 25:\n    x = x + 5\nif x > 29:\n    x = x - 3\nprint(x)\n```",
     "options": [
-      "46",
+      "43",
       "47",
       "45",
-      "43"
+      "44"
     ],
     "correctIndex": 2,
     "explanationTh": "[if หลายก้อนแยกกัน (ไม่ใช่ elif)] เฉลย: 45",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1647,14 +1647,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = 22\nif not (x > 0):\n    result = \"ไม่เป็นบวก\"\nelse:\n    result = \"เป็นบวก\"\nprint(result)\n```",
     "options": [
       "เป็นบวก",
+      "82",
       "100",
-      "Dede",
       "9"
     ],
     "correctIndex": 0,
     "explanationTh": "[ตัวดำเนินการ not] เฉลย: เป็นบวก",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1668,14 +1668,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mn` มีค่าเท่าใด\n\n```python\na = 82\nb = 96\nc = 61\nif a <= b and a <= c:\n    mn = a\nelif b <= a and b <= c:\n    mn = b\nelse:\n    mn = c\nprint(mn)\n```",
     "options": [
       "61",
-      "59",
+      "60",
       "122",
       "62"
     ],
     "correctIndex": 0,
     "explanationTh": "[หาค่ามาก/น้อยสุดด้วย if] เฉลย: 61",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1689,14 +1689,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nn = 81\nif n % 2 == 0:\n    parity = \"คู่\"\nelse:\n    parity = \"คี่\"\nprint(parity)\n```",
     "options": [
       "9",
-      "Dede",
       "100",
+      "82",
       "คี่"
     ],
     "correctIndex": 3,
     "explanationTh": "[if / else พื้นฐาน] เฉลย: คี่",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1710,14 +1710,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nscore = 50\nif score >= 80:\n    grade = \"A\"\nelif score >= 70:\n    grade = \"B\"\nelif score >= 60:\n    grade = \"C\"\nelse:\n    grade = \"F\"\nprint(grade)\n```",
     "options": [
       "F",
-      "Dede",
       "100",
+      "82",
       "9"
     ],
     "correctIndex": 0,
     "explanationTh": "[if/elif/else หลายชั้น] เฉลย: F",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1730,15 +1730,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\na = 48\nb = 14\nif a > b:\n    if a - b > 10:\n        result = \"ต่างกันมาก\"\n    else:\n        result = \"ต่างกันนิดหน่อย\"\nelse:\n    result = \"a ไม่มากกว่า b\"\nprint(result)\n```",
     "options": [
-      "100",
+      "82",
       "9",
       "ต่างกันมาก",
-      "Dede"
+      "100"
     ],
     "correctIndex": 2,
     "explanationTh": "[Nested if] เฉลย: ต่างกันมาก",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1753,13 +1753,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "เข้าเงื่อนไข",
       "9",
-      "Dede",
-      "100"
+      "100",
+      "82"
     ],
     "correctIndex": 0,
     "explanationTh": "[Guard pattern (กันหารศูนย์)] เฉลย: เข้าเงื่อนไข",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1772,15 +1772,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nscore = 57\nif 0 <= score <= 100:\n    result = \"คะแนนถูกต้อง\"\nelse:\n    result = \"คะแนนผิดพลาด\"\nprint(result)\n```",
     "options": [
-      "Dede",
       "100",
+      "82",
       "คะแนนถูกต้อง",
       "9"
     ],
     "correctIndex": 2,
     "explanationTh": "[Chained comparison] เฉลย: คะแนนถูกต้อง",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1795,13 +1795,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "9",
       "B",
-      "Dede",
-      "100"
+      "100",
+      "82"
     ],
     "correctIndex": 1,
     "explanationTh": "[Chained Comparison + and/or ผสมกัน] เฉลย: B",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1814,15 +1814,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nscore = 22\nattendance = 39\nif score >= 50 and attendance >= 80:\n    passed = True\nelse:\n    passed = False\nprint(passed)\n```",
     "options": [
-      "True",
-      "False",
       "Error",
-      "None"
+      "False",
+      "None",
+      "True"
     ],
     "correctIndex": 1,
     "explanationTh": "[and / or ผสมกัน] เฉลย: False",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1836,14 +1836,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `x` มีค่าเท่าใด\n\n```python\nx = 50\nif x > 50:\n    x = x + 5\nif x > 40:\n    x = x + 4\nif x > 30:\n    x = x + 3\nprint(x)\n```",
     "options": [
       "57",
-      "58",
       "114",
-      "56"
+      "58",
+      "55"
     ],
     "correctIndex": 0,
     "explanationTh": "[if หลายก้อนแยกกัน (ไม่ใช่ elif)] เฉลย: 57",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1857,14 +1857,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = -4\nif not (x > 0):\n    result = \"ไม่เป็นบวก\"\nelse:\n    result = \"เป็นบวก\"\nprint(result)\n```",
     "options": [
       "9",
-      "Dede",
+      "100",
       "ไม่เป็นบวก",
-      "100"
+      "82"
     ],
     "correctIndex": 2,
     "explanationTh": "[ตัวดำเนินการ not] เฉลย: ไม่เป็นบวก",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1878,14 +1878,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mx` มีค่าเท่าใด\n\n```python\na = 28\nb = 41\nc = 58\nif a >= b and a >= c:\n    mx = a\nelif b >= a and b >= c:\n    mx = b\nelse:\n    mx = c\nprint(mx)\n```",
     "options": [
       "58",
-      "56",
-      "59",
+      "116",
+      "60",
       "57"
     ],
     "correctIndex": 0,
     "explanationTh": "[หาค่ามาก/น้อยสุดด้วย if] เฉลย: 58",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1898,15 +1898,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = 84\nif x >= 40:\n    result = \"PASS\"\nelse:\n    result = \"FAIL\"\nprint(result)\n```",
     "options": [
-      "FAIL",
-      "PASS",
       "None",
-      "Error"
+      "PASS",
+      "Error",
+      "FAIL"
     ],
     "correctIndex": 1,
     "explanationTh": "[if / else พื้นฐาน] เฉลย: PASS",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1920,14 +1920,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nscore = 66\nif score >= 80:\n    grade = \"A\"\nelif score >= 70:\n    grade = \"B\"\nelif score >= 60:\n    grade = \"C\"\nelse:\n    grade = \"F\"\nprint(grade)\n```",
     "options": [
       "C",
-      "Dede",
       "100",
+      "82",
       "9"
     ],
     "correctIndex": 0,
     "explanationTh": "[if/elif/else หลายชั้น] เฉลย: C",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1940,15 +1940,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nyear = 23\nif year % 4 == 0:\n    if year % 100 == 0:\n        result = \"หาร 100 ลงตัว\"\n    else:\n        result = \"หาร 4 ลงตัวแต่ไม่หาร 100\"\nelse:\n    result = \"หาร 4 ไม่ลงตัว\"\nprint(result)\n```",
     "options": [
-      "100",
+      "82",
       "หาร 4 ไม่ลงตัว",
-      "Dede",
+      "100",
       "9"
     ],
     "correctIndex": 1,
     "explanationTh": "[Nested if] เฉลย: หาร 4 ไม่ลงตัว",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1961,15 +1961,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = -20\nif x != 0 and (100 / x) > 5:\n    result = \"เข้าเงื่อนไข\"\nelse:\n    result = \"ไม่เข้าเงื่อนไข\"\nprint(result)\n```",
     "options": [
-      "100",
+      "82",
       "9",
       "ไม่เข้าเงื่อนไข",
-      "Dede"
+      "100"
     ],
     "correctIndex": 2,
     "explanationTh": "[Guard pattern (กันหารศูนย์)] เฉลย: ไม่เข้าเงื่อนไข",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -1984,13 +1984,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "9",
       "อยู่ในช่วง",
-      "Dede",
-      "100"
+      "100",
+      "82"
     ],
     "correctIndex": 1,
     "explanationTh": "[Chained comparison] เฉลย: อยู่ในช่วง",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2005,13 +2005,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "9",
       "B",
-      "Dede",
-      "100"
+      "100",
+      "82"
     ],
     "correctIndex": 1,
     "explanationTh": "[Chained Comparison + and/or ผสมกัน] เฉลย: B",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2024,15 +2024,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\na = 1\nb = 14\nc = 9\nd = 11\nif a > b and c > d:\n    result = 1\nelif a > b or c > d:\n    result = 2\nelse:\n    result = 3\nprint(result)\n```",
     "options": [
-      "5",
+      "2",
       "3",
-      "6",
-      "4"
+      "4",
+      "5"
     ],
     "correctIndex": 1,
     "explanationTh": "[and / or ผสมกัน] เฉลย: 3",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2045,15 +2045,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `x` มีค่าเท่าใด\n\n```python\nx = 47\nif x > 15:\n    x = x + 5\nif x > 14:\n    x = x - 3\nprint(x)\n```",
     "options": [
-      "47",
-      "48",
+      "51",
+      "50",
       "98",
       "49"
     ],
     "correctIndex": 3,
     "explanationTh": "[if หลายก้อนแยกกัน (ไม่ใช่ elif)] เฉลย: 49",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2068,13 +2068,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "ไม่หารด้วย 3 ลงตัว",
       "9",
-      "Dede",
-      "100"
+      "100",
+      "82"
     ],
     "correctIndex": 0,
     "explanationTh": "[ตัวดำเนินการ not] เฉลย: ไม่หารด้วย 3 ลงตัว",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2087,15 +2087,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mx` มีค่าเท่าใด\n\n```python\na = 88\nb = 39\nc = 96\nif a >= b and a >= c:\n    mx = a\nelif b >= a and b >= c:\n    mx = b\nelse:\n    mx = c\nprint(mx)\n```",
     "options": [
-      "95",
+      "192",
       "96",
-      "97",
-      "192"
+      "95",
+      "97"
     ],
     "correctIndex": 1,
     "explanationTh": "[หาค่ามาก/น้อยสุดด้วย if] เฉลย: 96",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2108,15 +2108,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = 2\nif x >= 59:\n    result = \"PASS\"\nelse:\n    result = \"FAIL\"\nprint(result)\n```",
     "options": [
-      "Error",
       "None",
+      "Error",
       "PASS",
       "FAIL"
     ],
     "correctIndex": 3,
     "explanationTh": "[if / else พื้นฐาน] เฉลย: FAIL",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2130,14 +2130,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nscore = 100\nif score >= 80:\n    grade = \"A\"\nelif score >= 70:\n    grade = \"B\"\nelif score >= 60:\n    grade = \"C\"\nelse:\n    grade = \"F\"\nprint(grade)\n```",
     "options": [
       "9",
+      "82",
       "100",
-      "Dede",
       "A"
     ],
     "correctIndex": 3,
     "explanationTh": "[if/elif/else หลายชั้น] เฉลย: A",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2150,15 +2150,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nyear = 76\nif year % 4 == 0:\n    if year % 100 == 0:\n        result = \"หาร 100 ลงตัว\"\n    else:\n        result = \"หาร 4 ลงตัวแต่ไม่หาร 100\"\nelse:\n    result = \"หาร 4 ไม่ลงตัว\"\nprint(result)\n```",
     "options": [
-      "Dede",
+      "100",
       "9",
       "หาร 4 ลงตัวแต่ไม่หาร 100",
-      "100"
+      "82"
     ],
     "correctIndex": 2,
     "explanationTh": "[Nested if] เฉลย: หาร 4 ลงตัวแต่ไม่หาร 100",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2179,7 +2179,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "correctIndex": 2,
     "explanationTh": "[Guard pattern (กันหารศูนย์)] เฉลย: 2.0",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2192,15 +2192,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nscore = 7\nif 0 <= score <= 100:\n    result = \"คะแนนถูกต้อง\"\nelse:\n    result = \"คะแนนผิดพลาด\"\nprint(result)\n```",
     "options": [
-      "100",
+      "82",
       "9",
       "คะแนนถูกต้อง",
-      "Dede"
+      "100"
     ],
     "correctIndex": 2,
     "explanationTh": "[Chained comparison] เฉลย: คะแนนถูกต้อง",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2213,15 +2213,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = 16\ny = -2\nif 10 < x < 30 and y > 0:\n    result = \"A\"\nelse:\n    result = \"B\"\nprint(result)\n```",
     "options": [
-      "Dede",
-      "B",
       "100",
+      "B",
+      "82",
       "9"
     ],
     "correctIndex": 1,
     "explanationTh": "[Chained Comparison + and/or ผสมกัน] เฉลย: B",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2235,14 +2235,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nscore = 28\nattendance = 23\nif score >= 50 and attendance >= 80:\n    passed = True\nelse:\n    passed = False\nprint(passed)\n```",
     "options": [
       "False",
+      "None",
       "Error",
-      "True",
-      "None"
+      "True"
     ],
     "correctIndex": 0,
     "explanationTh": "[and / or ผสมกัน] เฉลย: False",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2256,14 +2256,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `x` มีค่าเท่าใด\n\n```python\nx = 45\nif x > 30:\n    x = x + 5\nif x > 8:\n    x = x - 3\nprint(x)\n```",
     "options": [
       "47",
-      "94",
-      "46",
-      "45"
+      "48",
+      "45",
+      "49"
     ],
     "correctIndex": 0,
     "explanationTh": "[if หลายก้อนแยกกัน (ไม่ใช่ elif)] เฉลย: 47",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2276,15 +2276,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = 5\nif not (x % 3 == 0):\n    result = \"ไม่หารด้วย 3 ลงตัว\"\nelse:\n    result = \"หารด้วย 3 ลงตัว\"\nprint(result)\n```",
     "options": [
+      "82",
       "100",
-      "Dede",
       "9",
       "ไม่หารด้วย 3 ลงตัว"
     ],
     "correctIndex": 3,
     "explanationTh": "[ตัวดำเนินการ not] เฉลย: ไม่หารด้วย 3 ลงตัว",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2300,12 +2300,12 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
       "122",
       "61",
       "63",
-      "59"
+      "60"
     ],
     "correctIndex": 1,
     "explanationTh": "[หาค่ามาก/น้อยสุดด้วย if] เฉลย: 61",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2318,15 +2318,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nn = 89\nif n % 2 == 0:\n    parity = \"คู่\"\nelse:\n    parity = \"คี่\"\nprint(parity)\n```",
     "options": [
-      "Dede",
       "100",
+      "82",
       "9",
       "คี่"
     ],
     "correctIndex": 3,
     "explanationTh": "[if / else พื้นฐาน] เฉลย: คี่",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2339,15 +2339,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nscore = 93\nif score >= 80:\n    grade = \"A\"\nelif score >= 70:\n    grade = \"B\"\nelif score >= 60:\n    grade = \"C\"\nelse:\n    grade = \"F\"\nprint(grade)\n```",
     "options": [
-      "Dede",
+      "100",
       "A",
       "9",
-      "100"
+      "82"
     ],
     "correctIndex": 1,
     "explanationTh": "[if/elif/else หลายชั้น] เฉลย: A",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2361,14 +2361,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\na = 4\nb = 45\nif a > b:\n    if a - b > 10:\n        result = \"ต่างกันมาก\"\n    else:\n        result = \"ต่างกันนิดหน่อย\"\nelse:\n    result = \"a ไม่มากกว่า b\"\nprint(result)\n```",
     "options": [
       "a ไม่มากกว่า b",
-      "Dede",
+      "100",
       "9",
-      "100"
+      "82"
     ],
     "correctIndex": 0,
     "explanationTh": "[Nested if] เฉลย: a ไม่มากกว่า b",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2382,14 +2382,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = -11\nif x != 0 and (100 / x) > 5:\n    result = \"เข้าเงื่อนไข\"\nelse:\n    result = \"ไม่เข้าเงื่อนไข\"\nprint(result)\n```",
     "options": [
       "ไม่เข้าเงื่อนไข",
-      "Dede",
+      "100",
       "9",
-      "100"
+      "82"
     ],
     "correctIndex": 0,
     "explanationTh": "[Guard pattern (กันหารศูนย์)] เฉลย: ไม่เข้าเงื่อนไข",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2402,15 +2402,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = 15\nif 12 < x < 35:\n    result = \"อยู่ในช่วง\"\nelse:\n    result = \"อยู่นอกช่วง\"\nprint(result)\n```",
     "options": [
-      "Dede",
+      "100",
       "9",
       "อยู่ในช่วง",
-      "100"
+      "82"
     ],
     "correctIndex": 2,
     "explanationTh": "[Chained comparison] เฉลย: อยู่ในช่วง",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2423,15 +2423,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = 30\ny = -8\nif 10 < x < 30 or y < 0:\n    result = \"A\"\nelse:\n    result = \"B\"\nprint(result)\n```",
     "options": [
-      "Dede",
+      "100",
       "A",
       "9",
-      "100"
+      "82"
     ],
     "correctIndex": 1,
     "explanationTh": "[Chained Comparison + and/or ผสมกัน] เฉลย: A",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2444,15 +2444,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nscore = 69\nattendance = 17\nif score >= 50 and attendance >= 80:\n    passed = True\nelse:\n    passed = False\nprint(passed)\n```",
     "options": [
-      "Error",
+      "None",
       "False",
-      "True",
-      "None"
+      "Error",
+      "True"
     ],
     "correctIndex": 1,
     "explanationTh": "[and / or ผสมกัน] เฉลย: False",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2466,14 +2466,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `x` มีค่าเท่าใด\n\n```python\nx = 30\nif x > 22:\n    x = x + 5\nif x > 8:\n    x = x - 3\nprint(x)\n```",
     "options": [
       "32",
-      "64",
       "30",
-      "34"
+      "31",
+      "64"
     ],
     "correctIndex": 0,
     "explanationTh": "[if หลายก้อนแยกกัน (ไม่ใช่ elif)] เฉลย: 32",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2488,13 +2488,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "ไม่หารด้วย 3 ลงตัว",
       "9",
-      "100",
-      "Dede"
+      "82",
+      "100"
     ],
     "correctIndex": 0,
     "explanationTh": "[ตัวดำเนินการ not] เฉลย: ไม่หารด้วย 3 ลงตัว",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2509,13 +2509,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "75",
       "77",
-      "76",
+      "73",
       "74"
     ],
     "correctIndex": 0,
     "explanationTh": "[หาค่ามาก/น้อยสุดด้วย if] เฉลย: 75",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2528,15 +2528,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = 61\nif x >= 42:\n    result = \"PASS\"\nelse:\n    result = \"FAIL\"\nprint(result)\n```",
     "options": [
+      "None",
       "FAIL",
-      "Error",
       "PASS",
-      "None"
+      "Error"
     ],
     "correctIndex": 2,
     "explanationTh": "[if / else พื้นฐาน] เฉลย: PASS",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2550,14 +2550,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nscore = 11\nif score >= 80:\n    grade = \"A\"\nelif score >= 70:\n    grade = \"B\"\nelif score >= 60:\n    grade = \"C\"\nelse:\n    grade = \"F\"\nprint(grade)\n```",
     "options": [
       "9",
-      "Dede",
       "100",
+      "82",
       "F"
     ],
     "correctIndex": 3,
     "explanationTh": "[if/elif/else หลายชั้น] เฉลย: F",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2570,15 +2570,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\na = 29\nb = 2\nif a > b:\n    if a - b > 10:\n        result = \"ต่างกันมาก\"\n    else:\n        result = \"ต่างกันนิดหน่อย\"\nelse:\n    result = \"a ไม่มากกว่า b\"\nprint(result)\n```",
     "options": [
-      "Dede",
-      "ต่างกันมาก",
       "100",
+      "ต่างกันมาก",
+      "82",
       "9"
     ],
     "correctIndex": 1,
     "explanationTh": "[Nested if] เฉลย: ต่างกันมาก",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2592,14 +2592,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nnumerator = 33\ndenominator = 0\nif denominator != 0:\n    result = numerator / denominator\nelse:\n    result = 0\nprint(result)\n```",
     "options": [
       "0",
+      "-1",
       "4",
-      "2",
-      "3"
+      "1"
     ],
     "correctIndex": 0,
     "explanationTh": "[Guard pattern (กันหารศูนย์)] เฉลย: 0",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2612,15 +2612,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nscore = 22\nif 0 <= score <= 100:\n    result = \"คะแนนถูกต้อง\"\nelse:\n    result = \"คะแนนผิดพลาด\"\nprint(result)\n```",
     "options": [
-      "100",
+      "82",
       "คะแนนถูกต้อง",
-      "Dede",
+      "100",
       "9"
     ],
     "correctIndex": 1,
     "explanationTh": "[Chained comparison] เฉลย: คะแนนถูกต้อง",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2634,14 +2634,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = 6\ny = -5\nif 10 < x < 30 or y < 0:\n    result = \"A\"\nelse:\n    result = \"B\"\nprint(result)\n```",
     "options": [
       "A",
-      "Dede",
+      "100",
       "9",
-      "100"
+      "82"
     ],
     "correctIndex": 0,
     "explanationTh": "[Chained Comparison + and/or ผสมกัน] เฉลย: A",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2654,15 +2654,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nscore = 70\nattendance = 10\nif score >= 50 and attendance >= 80:\n    passed = True\nelse:\n    passed = False\nprint(passed)\n```",
     "options": [
+      "Error",
       "True",
-      "None",
       "False",
-      "Error"
+      "None"
     ],
     "correctIndex": 2,
     "explanationTh": "[and / or ผสมกัน] เฉลย: False",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2675,15 +2675,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `x` มีค่าเท่าใด\n\n```python\nx = 8\nif x > 20:\n    x = x + 2\nif x > 50:\n    x = x + 5\nif x > 10:\n    x = x + 1\nprint(x)\n```",
     "options": [
-      "6",
-      "16",
+      "10",
+      "7",
       "8",
       "9"
     ],
     "correctIndex": 2,
     "explanationTh": "[if หลายก้อนแยกกัน (ไม่ใช่ elif)] เฉลย: 8",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2697,14 +2697,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = 26\nif not (x % 3 == 0):\n    result = \"ไม่หารด้วย 3 ลงตัว\"\nelse:\n    result = \"หารด้วย 3 ลงตัว\"\nprint(result)\n```",
     "options": [
       "ไม่หารด้วย 3 ลงตัว",
-      "Dede",
+      "100",
       "9",
-      "100"
+      "82"
     ],
     "correctIndex": 0,
     "explanationTh": "[ตัวดำเนินการ not] เฉลย: ไม่หารด้วย 3 ลงตัว",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2718,14 +2718,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mx` มีค่าเท่าใด\n\n```python\na = 82\nb = 54\nc = 18\nif a >= b and a >= c:\n    mx = a\nelif b >= a and b >= c:\n    mx = b\nelse:\n    mx = c\nprint(mx)\n```",
     "options": [
       "82",
-      "80",
-      "83",
-      "164"
+      "84",
+      "81",
+      "83"
     ],
     "correctIndex": 0,
     "explanationTh": "[หาค่ามาก/น้อยสุดด้วย if] เฉลย: 82",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2738,15 +2738,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nn = 97\nif n % 2 == 0:\n    parity = \"คู่\"\nelse:\n    parity = \"คี่\"\nprint(parity)\n```",
     "options": [
-      "100",
+      "82",
       "คี่",
-      "Dede",
+      "100",
       "9"
     ],
     "correctIndex": 1,
     "explanationTh": "[if / else พื้นฐาน] เฉลย: คี่",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2761,13 +2761,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "ผู้ใหญ่",
       "9",
-      "100",
-      "Dede"
+      "82",
+      "100"
     ],
     "correctIndex": 0,
     "explanationTh": "[if/elif/else หลายชั้น] เฉลย: ผู้ใหญ่",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2782,13 +2782,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "9",
       "หาร 4 ลงตัวแต่ไม่หาร 100",
-      "100",
-      "Dede"
+      "82",
+      "100"
     ],
     "correctIndex": 1,
     "explanationTh": "[Nested if] เฉลย: หาร 4 ลงตัวแต่ไม่หาร 100",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2809,7 +2809,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "correctIndex": 3,
     "explanationTh": "[Guard pattern (กันหารศูนย์)] เฉลย: 10.75",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2822,15 +2822,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = 2\nif 12 < x < 37:\n    result = \"อยู่ในช่วง\"\nelse:\n    result = \"อยู่นอกช่วง\"\nprint(result)\n```",
     "options": [
-      "100",
+      "82",
       "9",
-      "Dede",
+      "100",
       "อยู่นอกช่วง"
     ],
     "correctIndex": 3,
     "explanationTh": "[Chained comparison] เฉลย: อยู่นอกช่วง",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2843,15 +2843,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = 22\ny = 5\nif 10 < x < 30 or y < 0:\n    result = \"A\"\nelse:\n    result = \"B\"\nprint(result)\n```",
     "options": [
+      "82",
       "100",
-      "Dede",
       "A",
       "9"
     ],
     "correctIndex": 2,
     "explanationTh": "[Chained Comparison + and/or ผสมกัน] เฉลย: A",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2864,15 +2864,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\na = 20\nb = 2\nc = 15\nd = 7\nif a > b and c > d:\n    result = 1\nelif a > b or c > d:\n    result = 2\nelse:\n    result = 3\nprint(result)\n```",
     "options": [
-      "5",
-      "0",
+      "2",
+      "3",
       "1",
-      "4"
+      "0"
     ],
     "correctIndex": 2,
     "explanationTh": "[and / or ผสมกัน] เฉลย: 1",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2887,13 +2887,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "32",
       "33",
-      "34",
-      "64"
+      "64",
+      "30"
     ],
     "correctIndex": 0,
     "explanationTh": "[if หลายก้อนแยกกัน (ไม่ใช่ elif)] เฉลย: 32",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2906,15 +2906,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "ผลลัพธ์ (output) ที่ได้จากการรันโค้ดด้านล่างคืออะไร\n\n```python\nx = 4\nif not (x % 3 == 0):\n    result = \"ไม่หารด้วย 3 ลงตัว\"\nelse:\n    result = \"หารด้วย 3 ลงตัว\"\nprint(result)\n```",
     "options": [
+      "82",
       "100",
-      "Dede",
       "ไม่หารด้วย 3 ลงตัว",
       "9"
     ],
     "correctIndex": 2,
     "explanationTh": "[ตัวดำเนินการ not] เฉลย: ไม่หารด้วย 3 ลงตัว",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2928,14 +2928,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mn` มีค่าเท่าใด\n\n```python\na = 91\nb = 51\nc = 8\nif a <= b and a <= c:\n    mn = a\nelif b <= a and b <= c:\n    mn = b\nelse:\n    mn = c\nprint(mn)\n```",
     "options": [
       "8",
-      "16",
-      "10",
-      "6"
+      "7",
+      "6",
+      "10"
     ],
     "correctIndex": 0,
     "explanationTh": "[หาค่ามาก/น้อยสุดด้วย if] เฉลย: 8",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 5,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 3,
     "bonusPoints": 100,
     "source": "LOCAL",
@@ -2948,15 +2948,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 3\nwhile i < 7:\n    print(i)\n    i += 1\n```",
     "options": [
-      "4,5,6,7",
-      "3,6",
+      "6",
+      "3,4,5,6,7",
       "3,4,5,6",
-      "2,3,4,5"
+      "3,4,5"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop นับขึ้น] เฉลย: 3,4,5,6",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -2969,15 +2969,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 6\nwhile i > 0:\n    print(i)\n    i -= 1\n```",
     "options": [
-      "6,1",
       "6,5,4,3,2",
+      "6,1",
       "6,5,4,3,2,1",
-      "7,6,5,4,3,2"
+      "6,5,4,3,2,1,2"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop นับถอยหลัง] เฉลย: 6,5,4,3,2,1",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -2991,14 +2991,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\ni = 1\ntotal = 0\nwhile i <= 8:\n    total += i\n    i += 1\nprint(total)\n```",
     "options": [
       "38",
+      "37",
       "72",
-      "35",
       "36"
     ],
     "correctIndex": 3,
     "explanationTh": "[Accumulator ด้วย while] เฉลย: 36",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3013,13 +3013,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "5,3",
       "6,4",
-      "4",
-      "6,4,5"
+      "6,4,5",
+      "6"
     ],
     "correctIndex": 1,
     "explanationTh": "[Off-by-one ในเงื่อนไข while] เฉลย: 6,4",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3032,15 +3032,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 5\nwhile i < 17:\n    print(i)\n    i += 3\n\n```",
     "options": [
-      "4,7,10,13",
-      "5,8,11,14,15",
+      "5,14",
+      "5,8,11",
       "5,8,11,14",
-      "5,14"
+      "14"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 5,8,11,14",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3053,15 +3053,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\ncount = 0\ni = 0\nwhile i < 5:\n    count = count + 2\n    i += 1\nprint(count)\n```",
     "options": [
-      "9",
+      "20",
       "10",
       "8",
-      "12"
+      "9"
     ],
     "correctIndex": 1,
     "explanationTh": "[Accumulator ไม่ print ระหว่างรอบ] เฉลย: 10",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3075,14 +3075,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `x` มีค่าเท่าใด\n\n```python\nx = 1\ni = 0\nwhile i < 3:\n    x = x * 2\n    i += 1\nprint(x)\n```",
     "options": [
       "9",
-      "6",
+      "10",
       "8",
-      "16"
+      "7"
     ],
     "correctIndex": 2,
     "explanationTh": "[Accumulator แบบคูณสะสม] เฉลย: 8",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3095,15 +3095,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `i` มีค่าเท่าใด\n\n```python\nnums = list(range(7))\ni = 0\nfound = False\nwhile i < len(nums) and not found:\n    if nums[i] == 0:\n        found = True\n    i += 1\nprint(i)\n```",
     "options": [
-      "2",
-      "3",
+      "5",
+      "4",
       "1",
-      "0"
+      "3"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop หยุดด้วยเงื่อนไขค้นหา] เฉลย: 1",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3116,15 +3116,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 1\nresult = []\nwhile i <= 6:\n    if i % 2 == 0:\n        print(i)\n    i += 1\n```",
     "options": [
-      "2,4,6,7",
+      "2,6",
       "1,3,5",
       "2,4,6",
-      "3,5,7"
+      "2,4,6,7"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop + if ข้างใน (เลขคู่)] เฉลย: 2,4,6",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3137,15 +3137,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `steps` มีค่าเท่าใด\n\n```python\ni = 3\nsteps = 0\nwhile i > 1:\n    if i % 2 == 0:\n        i = i // 2\n    else:\n        i = i * 3 + 1\n    steps += 1\nprint(steps)\n```",
     "options": [
-      "8",
       "14",
+      "5",
       "6",
       "7"
     ],
     "correctIndex": 3,
     "explanationTh": "[while loop เงื่อนไขซับซ้อน] เฉลย: 7",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3158,15 +3158,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 0\nwhile i < 3:\n    print(i)\n    i += 1\n```",
     "options": [
-      "0,1",
-      "2",
+      "1,2,3",
+      "0,2",
       "0,1,2",
-      "0,2"
+      "2"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop นับขึ้น] เฉลย: 0,1,2",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3179,15 +3179,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 7\nwhile i > 0:\n    print(i)\n    i -= 1\n```",
     "options": [
-      "7,6,5,4,3,2",
-      "8,7,6,5,4,3,2",
       "7,1",
+      "7,6,5,4,3,2,1,2",
+      "7,6,5,4,3,2",
       "7,6,5,4,3,2,1"
     ],
     "correctIndex": 3,
     "explanationTh": "[while loop นับถอยหลัง] เฉลย: 7,6,5,4,3,2,1",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3201,14 +3201,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\ni = 1\ntotal = 0\nwhile i <= 4:\n    total += i\n    i += 1\nprint(total)\n```",
     "options": [
       "10",
+      "12",
       "20",
-      "9",
       "11"
     ],
     "correctIndex": 0,
     "explanationTh": "[Accumulator ด้วย while] เฉลย: 10",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3222,14 +3222,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 1\ntotal = 0\nwhile i < 5:\n    total += i\n    i += 1\nprint(total)\nprint(i)\n```",
     "options": [
       "10,5",
-      "10,5,6",
       "5",
-      "9,4"
+      "11,6",
+      "10"
     ],
     "correctIndex": 0,
     "explanationTh": "[Off-by-one ในเงื่อนไข while] เฉลย: 10,5",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3243,14 +3243,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 4\nwhile i < 20:\n    print(i)\n    i += 4\n\n```",
     "options": [
       "4,8,12,16",
-      "16",
-      "3,7,11,15",
-      "5,9,13,17"
+      "4,8,12",
+      "4,8,12,16,17",
+      "16"
     ],
     "correctIndex": 0,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 4,8,12,16",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3265,13 +3265,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "9",
       "8",
-      "7",
-      "10"
+      "16",
+      "6"
     ],
     "correctIndex": 1,
     "explanationTh": "[Accumulator ไม่ print ระหว่างรอบ] เฉลย: 8",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3284,7 +3284,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `x` มีค่าเท่าใด\n\n```python\nx = 1\ni = 0\nwhile i < 6:\n    x = x * 2\n    i += 1\nprint(x)\n```",
     "options": [
-      "63",
+      "65",
       "66",
       "64",
       "62"
@@ -3292,7 +3292,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "correctIndex": 2,
     "explanationTh": "[Accumulator แบบคูณสะสม] เฉลย: 64",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3308,12 +3308,12 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
       "2",
       "4",
       "12",
-      "1"
+      "0"
     ],
     "correctIndex": 0,
     "explanationTh": "[while loop หยุดด้วยเงื่อนไขค้นหา] เฉลย: 2",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3326,15 +3326,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 1\nresult = []\nwhile i <= 9:\n    if i % 2 == 0:\n        print(i)\n    i += 1\n```",
     "options": [
-      "2,4,6",
-      "8",
+      "1,3,5,7",
+      "2,8",
       "2,4,6,8",
-      "2,8"
+      "2,4,6"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop + if ข้างใน (เลขคู่)] เฉลย: 2,4,6,8",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3347,15 +3347,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 0\nwhile i < 5:\n    print(i)\n    i += 1\n```",
     "options": [
-      "4",
+      "0,4",
       "0,1,2,3,4",
-      "1,2,3,4,5",
-      "0,4"
+      "0,1,2,3",
+      "0,1,2,3,4,5"
     ],
     "correctIndex": 1,
     "explanationTh": "[while loop นับขึ้น] เฉลย: 0,1,2,3,4",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3368,15 +3368,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 5\nwhile i < 25:\n    print(i)\n    i += 4\n\n```",
     "options": [
-      "5,9,13,17",
+      "21",
       "5,9,13,17,21",
-      "6,10,14,18,22",
-      "5,9,13,17,21,22"
+      "5,9,13,17,21,22",
+      "4,8,12,16,20"
     ],
     "correctIndex": 1,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 5,9,13,17,21",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3390,14 +3390,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\ncount = 0\ni = 0\nwhile i < 6:\n    count = count + 2\n    i += 1\nprint(count)\n```",
     "options": [
       "24",
-      "14",
       "13",
+      "14",
       "12"
     ],
     "correctIndex": 3,
     "explanationTh": "[Accumulator ไม่ print ระหว่างรอบ] เฉลย: 12",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3410,15 +3410,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `x` มีค่าเท่าใด\n\n```python\nx = 1\ni = 0\nwhile i < 5:\n    x = x * 2\n    i += 1\nprint(x)\n```",
     "options": [
-      "34",
+      "64",
       "33",
       "32",
-      "30"
+      "31"
     ],
     "correctIndex": 2,
     "explanationTh": "[Accumulator แบบคูณสะสม] เฉลย: 32",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3433,13 +3433,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "2",
       "12",
-      "3",
+      "1",
       "4"
     ],
     "correctIndex": 0,
     "explanationTh": "[while loop หยุดด้วยเงื่อนไขค้นหา] เฉลย: 2",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3452,15 +3452,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `steps` มีค่าเท่าใด\n\n```python\ni = 5\nsteps = 0\nwhile i > 1:\n    if i % 2 == 0:\n        i = i // 2\n    else:\n        i = i * 3 + 1\n    steps += 1\nprint(steps)\n```",
     "options": [
-      "6",
       "10",
+      "6",
       "7",
       "5"
     ],
     "correctIndex": 3,
     "explanationTh": "[while loop เงื่อนไขซับซ้อน] เฉลย: 5",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3473,15 +3473,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 1\nwhile i < 6:\n    print(i)\n    i += 1\n```",
     "options": [
-      "2,3,4,5,6",
-      "5",
+      "1,2,3,4,5,6",
       "0,1,2,3,4",
+      "1,2,3,4",
       "1,2,3,4,5"
     ],
     "correctIndex": 3,
     "explanationTh": "[while loop นับขึ้น] เฉลย: 1,2,3,4,5",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3494,15 +3494,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\ni = 1\ntotal = 0\nwhile i <= 7:\n    total += i\n    i += 1\nprint(total)\n```",
     "options": [
-      "27",
-      "56",
+      "29",
+      "26",
       "28",
-      "26"
+      "56"
     ],
     "correctIndex": 2,
     "explanationTh": "[Accumulator ด้วย while] เฉลย: 28",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3516,14 +3516,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 1\nwhile i < 16:\n    print(i)\n    i += 3\n\n```",
     "options": [
       "1,4,7,10,13",
-      "1,4,7,10,13,14",
-      "1,13",
-      "2,5,8,11,14"
+      "2,5,8,11,14",
+      "13",
+      "1,4,7,10"
     ],
     "correctIndex": 0,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 1,4,7,10,13",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3536,15 +3536,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `i` มีค่าเท่าใด\n\n```python\nnums = list(range(7))\ni = 0\nfound = False\nwhile i < len(nums) and not found:\n    if nums[i] == 2:\n        found = True\n    i += 1\nprint(i)\n```",
     "options": [
-      "2",
-      "4",
+      "1",
+      "5",
       "3",
-      "1"
+      "6"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop หยุดด้วยเงื่อนไขค้นหา] เฉลย: 3",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3557,15 +3557,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 1\nresult = []\nwhile i <= 5:\n    if i % 2 == 0:\n        print(i)\n    i += 1\n```",
     "options": [
-      "4",
+      "3,5",
       "2,4",
-      "2,4,5",
+      "2",
       "1,3"
     ],
     "correctIndex": 1,
     "explanationTh": "[while loop + if ข้างใน (เลขคู่)] เฉลย: 2,4",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3578,15 +3578,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `steps` มีค่าเท่าใด\n\n```python\ni = 2\nsteps = 0\nwhile i > 1:\n    if i % 2 == 0:\n        i = i // 2\n    else:\n        i = i * 3 + 1\n    steps += 1\nprint(steps)\n```",
     "options": [
+      "3",
       "0",
-      "4",
       "1",
-      "3"
+      "4"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop เงื่อนไขซับซ้อน] เฉลย: 1",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3600,14 +3600,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 2\nwhile i < 8:\n    print(i)\n    i += 1\n```",
     "options": [
       "2,7",
+      "7",
       "3,4,5,6,7,8",
-      "2,3,4,5,6",
       "2,3,4,5,6,7"
     ],
     "correctIndex": 3,
     "explanationTh": "[while loop นับขึ้น] เฉลย: 2,3,4,5,6,7",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3620,15 +3620,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\ncount = 0\ni = 0\nwhile i < 3:\n    count = count + 2\n    i += 1\nprint(count)\n```",
     "options": [
-      "4",
+      "5",
       "6",
       "8",
-      "12"
+      "7"
     ],
     "correctIndex": 1,
     "explanationTh": "[Accumulator ไม่ print ระหว่างรอบ] เฉลย: 6",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3641,15 +3641,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `i` มีค่าเท่าใด\n\n```python\nnums = list(range(7))\ni = 0\nfound = False\nwhile i < len(nums) and not found:\n    if nums[i] == 3:\n        found = True\n    i += 1\nprint(i)\n```",
     "options": [
-      "3",
-      "2",
       "5",
+      "6",
+      "3",
       "4"
     ],
     "correctIndex": 3,
     "explanationTh": "[while loop หยุดด้วยเงื่อนไขค้นหา] เฉลย: 4",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3662,15 +3662,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 1\nresult = []\nwhile i <= 8:\n    if i % 2 == 0:\n        print(i)\n    i += 1\n```",
     "options": [
-      "2,4,6",
+      "1,3,5,7",
       "2,4,6,8",
-      "8",
-      "2,8"
+      "2,8",
+      "2,4,6"
     ],
     "correctIndex": 1,
     "explanationTh": "[while loop + if ข้างใน (เลขคู่)] เฉลย: 2,4,6,8",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3683,15 +3683,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `steps` มีค่าเท่าใด\n\n```python\ni = 4\nsteps = 0\nwhile i > 1:\n    if i % 2 == 0:\n        i = i // 2\n    else:\n        i = i * 3 + 1\n    steps += 1\nprint(steps)\n```",
     "options": [
-      "3",
+      "1",
       "2",
-      "0",
+      "3",
       "4"
     ],
     "correctIndex": 1,
     "explanationTh": "[while loop เงื่อนไขซับซ้อน] เฉลย: 2",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3704,15 +3704,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 0\nwhile i < 4:\n    print(i)\n    i += 1\n```",
     "options": [
-      "0,1,2",
+      "1,2,3,4",
+      "3",
       "0,3",
-      "0,1,2,3,4",
       "0,1,2,3"
     ],
     "correctIndex": 3,
     "explanationTh": "[while loop นับขึ้น] เฉลย: 0,1,2,3",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3725,15 +3725,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 9\nwhile i > 0:\n    print(i)\n    i -= 1\n```",
     "options": [
-      "10,9,8,7,6,5,4,3,2",
+      "9,8,7,6,5,4,3,2,1,2",
       "9,8,7,6,5,4,3,2,1",
-      "9,1",
-      "1"
+      "8,7,6,5,4,3,2,1,0",
+      "9,1"
     ],
     "correctIndex": 1,
     "explanationTh": "[while loop นับถอยหลัง] เฉลย: 9,8,7,6,5,4,3,2,1",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3746,15 +3746,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 1\ntotal = 0\nwhile i < 6:\n    total += i\n    i += 1\nprint(total)\nprint(i)\n```",
     "options": [
+      "16,7",
+      "15,6,7",
       "14,5",
-      "15",
-      "6",
       "15,6"
     ],
     "correctIndex": 3,
     "explanationTh": "[Off-by-one ในเงื่อนไข while] เฉลย: 15,6",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3769,13 +3769,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "11",
       "5,8,11",
-      "6,9,12",
-      "5,8,11,12"
+      "4,7,10",
+      "5,11"
     ],
     "correctIndex": 1,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 5,8,11",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3788,7 +3788,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `x` มีค่าเท่าใด\n\n```python\nx = 1\ni = 0\nwhile i < 4:\n    x = x * 2\n    i += 1\nprint(x)\n```",
     "options": [
-      "17",
+      "14",
       "16",
       "18",
       "32"
@@ -3796,7 +3796,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "correctIndex": 1,
     "explanationTh": "[Accumulator แบบคูณสะสม] เฉลย: 16",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3810,14 +3810,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `i` มีค่าเท่าใด\n\n```python\nnums = list(range(5))\ni = 0\nfound = False\nwhile i < len(nums) and not found:\n    if nums[i] == 1:\n        found = True\n    i += 1\nprint(i)\n```",
     "options": [
       "2",
-      "1",
       "0",
+      "3",
       "4"
     ],
     "correctIndex": 0,
     "explanationTh": "[while loop หยุดด้วยเงื่อนไขค้นหา] เฉลย: 2",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3832,13 +3832,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "0,1,2,3,4,5",
       "0,1,2,3,4",
-      "5",
-      "1,2,3,4,5,6"
+      "1,2,3,4,5,6",
+      "0,1,2,3,4,5,6"
     ],
     "correctIndex": 0,
     "explanationTh": "[while loop นับขึ้น] เฉลย: 0,1,2,3,4,5",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3859,7 +3859,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "correctIndex": 0,
     "explanationTh": "[Off-by-one ในเงื่อนไข while] เฉลย: 21,7",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3873,14 +3873,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 2\nwhile i < 12:\n    print(i)\n    i += 2\n\n```",
     "options": [
       "1,3,5,7,9",
+      "2,10",
       "2,4,6,8,10,11",
-      "3,5,7,9,11",
       "2,4,6,8,10"
     ],
     "correctIndex": 3,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 2,4,6,8,10",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3893,15 +3893,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `i` มีค่าเท่าใด\n\n```python\nnums = list(range(6))\ni = 0\nfound = False\nwhile i < len(nums) and not found:\n    if nums[i] == 2:\n        found = True\n    i += 1\nprint(i)\n```",
     "options": [
-      "4",
-      "2",
+      "5",
+      "1",
       "3",
-      "6"
+      "4"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop หยุดด้วยเงื่อนไขค้นหา] เฉลย: 3",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3914,15 +3914,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 3\nwhile i < 8:\n    print(i)\n    i += 1\n```",
     "options": [
-      "3,4,5,6,7,8",
+      "3,7",
       "3,4,5,6,7",
-      "2,3,4,5,6",
-      "3,7"
+      "4,5,6,7,8",
+      "7"
     ],
     "correctIndex": 1,
     "explanationTh": "[while loop นับขึ้น] เฉลย: 3,4,5,6,7",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3935,15 +3935,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\ni = 1\ntotal = 0\nwhile i <= 5:\n    total += i\n    i += 1\nprint(total)\n```",
     "options": [
-      "17",
-      "15",
       "16",
-      "30"
+      "15",
+      "30",
+      "13"
     ],
     "correctIndex": 1,
     "explanationTh": "[Accumulator ด้วย while] เฉลย: 15",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3957,14 +3957,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 2\nwhile i < 17:\n    print(i)\n    i += 3\n\n```",
     "options": [
       "2,5,8,11,14",
+      "2,5,8,11,14,15",
       "14",
-      "1,4,7,10,13",
       "2,14"
     ],
     "correctIndex": 0,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 2,5,8,11,14",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3979,13 +3979,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "1,3,5",
       "2,4,6",
-      "3,5,7",
-      "2,4,6,7"
+      "2,4,6,7",
+      "2,6"
     ],
     "correctIndex": 1,
     "explanationTh": "[while loop + if ข้างใน (เลขคู่)] เฉลย: 2,4,6",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -3998,15 +3998,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 3\nwhile i < 9:\n    print(i)\n    i += 1\n```",
     "options": [
-      "4,5,6,7,8,9",
-      "8",
       "2,3,4,5,6,7",
+      "3,4,5,6,7,8,9",
+      "3,8",
       "3,4,5,6,7,8"
     ],
     "correctIndex": 3,
     "explanationTh": "[while loop นับขึ้น] เฉลย: 3,4,5,6,7,8",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4020,14 +4020,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 8\nwhile i > 0:\n    print(i)\n    i -= 1\n```",
     "options": [
       "8,7,6,5,4,3,2,1",
+      "8,1",
       "8,7,6,5,4,3,2",
-      "1",
       "7,6,5,4,3,2,1,0"
     ],
     "correctIndex": 0,
     "explanationTh": "[while loop นับถอยหลัง] เฉลย: 8,7,6,5,4,3,2,1",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4041,14 +4041,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 1\nwhile i < 13:\n    print(i)\n    i += 3\n\n```",
     "options": [
       "1,4,7,10",
-      "1,10",
-      "0,3,6,9",
-      "1,4,7,10,11"
+      "1,4,7",
+      "1,4,7,10,11",
+      "0,3,6,9"
     ],
     "correctIndex": 0,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 1,4,7,10",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4061,15 +4061,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 1\nwhile i < 7:\n    print(i)\n    i += 1\n```",
     "options": [
-      "1,6",
-      "1,2,3,4,5,6,7",
+      "2,3,4,5,6,7",
+      "0,1,2,3,4,5",
       "1,2,3,4,5,6",
-      "2,3,4,5,6,7"
+      "1,2,3,4,5,6,7"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop นับขึ้น] เฉลย: 1,2,3,4,5,6",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4083,14 +4083,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 5\nwhile i < 15:\n    print(i)\n    i += 2\n\n```",
     "options": [
       "5,13",
-      "5,7,9,11,13,14",
+      "4,6,8,10,12",
       "5,7,9,11,13",
-      "4,6,8,10,12"
+      "6,8,10,12,14"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 5,7,9,11,13",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4103,15 +4103,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\ni = 1\ntotal = 0\nwhile i <= 6:\n    total += i\n    i += 1\nprint(total)\n```",
     "options": [
-      "22",
+      "23",
       "21",
-      "20",
-      "19"
+      "19",
+      "20"
     ],
     "correctIndex": 1,
     "explanationTh": "[Accumulator ด้วย while] เฉลย: 21",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4125,14 +4125,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 0\nwhile i < 12:\n    print(i)\n    i += 3\n\n```",
     "options": [
       "0,3,6,9",
-      "0,3,6",
       "9",
-      "1,4,7,10"
+      "1,4,7,10",
+      "0,3,6,9,10"
     ],
     "correctIndex": 0,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 0,3,6,9",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4147,13 +4147,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "8",
       "4",
-      "3",
-      "5"
+      "5",
+      "3"
     ],
     "correctIndex": 1,
     "explanationTh": "[while loop หยุดด้วยเงื่อนไขค้นหา] เฉลย: 4",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4166,15 +4166,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 4\nwhile i < 14:\n    print(i)\n    i += 2\n\n```",
     "options": [
-      "4,6,8,10,12,13",
-      "3,5,7,9,11",
       "12",
+      "3,5,7,9,11",
+      "4,6,8,10,12,13",
       "4,6,8,10,12"
     ],
     "correctIndex": 3,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 4,6,8,10,12",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4187,15 +4187,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 1\nwhile i < 4:\n    print(i)\n    i += 1\n```",
     "options": [
-      "1,3",
-      "0,1,2",
       "2,3,4",
+      "1,2,3,4",
+      "3",
       "1,2,3"
     ],
     "correctIndex": 3,
     "explanationTh": "[while loop นับขึ้น] เฉลย: 1,2,3",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4208,15 +4208,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 3\nwhile i < 19:\n    print(i)\n    i += 4\n\n```",
     "options": [
-      "4,8,12,16",
-      "3,7,11",
+      "2,6,10,14",
+      "3,15",
       "3,7,11,15",
       "3,7,11,15,16"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 3,7,11,15",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4231,13 +4231,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "3,4,5",
       "2,3,4",
-      "5",
-      "3,4"
+      "3,4,5,6",
+      "3,5"
     ],
     "correctIndex": 0,
     "explanationTh": "[while loop นับขึ้น] เฉลย: 3,4,5",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4250,15 +4250,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `i` มีค่าเท่าใด\n\n```python\nnums = list(range(6))\ni = 0\nfound = False\nwhile i < len(nums) and not found:\n    if nums[i] == 0:\n        found = True\n    i += 1\nprint(i)\n```",
     "options": [
-      "2",
-      "3",
+      "5",
+      "4",
       "1",
-      "4"
+      "0"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop หยุดด้วยเงื่อนไขค้นหา] เฉลย: 1",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4271,15 +4271,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 3\nwhile i < 11:\n    print(i)\n    i += 2\n\n```",
     "options": [
+      "9",
+      "4,6,8,10",
       "3,5,7",
-      "3,9",
-      "3,5,7,9,10",
       "3,5,7,9"
     ],
     "correctIndex": 3,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 3,5,7,9",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4292,15 +4292,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `i` มีค่าเท่าใด\n\n```python\nnums = list(range(6))\ni = 0\nfound = False\nwhile i < len(nums) and not found:\n    if nums[i] == 5:\n        found = True\n    i += 1\nprint(i)\n```",
     "options": [
-      "12",
-      "6",
       "7",
-      "4"
+      "6",
+      "4",
+      "5"
     ],
     "correctIndex": 1,
     "explanationTh": "[while loop หยุดด้วยเงื่อนไขค้นหา] เฉลย: 6",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4313,15 +4313,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 10\nwhile i > 0:\n    print(i)\n    i -= 1\n```",
     "options": [
-      "9,8,7,6,5,4,3,2,1,0",
       "10,9,8,7,6,5,4,3,2,1,2",
+      "10,1",
       "10,9,8,7,6,5,4,3,2,1",
-      "10,9,8,7,6,5,4,3,2"
+      "9,8,7,6,5,4,3,2,1,0"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop นับถอยหลัง] เฉลย: 10,9,8,7,6,5,4,3,2,1",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4334,15 +4334,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 2\nwhile i < 10:\n    print(i)\n    i += 2\n\n```",
     "options": [
-      "2,4,6",
+      "1,3,5,7",
       "2,4,6,8",
-      "2,8",
-      "8"
+      "2,4,6",
+      "2,8"
     ],
     "correctIndex": 1,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 2,4,6,8",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4355,15 +4355,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 2\nwhile i < 6:\n    print(i)\n    i += 1\n```",
     "options": [
-      "5",
-      "2,3,4,5",
       "2,3,4",
-      "2,3,4,5,6"
+      "2,3,4,5",
+      "1,2,3,4",
+      "3,4,5,6"
     ],
     "correctIndex": 1,
     "explanationTh": "[while loop นับขึ้น] เฉลย: 2,3,4,5",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4376,15 +4376,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 3\nwhile i < 9:\n    print(i)\n    i += 2\n\n```",
     "options": [
-      "7",
-      "2,4,6",
+      "3,5",
+      "3,7",
       "3,5,7",
-      "3,7"
+      "7"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 3,5,7",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4397,7 +4397,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 1\ntotal = 0\nwhile i < 8:\n    total += i\n    i += 1\nprint(total)\nprint(i)\n```",
     "options": [
-      "28,8,9",
+      "29,9",
       "28,8",
       "27,7",
       "8"
@@ -4405,7 +4405,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "correctIndex": 1,
     "explanationTh": "[Off-by-one ในเงื่อนไข while] เฉลย: 28,8",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4418,15 +4418,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `i` มีค่าเท่าใด\n\n```python\nnums = list(range(5))\ni = 0\nfound = False\nwhile i < len(nums) and not found:\n    if nums[i] == 2:\n        found = True\n    i += 1\nprint(i)\n```",
     "options": [
-      "6",
-      "5",
+      "4",
+      "2",
       "3",
-      "4"
+      "5"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop หยุดด้วยเงื่อนไขค้นหา] เฉลย: 3",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4440,14 +4440,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 0\nwhile i < 6:\n    print(i)\n    i += 2\n\n```",
     "options": [
       "0,2,4",
-      "4",
-      "0,4",
-      "1,3,5"
+      "0,2",
+      "1,3,5",
+      "0,4"
     ],
     "correctIndex": 0,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 0,2,4",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4460,15 +4460,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `i` มีค่าเท่าใด\n\n```python\nnums = list(range(6))\ni = 0\nfound = False\nwhile i < len(nums) and not found:\n    if nums[i] == 4:\n        found = True\n    i += 1\nprint(i)\n```",
     "options": [
-      "4",
-      "10",
+      "3",
+      "6",
       "5",
-      "6"
+      "10"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop หยุดด้วยเงื่อนไขค้นหา] เฉลย: 5",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4482,14 +4482,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 1\nwhile i < 13:\n    print(i)\n    i += 4\n\n```",
     "options": [
       "1,5,9",
+      "0,4,8",
       "1,5,9,10",
-      "9",
-      "1,9"
+      "9"
     ],
     "correctIndex": 0,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 1,5,9",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4503,14 +4503,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `i` มีค่าเท่าใด\n\n```python\nnums = list(range(7))\ni = 0\nfound = False\nwhile i < len(nums) and not found:\n    if nums[i] == 5:\n        found = True\n    i += 1\nprint(i)\n```",
     "options": [
       "6",
+      "12",
       "5",
-      "4",
-      "12"
+      "7"
     ],
     "correctIndex": 0,
     "explanationTh": "[while loop หยุดด้วยเงื่อนไขค้นหา] เฉลย: 6",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4524,14 +4524,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `i` มีค่าเท่าใด\n\n```python\nnums = list(range(4))\ni = 0\nfound = False\nwhile i < len(nums) and not found:\n    if nums[i] == 2:\n        found = True\n    i += 1\nprint(i)\n```",
     "options": [
       "3",
-      "4",
-      "1",
-      "5"
+      "5",
+      "6",
+      "2"
     ],
     "correctIndex": 0,
     "explanationTh": "[while loop หยุดด้วยเงื่อนไขค้นหา] เฉลย: 3",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4545,14 +4545,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 5\nwhile i < 21:\n    print(i)\n    i += 4\n\n```",
     "options": [
       "5,9,13,17",
+      "5,9,13",
       "5,9,13,17,18",
-      "4,8,12,16",
       "5,17"
     ],
     "correctIndex": 0,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 5,9,13,17",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4565,15 +4565,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `i` มีค่าเท่าใด\n\n```python\nnums = list(range(5))\ni = 0\nfound = False\nwhile i < len(nums) and not found:\n    if nums[i] == 0:\n        found = True\n    i += 1\nprint(i)\n```",
     "options": [
-      "4",
-      "5",
+      "0",
+      "2",
       "1",
-      "0"
+      "3"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop หยุดด้วยเงื่อนไขค้นหา] เฉลย: 1",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4586,15 +4586,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 1\nwhile i < 5:\n    print(i)\n    i += 1\n```",
     "options": [
-      "2,3,4,5",
-      "1,2,3,4,5",
-      "4",
+      "1,4",
+      "0,1,2,3",
+      "1,2,3",
       "1,2,3,4"
     ],
     "correctIndex": 3,
     "explanationTh": "[while loop นับขึ้น] เฉลย: 1,2,3,4",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4607,15 +4607,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 3\nwhile i < 15:\n    print(i)\n    i += 4\n\n```",
     "options": [
-      "11",
       "3,7",
+      "3,7,11,12",
       "3,7,11",
-      "3,7,11,12"
+      "11"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 3,7,11",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4628,15 +4628,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `i` มีค่าเท่าใด\n\n```python\nnums = list(range(4))\ni = 0\nfound = False\nwhile i < len(nums) and not found:\n    if nums[i] == 1:\n        found = True\n    i += 1\nprint(i)\n```",
     "options": [
-      "3",
       "1",
+      "0",
       "2",
       "12"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop หยุดด้วยเงื่อนไขค้นหา] เฉลย: 2",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4649,15 +4649,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 3\nwhile i < 23:\n    print(i)\n    i += 4\n\n```",
     "options": [
-      "19",
       "3,19",
+      "4,8,12,16,20",
       "3,7,11,15,19",
       "2,6,10,14,18"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 3,7,11,15,19",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4670,15 +4670,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 1\nwhile i < 11:\n    print(i)\n    i += 2\n\n```",
     "options": [
-      "1,9",
-      "2,4,6,8,10",
+      "9",
+      "1,3,5,7",
       "1,3,5,7,9",
-      "9"
+      "1,9"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 1,3,5,7,9",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4691,15 +4691,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `i` มีค่าเท่าใด\n\n```python\nnums = list(range(7))\ni = 0\nfound = False\nwhile i < len(nums) and not found:\n    if nums[i] == 4:\n        found = True\n    i += 1\nprint(i)\n```",
     "options": [
-      "4",
       "3",
-      "6",
+      "4",
+      "10",
       "5"
     ],
     "correctIndex": 3,
     "explanationTh": "[while loop หยุดด้วยเงื่อนไขค้นหา] เฉลย: 5",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4712,15 +4712,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 2\nwhile i < 18:\n    print(i)\n    i += 4\n\n```",
     "options": [
+      "14",
+      "2,14",
       "1,5,9,13",
-      "3,7,11,15",
-      "2,6,10,14,15",
       "2,6,10,14"
     ],
     "correctIndex": 3,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 2,6,10,14",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4733,15 +4733,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `i` มีค่าเท่าใด\n\n```python\nnums = list(range(5))\ni = 0\nfound = False\nwhile i < len(nums) and not found:\n    if nums[i] == 4:\n        found = True\n    i += 1\nprint(i)\n```",
     "options": [
-      "4",
+      "3",
       "5",
-      "6",
+      "10",
       "7"
     ],
     "correctIndex": 1,
     "explanationTh": "[while loop หยุดด้วยเงื่อนไขค้นหา] เฉลย: 5",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4754,15 +4754,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `i` มีค่าเท่าใด\n\n```python\nnums = list(range(6))\ni = 0\nfound = False\nwhile i < len(nums) and not found:\n    if nums[i] == 3:\n        found = True\n    i += 1\nprint(i)\n```",
     "options": [
-      "3",
-      "4",
       "5",
-      "6"
+      "4",
+      "3",
+      "2"
     ],
     "correctIndex": 1,
     "explanationTh": "[while loop หยุดด้วยเงื่อนไขค้นหา] เฉลย: 4",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4776,14 +4776,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 3\nwhile i < 15:\n    print(i)\n    i += 3\n\n```",
     "options": [
       "3,6,9,12",
+      "3,12",
       "12",
-      "3,6,9",
-      "4,7,10,13"
+      "3,6,9,12,13"
     ],
     "correctIndex": 0,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 3,6,9,12",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4796,15 +4796,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `i` มีค่าเท่าใด\n\n```python\nnums = list(range(7))\ni = 0\nfound = False\nwhile i < len(nums) and not found:\n    if nums[i] == 6:\n        found = True\n    i += 1\nprint(i)\n```",
     "options": [
-      "14",
+      "5",
       "7",
-      "9",
+      "8",
       "6"
     ],
     "correctIndex": 1,
     "explanationTh": "[while loop หยุดด้วยเงื่อนไขค้นหา] เฉลย: 7",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4817,15 +4817,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 4\nwhile i < 12:\n    print(i)\n    i += 2\n\n```",
     "options": [
-      "5,7,9,11",
+      "10",
       "4,6,8,10",
-      "4,6,8,10,11",
+      "5,7,9,11",
       "4,10"
     ],
     "correctIndex": 1,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 4,6,8,10",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4838,15 +4838,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 4\nwhile i < 13:\n    print(i)\n    i += 3\n\n```",
     "options": [
-      "4,10",
+      "5,8,11",
       "4,7,10",
-      "3,6,9",
-      "4,7,10,11"
+      "4,7,10,11",
+      "4,10"
     ],
     "correctIndex": 1,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 4,7,10",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4860,14 +4860,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 2\nwhile i < 5:\n    print(i)\n    i += 1\n```",
     "options": [
       "2,3,4",
-      "4",
-      "2,3,4,5",
-      "3,4,5"
+      "1,2,3",
+      "3,4,5",
+      "2,4"
     ],
     "correctIndex": 0,
     "explanationTh": "[while loop นับขึ้น] เฉลย: 2,3,4",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4880,15 +4880,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 1\nwhile i < 10:\n    print(i)\n    i += 3\n\n```",
     "options": [
-      "0,3,6",
-      "2,5,8",
       "7",
+      "0,3,6",
+      "1,4,7,8",
       "1,4,7"
     ],
     "correctIndex": 3,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 1,4,7",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4903,13 +4903,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "1,5,9,13",
       "1,5,9",
-      "1,13",
-      "1,5,9,13,14"
+      "13",
+      "2,6,10,14"
     ],
     "correctIndex": 0,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 1,5,9,13",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4922,15 +4922,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `i` มีค่าเท่าใด\n\n```python\nnums = list(range(4))\ni = 0\nfound = False\nwhile i < len(nums) and not found:\n    if nums[i] == 3:\n        found = True\n    i += 1\nprint(i)\n```",
     "options": [
-      "2",
+      "6",
       "8",
       "4",
-      "5"
+      "3"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop หยุดด้วยเงื่อนไขค้นหา] เฉลย: 4",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4943,15 +4943,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 0\nwhile i < 12:\n    print(i)\n    i += 4\n\n```",
     "options": [
-      "0,4",
-      "0,8",
+      "0,4,8,9",
+      "8",
       "0,4,8",
       "1,5,9"
     ],
     "correctIndex": 2,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 0,4,8",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4964,15 +4964,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 4\nwhile i < 24:\n    print(i)\n    i += 4\n\n```",
     "options": [
+      "4,20",
       "4,8,12,16,20,21",
-      "4,8,12,16",
-      "20",
+      "5,9,13,17,21",
       "4,8,12,16,20"
     ],
     "correctIndex": 3,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 4,8,12,16,20",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -4985,15 +4985,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 3\nwhile i < 12:\n    print(i)\n    i += 3\n\n```",
     "options": [
-      "2,5,8",
-      "3,9",
-      "3,6",
+      "4,7,10",
+      "9",
+      "3,6,9,10",
       "3,6,9"
     ],
     "correctIndex": 3,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 3,6,9",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -5007,14 +5007,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 1\nwhile i < 21:\n    print(i)\n    i += 4\n\n```",
     "options": [
       "1,5,9,13,17",
-      "2,6,10,14,18",
       "1,17",
-      "0,4,8,12,16"
+      "1,5,9,13",
+      "2,6,10,14,18"
     ],
     "correctIndex": 0,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 1,5,9,13,17",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -5027,15 +5027,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ni = 2\nwhile i < 8:\n    print(i)\n    i += 2\n\n```",
     "options": [
-      "3,5,7",
-      "1,3,5",
       "2,4,6,7",
+      "1,3,5",
+      "2,6",
       "2,4,6"
     ],
     "correctIndex": 3,
     "explanationTh": "[while loop ก้าวกระโดด (step > 1)] เฉลย: 2,4,6",
     "difficulty": "MEDIUM",
-    "timeLimitSeconds": 6,
+    "timeLimitSeconds": 9,
     "rewardAmmo": 4,
     "bonusPoints": 120,
     "source": "LOCAL",
@@ -5048,15 +5048,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(3):\n    print(i)\n```",
     "options": [
-      "0,2",
       "2",
-      "0,1",
+      "0,2",
+      "1,2,3",
       "0,1,2"
     ],
     "correctIndex": 3,
     "explanationTh": "[for loop กับ range(n)] เฉลย: 0,1,2",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5069,15 +5069,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(2, 6):\n    print(i)\n```",
     "options": [
-      "2,3,4,5,6",
-      "5",
+      "3,4,5,6",
+      "2,3,4",
       "2,3,4,5",
-      "2,3,4"
+      "1,2,3,4"
     ],
     "correctIndex": 2,
     "explanationTh": "[for loop กับ range(a, b)] เฉลย: 2,3,4,5",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5090,15 +5090,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(3, 12, 3):\n    print(i)\n```",
     "options": [
-      "3,9",
-      "3,6",
+      "9",
+      "3,6,9,10",
       "3,6,9",
-      "2,5,8"
+      "4,7,10"
     ],
     "correctIndex": 2,
     "explanationTh": "[for loop กับ range(a, b, step)] เฉลย: 3,6,9",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5111,15 +5111,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\ntotal = 0\nfor i in range(1, 9 + 1):\n    total += i\nprint(total)\n```",
     "options": [
-      "44",
       "46",
+      "43",
       "47",
       "45"
     ],
     "correctIndex": 3,
     "explanationTh": "[Accumulator sum ด้วย for] เฉลย: 45",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5133,14 +5133,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `product` มีค่าเท่าใด\n\n```python\nproduct = 1\nfor i in range(1, 3 + 1):\n    product *= i\nprint(product)\n```",
     "options": [
       "8",
+      "4",
       "7",
-      "12",
       "6"
     ],
     "correctIndex": 3,
     "explanationTh": "[Accumulator product (factorial)] เฉลย: 6",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5153,15 +5153,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mx` มีค่าเท่าใด\n\n```python\nnums = [22, 14, 19, 16]\nmx = nums[0]\nfor n in nums:\n    if n > mx:\n        mx = n\nprint(mx)\n```",
     "options": [
-      "20",
-      "23",
       "21",
+      "44",
+      "24",
       "22"
     ],
     "correctIndex": 3,
     "explanationTh": "[Max pattern] เฉลย: 22",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5174,15 +5174,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mn` มีค่าเท่าใด\n\n```python\nnums = [84, 97, 43, 48]\nmn = nums[0]\nfor n in nums:\n    if n < mn:\n        mn = n\nprint(mn)\n```",
     "options": [
-      "44",
+      "86",
       "43",
       "45",
-      "42"
+      "44"
     ],
     "correctIndex": 1,
     "explanationTh": "[Min pattern] เฉลย: 43",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5195,15 +5195,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\nnums = [13, 38, 17, 26, 21]\ncount = 0\nfor n in nums:\n    if n > 34:\n        count += 1\nprint(count)\n```",
     "options": [
-      "4",
       "0",
-      "2",
+      "3",
+      "5",
       "1"
     ],
     "correctIndex": 3,
     "explanationTh": "[Count pattern] เฉลย: 1",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5216,15 +5216,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\nword = \"programming\"\ncount = 0\nfor ch in word:\n    if ch in \"aeiou\":\n        count += 1\nprint(count)\n```",
     "options": [
-      "2",
       "1",
+      "6",
       "3",
-      "5"
+      "2"
     ],
     "correctIndex": 2,
     "explanationTh": "[for loop วนตัวอักษรของ string] เฉลย: 3",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5237,15 +5237,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ntotal = 0\nfor i in range(6):\n    total += i\n    print(total)\n```",
     "options": [
-      "1,2,4,7,11,16",
       "0,1,3,6,10,15,16",
-      "15",
+      "0,1,3,6,10",
+      "1,2,4,7,11,16",
       "0,1,3,6,10,15"
     ],
     "correctIndex": 3,
     "explanationTh": "[Accumulator แบบ print ทุกรอบ] เฉลย: 0,1,3,6,10,15",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5258,15 +5258,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nresult = 0\nfor i in range(1, 6 + 1):\n    if i % 2 == 0:\n        result += i\n    else:\n        result -= i\nprint(result)\n```",
     "options": [
-      "5",
-      "6",
+      "2",
+      "4",
       "3",
-      "4"
+      "5"
     ],
     "correctIndex": 2,
     "explanationTh": "[for loop + if บวก/ลบสลับ] เฉลย: 3",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5279,15 +5279,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(4, 10):\n    print(i)\n```",
     "options": [
-      "3,4,5,6,7,8",
+      "9",
       "4,5,6,7,8,9",
-      "5,6,7,8,9,10",
+      "4,5,6,7,8",
       "4,9"
     ],
     "correctIndex": 1,
     "explanationTh": "[for loop กับ range(a, b)] เฉลย: 4,5,6,7,8,9",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5300,15 +5300,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(1, 10, 3):\n    print(i)\n```",
     "options": [
+      "1,4,7,8",
       "7",
       "0,3,6",
-      "2,5,8",
       "1,4,7"
     ],
     "correctIndex": 3,
     "explanationTh": "[for loop กับ range(a, b, step)] เฉลย: 1,4,7",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5324,12 +5324,12 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
       "34",
       "38",
       "36",
-      "37"
+      "35"
     ],
     "correctIndex": 2,
     "explanationTh": "[Accumulator sum ด้วย for] เฉลย: 36",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5345,12 +5345,12 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
       "4",
       "2",
       "12",
-      "3"
+      "1"
     ],
     "correctIndex": 1,
     "explanationTh": "[Accumulator product (factorial)] เฉลย: 2",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5364,14 +5364,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mx` มีค่าเท่าใด\n\n```python\nnums = [5, 77, 16, 21]\nmx = nums[0]\nfor n in nums:\n    if n > mx:\n        mx = n\nprint(mx)\n```",
     "options": [
       "77",
-      "76",
       "154",
-      "79"
+      "78",
+      "76"
     ],
     "correctIndex": 0,
     "explanationTh": "[Max pattern] เฉลย: 77",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5384,15 +5384,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mn` มีค่าเท่าใด\n\n```python\nnums = [72, 54, 44, 10, 45]\nmn = nums[0]\nfor n in nums:\n    if n < mn:\n        mn = n\nprint(mn)\n```",
     "options": [
-      "12",
+      "9",
       "11",
       "10",
-      "20"
+      "12"
     ],
     "correctIndex": 2,
     "explanationTh": "[Min pattern] เฉลย: 10",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5405,15 +5405,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\nnums = [7, 3, 47, 43, 30, 36]\ncount = 0\nfor n in nums:\n    if n > 30:\n        count += 1\nprint(count)\n```",
     "options": [
-      "1",
       "6",
-      "5",
+      "4",
+      "2",
       "3"
     ],
     "correctIndex": 3,
     "explanationTh": "[Count pattern] เฉลย: 3",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5427,14 +5427,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ntotal = 0\nfor i in range(5):\n    total += i\n    print(total)\n```",
     "options": [
       "0,1,3,6,10",
-      "0,1,3,6",
-      "0,10",
-      "1,2,4,7,11"
+      "10",
+      "0,1,3,6,10,11",
+      "0,10"
     ],
     "correctIndex": 0,
     "explanationTh": "[Accumulator แบบ print ทุกรอบ] เฉลย: 0,1,3,6,10",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5449,13 +5449,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "2",
       "4",
-      "1",
-      "3"
+      "0",
+      "1"
     ],
     "correctIndex": 0,
     "explanationTh": "[for loop + if บวก/ลบสลับ] เฉลย: 2",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5469,14 +5469,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(4):\n    print(i)\n```",
     "options": [
       "0,1,2,3",
-      "0,1,2,3,4",
-      "0,1,2",
-      "0,3"
+      "0,3",
+      "1,2,3,4",
+      "3"
     ],
     "correctIndex": 0,
     "explanationTh": "[for loop กับ range(n)] เฉลย: 0,1,2,3",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5489,15 +5489,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(5, 9):\n    print(i)\n```",
     "options": [
-      "5,6,7",
-      "4,5,6,7",
       "6,7,8,9",
+      "8",
+      "5,6,7,8,9",
       "5,6,7,8"
     ],
     "correctIndex": 3,
     "explanationTh": "[for loop กับ range(a, b)] เฉลย: 5,6,7,8",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5511,14 +5511,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(0, 9, 3):\n    print(i)\n```",
     "options": [
       "0,3,6,7",
-      "0,3",
+      "1,4,7",
       "0,3,6",
-      "0,6"
+      "0,3"
     ],
     "correctIndex": 2,
     "explanationTh": "[for loop กับ range(a, b, step)] เฉลย: 0,3,6",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5532,14 +5532,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\ntotal = 0\nfor i in range(1, 5 + 1):\n    total += i\nprint(total)\n```",
     "options": [
       "15",
-      "14",
       "17",
-      "13"
+      "16",
+      "14"
     ],
     "correctIndex": 0,
     "explanationTh": "[Accumulator sum ด้วย for] เฉลย: 15",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5552,15 +5552,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `product` มีค่าเท่าใด\n\n```python\nproduct = 1\nfor i in range(1, 5 + 1):\n    product *= i\nprint(product)\n```",
     "options": [
-      "122",
       "119",
-      "121",
+      "122",
+      "118",
       "120"
     ],
     "correctIndex": 3,
     "explanationTh": "[Accumulator product (factorial)] เฉลย: 120",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5574,14 +5574,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mx` มีค่าเท่าใด\n\n```python\nnums = [28, 80, 57, 11]\nmx = nums[0]\nfor n in nums:\n    if n > mx:\n        mx = n\nprint(mx)\n```",
     "options": [
       "80",
-      "81",
-      "160",
-      "78"
+      "79",
+      "82",
+      "81"
     ],
     "correctIndex": 0,
     "explanationTh": "[Max pattern] เฉลย: 80",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5595,14 +5595,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mn` มีค่าเท่าใด\n\n```python\nnums = [20, 10, 2, 17]\nmn = nums[0]\nfor n in nums:\n    if n < mn:\n        mn = n\nprint(mn)\n```",
     "options": [
       "4",
-      "3",
+      "1",
       "2",
-      "0"
+      "3"
     ],
     "correctIndex": 2,
     "explanationTh": "[Min pattern] เฉลย: 2",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5616,14 +5616,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\nnums = [8, 5, 31, 40, 36, 46]\ncount = 0\nfor n in nums:\n    if n > 28:\n        count += 1\nprint(count)\n```",
     "options": [
       "4",
-      "5",
-      "6",
-      "2"
+      "3",
+      "2",
+      "6"
     ],
     "correctIndex": 0,
     "explanationTh": "[Count pattern] เฉลย: 4",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5637,14 +5637,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\nword = \"internet\"\ncount = 0\nfor ch in word:\n    if ch in \"aeiou\":\n        count += 1\nprint(count)\n```",
     "options": [
       "3",
-      "2",
-      "6",
-      "4"
+      "1",
+      "4",
+      "5"
     ],
     "correctIndex": 0,
     "explanationTh": "[for loop วนตัวอักษรของ string] เฉลย: 3",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5657,7 +5657,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ntotal = 0\nfor i in range(7):\n    total += i\n    print(total)\n```",
     "options": [
-      "21",
+      "0,21",
       "0,1,3,6,10,15,21",
       "1,2,4,7,11,16,22",
       "0,1,3,6,10,15,21,22"
@@ -5665,7 +5665,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "correctIndex": 1,
     "explanationTh": "[Accumulator แบบ print ทุกรอบ] เฉลย: 0,1,3,6,10,15,21",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5679,14 +5679,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(6):\n    print(i)\n```",
     "options": [
       "0,1,2,3,4,5",
+      "0,1,2,3,4,5,6",
       "1,2,3,4,5,6",
-      "5",
       "0,1,2,3,4"
     ],
     "correctIndex": 0,
     "explanationTh": "[for loop กับ range(n)] เฉลย: 0,1,2,3,4,5",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5700,14 +5700,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(3, 6):\n    print(i)\n```",
     "options": [
       "3,4,5",
-      "3,4",
-      "5",
+      "3,5",
+      "3,4,5,6",
       "2,3,4"
     ],
     "correctIndex": 0,
     "explanationTh": "[for loop กับ range(a, b)] เฉลย: 3,4,5",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5720,15 +5720,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(0, 15, 3):\n    print(i)\n```",
     "options": [
+      "1,4,7,10,13",
       "0,3,6,9",
-      "12",
       "0,3,6,9,12",
-      "0,3,6,9,12,13"
+      "12"
     ],
     "correctIndex": 2,
     "explanationTh": "[for loop กับ range(a, b, step)] เฉลย: 0,3,6,9,12",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5741,15 +5741,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mx` มีค่าเท่าใด\n\n```python\nnums = [4, 33, 3, 26, 63, 58]\nmx = nums[0]\nfor n in nums:\n    if n > mx:\n        mx = n\nprint(mx)\n```",
     "options": [
+      "65",
       "126",
-      "64",
       "63",
-      "65"
+      "61"
     ],
     "correctIndex": 2,
     "explanationTh": "[Max pattern] เฉลย: 63",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5763,14 +5763,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mn` มีค่าเท่าใด\n\n```python\nnums = [12, 25, 75, 32]\nmn = nums[0]\nfor n in nums:\n    if n < mn:\n        mn = n\nprint(mn)\n```",
     "options": [
       "11",
-      "14",
+      "13",
       "12",
       "10"
     ],
     "correctIndex": 2,
     "explanationTh": "[Min pattern] เฉลย: 12",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5784,14 +5784,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\nnums = [40, 42, 20, 7, 37]\ncount = 0\nfor n in nums:\n    if n > 20:\n        count += 1\nprint(count)\n```",
     "options": [
       "3",
-      "5",
-      "6",
-      "4"
+      "2",
+      "4",
+      "5"
     ],
     "correctIndex": 0,
     "explanationTh": "[Count pattern] เฉลย: 3",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5804,15 +5804,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\nword = \"banana\"\ncount = 0\nfor ch in word:\n    if ch in \"aeiou\":\n        count += 1\nprint(count)\n```",
     "options": [
-      "6",
-      "5",
+      "4",
+      "2",
       "3",
-      "4"
+      "5"
     ],
     "correctIndex": 2,
     "explanationTh": "[for loop วนตัวอักษรของ string] เฉลย: 3",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5826,14 +5826,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\ntotal = 0\nfor i in range(4):\n    total += i\n    print(total)\n```",
     "options": [
       "0,1,3,6",
-      "1,2,4,7",
-      "0,6",
-      "0,1,3,6,7"
+      "6",
+      "0,1,3",
+      "1,2,4,7"
     ],
     "correctIndex": 0,
     "explanationTh": "[Accumulator แบบ print ทุกรอบ] เฉลย: 0,1,3,6",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5847,14 +5847,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(2, 8):\n    print(i)\n```",
     "options": [
       "2,7",
-      "3,4,5,6,7,8",
+      "7",
       "2,3,4,5,6,7",
-      "2,3,4,5,6"
+      "3,4,5,6,7,8"
     ],
     "correctIndex": 2,
     "explanationTh": "[for loop กับ range(a, b)] เฉลย: 2,3,4,5,6,7",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5867,15 +5867,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(2, 8, 2):\n    print(i)\n```",
     "options": [
-      "3,5,7",
       "2,4,6,7",
+      "2,6",
       "1,3,5",
       "2,4,6"
     ],
     "correctIndex": 3,
     "explanationTh": "[for loop กับ range(a, b, step)] เฉลย: 2,4,6",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5889,14 +5889,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\ntotal = 0\nfor i in range(1, 4 + 1):\n    total += i\nprint(total)\n```",
     "options": [
       "8",
-      "20",
       "12",
+      "9",
       "10"
     ],
     "correctIndex": 3,
     "explanationTh": "[Accumulator sum ด้วย for] เฉลย: 10",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5909,15 +5909,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mx` มีค่าเท่าใด\n\n```python\nnums = [30, 32, 76, 89]\nmx = nums[0]\nfor n in nums:\n    if n > mx:\n        mx = n\nprint(mx)\n```",
     "options": [
-      "91",
+      "88",
+      "90",
       "178",
-      "87",
       "89"
     ],
     "correctIndex": 3,
     "explanationTh": "[Max pattern] เฉลย: 89",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5930,15 +5930,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mn` มีค่าเท่าใด\n\n```python\nnums = [94, 26, 81, 7]\nmn = nums[0]\nfor n in nums:\n    if n < mn:\n        mn = n\nprint(mn)\n```",
     "options": [
-      "14",
-      "7",
       "5",
-      "9"
+      "7",
+      "9",
+      "8"
     ],
     "correctIndex": 1,
     "explanationTh": "[Min pattern] เฉลย: 7",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5952,14 +5952,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\nnums = [33, 46, 15, 33, 34, 16, 31, 13]\ncount = 0\nfor n in nums:\n    if n > 30:\n        count += 1\nprint(count)\n```",
     "options": [
       "5",
-      "3",
       "4",
-      "10"
+      "3",
+      "6"
     ],
     "correctIndex": 0,
     "explanationTh": "[Count pattern] เฉลย: 5",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5972,15 +5972,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nresult = 0\nfor i in range(1, 5 + 1):\n    if i % 2 == 0:\n        result += i\n    else:\n        result -= i\nprint(result)\n```",
     "options": [
-      "0",
-      "-2",
+      "-6",
+      "-5",
       "-3",
-      "-6"
+      "0"
     ],
     "correctIndex": 2,
     "explanationTh": "[for loop + if บวก/ลบสลับ] เฉลย: -3",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -5993,15 +5993,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(7):\n    print(i)\n```",
     "options": [
+      "0,1,2,3,4,5,6,7",
       "1,2,3,4,5,6,7",
-      "6",
-      "0,6",
+      "0,1,2,3,4,5",
       "0,1,2,3,4,5,6"
     ],
     "correctIndex": 3,
     "explanationTh": "[for loop กับ range(n)] เฉลย: 0,1,2,3,4,5,6",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6014,15 +6014,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(1, 7):\n    print(i)\n```",
     "options": [
+      "0,1,2,3,4,5",
       "1,2,3,4,5,6,7",
-      "2,3,4,5,6,7",
       "1,2,3,4,5,6",
-      "1,6"
+      "2,3,4,5,6,7"
     ],
     "correctIndex": 2,
     "explanationTh": "[for loop กับ range(a, b)] เฉลย: 1,2,3,4,5,6",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6035,15 +6035,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(1, 7, 2):\n    print(i)\n```",
     "options": [
-      "5",
-      "1,3",
+      "2,4,6",
+      "0,2,4",
       "1,3,5",
-      "2,4,6"
+      "1,3"
     ],
     "correctIndex": 2,
     "explanationTh": "[for loop กับ range(a, b, step)] เฉลย: 1,3,5",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6057,14 +6057,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\ntotal = 0\nfor i in range(1, 7 + 1):\n    total += i\nprint(total)\n```",
     "options": [
       "28",
-      "29",
       "27",
-      "56"
+      "29",
+      "26"
     ],
     "correctIndex": 0,
     "explanationTh": "[Accumulator sum ด้วย for] เฉลย: 28",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6078,14 +6078,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mx` มีค่าเท่าใด\n\n```python\nnums = [28, 49, 79, 57, 36]\nmx = nums[0]\nfor n in nums:\n    if n > mx:\n        mx = n\nprint(mx)\n```",
     "options": [
       "79",
-      "80",
-      "158",
-      "81"
+      "78",
+      "81",
+      "80"
     ],
     "correctIndex": 0,
     "explanationTh": "[Max pattern] เฉลย: 79",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6098,15 +6098,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mn` มีค่าเท่าใด\n\n```python\nnums = [66, 18, 65, 46]\nmn = nums[0]\nfor n in nums:\n    if n < mn:\n        mn = n\nprint(mn)\n```",
     "options": [
-      "16",
       "20",
+      "16",
       "18",
-      "36"
+      "17"
     ],
     "correctIndex": 2,
     "explanationTh": "[Min pattern] เฉลย: 18",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6119,15 +6119,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\nnums = [50, 38, 11, 30, 1]\ncount = 0\nfor n in nums:\n    if n > 20:\n        count += 1\nprint(count)\n```",
     "options": [
-      "5",
+      "2",
       "3",
-      "1",
-      "2"
+      "6",
+      "1"
     ],
     "correctIndex": 1,
     "explanationTh": "[Count pattern] เฉลย: 3",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6140,15 +6140,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(3, 8):\n    print(i)\n```",
     "options": [
-      "2,3,4,5,6",
-      "3,7",
+      "4,5,6,7,8",
+      "7",
       "3,4,5,6,7",
-      "3,4,5,6,7,8"
+      "3,7"
     ],
     "correctIndex": 2,
     "explanationTh": "[for loop กับ range(a, b)] เฉลย: 3,4,5,6,7",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6161,15 +6161,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(3, 13, 2):\n    print(i)\n```",
     "options": [
-      "4,6,8,10,12",
+      "11",
       "3,5,7,9,11",
-      "2,4,6,8,10",
-      "11"
+      "3,5,7,9,11,12",
+      "4,6,8,10,12"
     ],
     "correctIndex": 1,
     "explanationTh": "[for loop กับ range(a, b, step)] เฉลย: 3,5,7,9,11",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6182,7 +6182,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mx` มีค่าเท่าใด\n\n```python\nnums = [63, 16, 40, 94]\nmx = nums[0]\nfor n in nums:\n    if n > mx:\n        mx = n\nprint(mx)\n```",
     "options": [
-      "96",
+      "95",
       "93",
       "94",
       "188"
@@ -6190,7 +6190,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "correctIndex": 2,
     "explanationTh": "[Max pattern] เฉลย: 94",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6205,13 +6205,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "2",
       "12",
-      "0",
-      "1"
+      "3",
+      "0"
     ],
     "correctIndex": 0,
     "explanationTh": "[Min pattern] เฉลย: 2",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6224,15 +6224,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\nnums = [8, 16, 35, 32, 7, 24, 16]\ncount = 0\nfor n in nums:\n    if n > 17:\n        count += 1\nprint(count)\n```",
     "options": [
+      "1",
       "2",
-      "5",
       "3",
-      "4"
+      "5"
     ],
     "correctIndex": 2,
     "explanationTh": "[Count pattern] เฉลย: 3",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6245,15 +6245,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\nword = \"computer\"\ncount = 0\nfor ch in word:\n    if ch in \"aeiou\":\n        count += 1\nprint(count)\n```",
     "options": [
-      "1",
-      "4",
+      "6",
+      "5",
       "3",
-      "2"
+      "1"
     ],
     "correctIndex": 2,
     "explanationTh": "[for loop วนตัวอักษรของ string] เฉลย: 3",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6266,15 +6266,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(5):\n    print(i)\n```",
     "options": [
-      "0,4",
+      "0,1,2,3,4,5",
       "0,1,2,3,4",
-      "1,2,3,4,5",
-      "4"
+      "0,1,2,3",
+      "0,4"
     ],
     "correctIndex": 1,
     "explanationTh": "[for loop กับ range(n)] เฉลย: 0,1,2,3,4",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6287,15 +6287,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mx` มีค่าเท่าใด\n\n```python\nnums = [73, 48, 21, 14]\nmx = nums[0]\nfor n in nums:\n    if n > mx:\n        mx = n\nprint(mx)\n```",
     "options": [
-      "75",
       "71",
+      "146",
       "73",
-      "74"
+      "72"
     ],
     "correctIndex": 2,
     "explanationTh": "[Max pattern] เฉลย: 73",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6309,14 +6309,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mn` มีค่าเท่าใด\n\n```python\nnums = [42, 19, 85, 55, 39, 75]\nmn = nums[0]\nfor n in nums:\n    if n < mn:\n        mn = n\nprint(mn)\n```",
     "options": [
       "19",
+      "21",
       "18",
-      "38",
-      "20"
+      "38"
     ],
     "correctIndex": 0,
     "explanationTh": "[Min pattern] เฉลย: 19",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6330,14 +6330,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\nnums = [14, 16, 7, 34, 48, 24]\ncount = 0\nfor n in nums:\n    if n > 33:\n        count += 1\nprint(count)\n```",
     "options": [
       "2",
-      "0",
+      "3",
       "4",
-      "1"
+      "0"
     ],
     "correctIndex": 0,
     "explanationTh": "[Count pattern] เฉลย: 2",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6350,15 +6350,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(3, 7):\n    print(i)\n```",
     "options": [
-      "4,5,6,7",
-      "3,6",
-      "2,3,4,5",
+      "6",
+      "3,4,5,6,7",
+      "3,4,5",
       "3,4,5,6"
     ],
     "correctIndex": 3,
     "explanationTh": "[for loop กับ range(a, b)] เฉลย: 3,4,5,6",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6371,15 +6371,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(1, 9, 2):\n    print(i)\n```",
     "options": [
-      "7",
       "0,2,4,6",
+      "7",
       "1,3,5",
       "1,3,5,7"
     ],
     "correctIndex": 3,
     "explanationTh": "[for loop กับ range(a, b, step)] เฉลย: 1,3,5,7",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6392,15 +6392,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mx` มีค่าเท่าใด\n\n```python\nnums = [27, 9, 72, 37]\nmx = nums[0]\nfor n in nums:\n    if n > mx:\n        mx = n\nprint(mx)\n```",
     "options": [
-      "144",
+      "70",
       "73",
-      "74",
+      "144",
       "72"
     ],
     "correctIndex": 3,
     "explanationTh": "[Max pattern] เฉลย: 72",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6413,15 +6413,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mn` มีค่าเท่าใด\n\n```python\nnums = [1, 91, 38, 98]\nmn = nums[0]\nfor n in nums:\n    if n < mn:\n        mn = n\nprint(mn)\n```",
     "options": [
-      "0",
-      "2",
       "3",
+      "5",
+      "4",
       "1"
     ],
     "correctIndex": 3,
     "explanationTh": "[Min pattern] เฉลย: 1",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6435,14 +6435,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\nnums = [10, 27, 8, 39, 35]\ncount = 0\nfor n in nums:\n    if n > 22:\n        count += 1\nprint(count)\n```",
     "options": [
       "3",
-      "1",
       "6",
-      "5"
+      "4",
+      "2"
     ],
     "correctIndex": 0,
     "explanationTh": "[Count pattern] เฉลย: 3",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6455,15 +6455,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(2, 9):\n    print(i)\n```",
     "options": [
-      "1,2,3,4,5,6,7",
+      "3,4,5,6,7,8,9",
       "2,3,4,5,6,7,8",
-      "8",
-      "2,3,4,5,6,7"
+      "1,2,3,4,5,6,7",
+      "2,8"
     ],
     "correctIndex": 1,
     "explanationTh": "[for loop กับ range(a, b)] เฉลย: 2,3,4,5,6,7,8",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6476,15 +6476,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(1, 11, 2):\n    print(i)\n```",
     "options": [
-      "1,9",
-      "1,3,5,7,9",
       "9",
-      "2,4,6,8,10"
+      "1,3,5,7,9",
+      "1,9",
+      "1,3,5,7"
     ],
     "correctIndex": 1,
     "explanationTh": "[for loop กับ range(a, b, step)] เฉลย: 1,3,5,7,9",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6497,15 +6497,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `product` มีค่าเท่าใด\n\n```python\nproduct = 1\nfor i in range(1, 4 + 1):\n    product *= i\nprint(product)\n```",
     "options": [
-      "23",
       "25",
+      "48",
       "22",
       "24"
     ],
     "correctIndex": 3,
     "explanationTh": "[Accumulator product (factorial)] เฉลย: 24",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6518,15 +6518,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mx` มีค่าเท่าใด\n\n```python\nnums = [34, 56, 88, 42, 61]\nmx = nums[0]\nfor n in nums:\n    if n > mx:\n        mx = n\nprint(mx)\n```",
     "options": [
-      "90",
+      "89",
       "88",
       "87",
-      "176"
+      "90"
     ],
     "correctIndex": 1,
     "explanationTh": "[Max pattern] เฉลย: 88",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6539,15 +6539,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mn` มีค่าเท่าใด\n\n```python\nnums = [8, 82, 58, 99, 35, 80]\nmn = nums[0]\nfor n in nums:\n    if n < mn:\n        mn = n\nprint(mn)\n```",
     "options": [
-      "7",
+      "16",
       "8",
-      "10",
+      "6",
       "9"
     ],
     "correctIndex": 1,
     "explanationTh": "[Min pattern] เฉลย: 8",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6561,14 +6561,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\nnums = [26, 21, 43, 33, 44]\ncount = 0\nfor n in nums:\n    if n > 20:\n        count += 1\nprint(count)\n```",
     "options": [
       "5",
-      "6",
       "10",
+      "6",
       "7"
     ],
     "correctIndex": 0,
     "explanationTh": "[Count pattern] เฉลย: 5",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6582,14 +6582,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\nword = \"algorithm\"\ncount = 0\nfor ch in word:\n    if ch in \"aeiou\":\n        count += 1\nprint(count)\n```",
     "options": [
       "3",
+      "1",
       "2",
-      "5",
-      "1"
+      "6"
     ],
     "correctIndex": 0,
     "explanationTh": "[for loop วนตัวอักษรของ string] เฉลย: 3",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6603,14 +6603,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mx` มีค่าเท่าใด\n\n```python\nnums = [66, 25, 36, 74, 16, 97]\nmx = nums[0]\nfor n in nums:\n    if n > mx:\n        mx = n\nprint(mx)\n```",
     "options": [
       "97",
+      "194",
       "95",
-      "96",
-      "194"
+      "98"
     ],
     "correctIndex": 0,
     "explanationTh": "[Max pattern] เฉลย: 97",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6623,15 +6623,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mn` มีค่าเท่าใด\n\n```python\nnums = [36, 15, 64, 11]\nmn = nums[0]\nfor n in nums:\n    if n < mn:\n        mn = n\nprint(mn)\n```",
     "options": [
+      "13",
       "9",
-      "12",
       "11",
-      "22"
+      "12"
     ],
     "correctIndex": 2,
     "explanationTh": "[Min pattern] เฉลย: 11",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6645,14 +6645,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\nnums = [22, 44, 45, 39, 27]\ncount = 0\nfor n in nums:\n    if n > 33:\n        count += 1\nprint(count)\n```",
     "options": [
       "3",
-      "6",
-      "2",
-      "4"
+      "4",
+      "1",
+      "5"
     ],
     "correctIndex": 0,
     "explanationTh": "[Count pattern] เฉลย: 3",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6666,14 +6666,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(5, 8):\n    print(i)\n```",
     "options": [
       "5,6,7",
-      "6,7,8",
-      "5,6",
-      "5,7"
+      "5,6,7,8",
+      "7",
+      "5,6"
     ],
     "correctIndex": 0,
     "explanationTh": "[for loop กับ range(a, b)] เฉลย: 5,6,7",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6686,15 +6686,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(2, 11, 3):\n    print(i)\n```",
     "options": [
-      "8",
-      "2,5,8",
       "2,8",
-      "3,6,9"
+      "2,5,8",
+      "2,5,8,9",
+      "1,4,7"
     ],
     "correctIndex": 1,
     "explanationTh": "[for loop กับ range(a, b, step)] เฉลย: 2,5,8",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6707,15 +6707,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mx` มีค่าเท่าใด\n\n```python\nnums = [11, 98, 16, 58]\nmx = nums[0]\nfor n in nums:\n    if n > mx:\n        mx = n\nprint(mx)\n```",
     "options": [
-      "99",
+      "196",
       "98",
-      "97",
-      "96"
+      "96",
+      "100"
     ],
     "correctIndex": 1,
     "explanationTh": "[Max pattern] เฉลย: 98",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6736,7 +6736,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "correctIndex": 2,
     "explanationTh": "[Min pattern] เฉลย: 12",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6749,15 +6749,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\nnums = [7, 19, 12, 40, 38]\ncount = 0\nfor n in nums:\n    if n > 17:\n        count += 1\nprint(count)\n```",
     "options": [
-      "5",
+      "2",
       "3",
-      "4",
-      "2"
+      "5",
+      "1"
     ],
     "correctIndex": 1,
     "explanationTh": "[Count pattern] เฉลย: 3",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6772,13 +6772,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "0,28",
       "0,1,3,6,10,15,21,28",
-      "1,2,4,7,11,16,22,29",
-      "0,1,3,6,10,15,21"
+      "0,1,3,6,10,15,21,28,29",
+      "28"
     ],
     "correctIndex": 1,
     "explanationTh": "[Accumulator แบบ print ทุกรอบ] เฉลย: 0,1,3,6,10,15,21,28",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6792,14 +6792,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(0, 6, 2):\n    print(i)\n```",
     "options": [
       "0,2,4",
-      "4",
-      "1,3,5",
-      "0,4"
+      "0,2",
+      "0,4",
+      "1,3,5"
     ],
     "correctIndex": 0,
     "explanationTh": "[for loop กับ range(a, b, step)] เฉลย: 0,2,4",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6815,12 +6815,12 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
       "93",
       "92",
       "94",
-      "95"
+      "186"
     ],
     "correctIndex": 0,
     "explanationTh": "[Max pattern] เฉลย: 93",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6833,15 +6833,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mn` มีค่าเท่าใด\n\n```python\nnums = [16, 42, 31, 14, 24, 76]\nmn = nums[0]\nfor n in nums:\n    if n < mn:\n        mn = n\nprint(mn)\n```",
     "options": [
-      "16",
-      "13",
       "28",
+      "13",
+      "15",
       "14"
     ],
     "correctIndex": 3,
     "explanationTh": "[Min pattern] เฉลย: 14",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6854,15 +6854,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\nnums = [32, 32, 6, 3, 15, 45]\ncount = 0\nfor n in nums:\n    if n > 32:\n        count += 1\nprint(count)\n```",
     "options": [
+      "4",
       "3",
-      "0",
       "1",
-      "4"
+      "0"
     ],
     "correctIndex": 2,
     "explanationTh": "[Count pattern] เฉลย: 1",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6876,14 +6876,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mx` มีค่าเท่าใด\n\n```python\nnums = [26, 38, 45, 19]\nmx = nums[0]\nfor n in nums:\n    if n > mx:\n        mx = n\nprint(mx)\n```",
     "options": [
       "90",
-      "43",
       "44",
+      "46",
       "45"
     ],
     "correctIndex": 3,
     "explanationTh": "[Max pattern] เฉลย: 45",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6896,15 +6896,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mn` มีค่าเท่าใด\n\n```python\nnums = [13, 74, 20, 78, 31, 94]\nmn = nums[0]\nfor n in nums:\n    if n < mn:\n        mn = n\nprint(mn)\n```",
     "options": [
-      "12",
+      "11",
       "13",
       "26",
-      "14"
+      "15"
     ],
     "correctIndex": 1,
     "explanationTh": "[Min pattern] เฉลย: 13",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6917,15 +6917,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\nnums = [28, 35, 48, 32, 46, 39]\ncount = 0\nfor n in nums:\n    if n > 27:\n        count += 1\nprint(count)\n```",
     "options": [
-      "12",
       "7",
+      "4",
       "6",
-      "5"
+      "12"
     ],
     "correctIndex": 2,
     "explanationTh": "[Count pattern] เฉลย: 6",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6939,14 +6939,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(4, 7):\n    print(i)\n```",
     "options": [
       "4,5,6",
+      "4,5",
       "4,6",
-      "4,5,6,7",
-      "5,6,7"
+      "3,4,5"
     ],
     "correctIndex": 0,
     "explanationTh": "[for loop กับ range(a, b)] เฉลย: 4,5,6",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6959,15 +6959,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mx` มีค่าเท่าใด\n\n```python\nnums = [52, 30, 86, 24, 35]\nmx = nums[0]\nfor n in nums:\n    if n > mx:\n        mx = n\nprint(mx)\n```",
     "options": [
-      "172",
-      "84",
+      "85",
+      "87",
       "86",
-      "87"
+      "84"
     ],
     "correctIndex": 2,
     "explanationTh": "[Max pattern] เฉลย: 86",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -6980,15 +6980,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mn` มีค่าเท่าใด\n\n```python\nnums = [64, 37, 91, 46, 13, 3]\nmn = nums[0]\nfor n in nums:\n    if n < mn:\n        mn = n\nprint(mn)\n```",
     "options": [
-      "4",
-      "2",
+      "5",
+      "1",
       "3",
-      "5"
+      "2"
     ],
     "correctIndex": 2,
     "explanationTh": "[Min pattern] เฉลย: 3",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -7001,15 +7001,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\nnums = [26, 22, 8, 28, 42, 22]\ncount = 0\nfor n in nums:\n    if n > 16:\n        count += 1\nprint(count)\n```",
     "options": [
-      "6",
-      "4",
+      "10",
+      "3",
       "5",
       "7"
     ],
     "correctIndex": 2,
     "explanationTh": "[Count pattern] เฉลย: 5",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -7022,15 +7022,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(3, 10):\n    print(i)\n```",
     "options": [
-      "3,4,5,6,7,8",
       "3,4,5,6,7,8,9,10",
+      "9",
       "3,4,5,6,7,8,9",
-      "2,3,4,5,6,7,8"
+      "3,4,5,6,7,8"
     ],
     "correctIndex": 2,
     "explanationTh": "[for loop กับ range(a, b)] เฉลย: 3,4,5,6,7,8,9",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -7044,14 +7044,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(0, 10, 2):\n    print(i)\n```",
     "options": [
       "0,2,4,6,8",
+      "8",
       "0,2,4,6",
-      "0,2,4,6,8,9",
-      "0,8"
+      "1,3,5,7,9"
     ],
     "correctIndex": 0,
     "explanationTh": "[for loop กับ range(a, b, step)] เฉลย: 0,2,4,6,8",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -7064,15 +7064,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mx` มีค่าเท่าใด\n\n```python\nnums = [73, 36, 46, 60, 37]\nmx = nums[0]\nfor n in nums:\n    if n > mx:\n        mx = n\nprint(mx)\n```",
     "options": [
-      "74",
-      "73",
       "72",
-      "146"
+      "73",
+      "74",
+      "75"
     ],
     "correctIndex": 1,
     "explanationTh": "[Max pattern] เฉลย: 73",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -7085,15 +7085,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `mn` มีค่าเท่าใด\n\n```python\nnums = [19, 16, 18, 4]\nmn = nums[0]\nfor n in nums:\n    if n < mn:\n        mn = n\nprint(mn)\n```",
     "options": [
-      "6",
+      "2",
       "4",
-      "5",
-      "3"
+      "3",
+      "5"
     ],
     "correctIndex": 1,
     "explanationTh": "[Min pattern] เฉลย: 4",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -7106,15 +7106,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `count` มีค่าเท่าใด\n\n```python\nnums = [35, 14, 35, 39, 5, 25, 24]\ncount = 0\nfor n in nums:\n    if n > 28:\n        count += 1\nprint(count)\n```",
     "options": [
-      "1",
+      "6",
       "3",
-      "2",
-      "5"
+      "1",
+      "2"
     ],
     "correctIndex": 1,
     "explanationTh": "[Count pattern] เฉลย: 3",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -7128,14 +7128,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(1, 5):\n    print(i)\n```",
     "options": [
       "1,2,3,4",
-      "2,3,4,5",
-      "1,2,3,4,5",
-      "4"
+      "1,4",
+      "0,1,2,3",
+      "1,2,3"
     ],
     "correctIndex": 0,
     "explanationTh": "[for loop กับ range(a, b)] เฉลย: 1,2,3,4",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 4,
     "bonusPoints": 130,
     "source": "LOCAL",
@@ -7148,15 +7148,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `found` มีค่าเท่าใด\n\n```python\nnums = [38, 51, 7, 1, 20, 34, 50]\ntarget = 34\nfound = False\nfor n in nums:\n    if n == target:\n        found = True\nprint(found)\n```",
     "options": [
-      "False",
+      "Error",
       "True",
-      "None",
-      "Error"
+      "False",
+      "None"
     ],
     "correctIndex": 1,
     "explanationTh": "[Search/Flag pattern] เฉลย: True",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7169,15 +7169,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [11, 23, 11, 49, 10, 7, 43]\nresult = []\nfor n in nums:\n    if n > 27:\n        result.append(n)\nprint(result)\n```",
     "options": [
-      "[43, 49]",
+      "[49]",
       "2",
-      "[49, 44]",
+      "(49, 43)",
       "[49, 43]"
     ],
     "correctIndex": 3,
     "explanationTh": "[Filter pattern] เฉลย: [49, 43]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7192,13 +7192,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "0 0,0 1,1 0,1 1,2 0,2 1",
       "9",
-      "Dede",
-      "100"
+      "100",
+      "82"
     ],
     "correctIndex": 0,
     "explanationTh": "[Nested loop พื้นฐาน] เฉลย: 0 0,0 1,1 0,1 1,2 0,2 1",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7211,15 +7211,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\ntotal = 0\nfor i in range(1, 4 + 1):\n    for j in range(1, 4 + 1):\n        total += i * j\nprint(total)\n```",
     "options": [
-      "200",
+      "102",
       "101",
       "100",
-      "102"
+      "200"
     ],
     "correctIndex": 2,
     "explanationTh": "[Nested loop + accumulator] เฉลย: 100",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7232,15 +7232,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [13, 15, 16, 8, 6, 20, 10]\nresult = []\nfor n in nums:\n    if n > 12:\n        continue\n    result.append(n)\nprint(result)\n```",
     "options": [
+      "3",
+      "[8, 6]",
       "(8, 6, 10)",
-      "[10, 6, 8]",
-      "[8, 6, 11]",
       "[8, 6, 10]"
     ],
     "correctIndex": 3,
     "explanationTh": "[for loop + continue] เฉลย: [8, 6, 10]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7254,14 +7254,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [21, 40, 8, 23, 47, 49]\nresult = []\nfor n in nums:\n    if n == 49:\n        break\n    result.append(n)\nprint(result)\n```",
     "options": [
       "[21, 40, 8, 23, 47]",
-      "[47, 23, 8, 40, 21]",
+      "[21, 40, 8, 23, 48]",
       "(21, 40, 8, 23, 47)",
-      "5"
+      "[21, 40, 8, 23]"
     ],
     "correctIndex": 0,
     "explanationTh": "[for loop + break] เฉลย: [21, 40, 8, 23, 47]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7274,15 +7274,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `idx` มีค่าเท่าใด\n\n```python\nnums = [54, 53, 48, 26, 35, 33]\ntarget = 35\nidx = -1\nfor i in range(len(nums)):\n    if nums[i] == target:\n        idx = i\n        break\nprint(idx)\n```",
     "options": [
-      "3",
-      "2",
+      "5",
+      "6",
       "4",
-      "5"
+      "3"
     ],
     "correctIndex": 2,
     "explanationTh": "[Search index pattern (แรกที่เจอ)] เฉลย: 4",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7295,15 +7295,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `rows` มีค่าเท่าใด\n\n```python\nrows = []\nfor i in range(1, 4 + 1):\n    row_sum = 0\n    for j in range(1, i + 1):\n        row_sum += j\n    rows.append(row_sum)\nprint(rows)\n```",
     "options": [
-      "[1, 3, 6]",
-      "(1, 3, 6, 10)",
+      "[10, 6, 3, 1]",
+      "[1, 3, 6, 11]",
       "[1, 3, 6, 10]",
-      "[1, 3, 6, 11]"
+      "[1, 3, 6]"
     ],
     "correctIndex": 2,
     "explanationTh": "[Nested loop จำนวนรอบไม่คงที่] เฉลย: [1, 3, 6, 10]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7316,15 +7316,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\nmatrix = [[9, 7, 5], [9, 2, 7], [6, 5, 5]]\ntotal = 0\nfor row in matrix:\n    for val in row:\n        total += val\nprint(total)\n```",
     "options": [
-      "110",
-      "54",
+      "56",
+      "53",
       "55",
-      "56"
+      "57"
     ],
     "correctIndex": 2,
     "explanationTh": "[Nested loop กับ list ซ้อน list] เฉลย: 55",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7337,15 +7337,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `found` มีค่าเท่าใด\n\n```python\nnums = [36, 13, 14, 4, 40]\ntarget = 14\nfound = False\nfor n in nums:\n    if n == target:\n        found = True\nprint(found)\n```",
     "options": [
-      "False",
-      "True",
       "Error",
-      "None"
+      "True",
+      "None",
+      "False"
     ],
     "correctIndex": 1,
     "explanationTh": "[Search/Flag pattern] เฉลย: True",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7358,15 +7358,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [29, 50, 38, 33, 11, 43, 3, 5]\nresult = []\nfor n in nums:\n    if n > 35:\n        result.append(n)\nprint(result)\n```",
     "options": [
-      "(50, 38, 43)",
-      "[43, 38, 50]",
+      "[50, 38, 44]",
+      "[50, 38]",
       "[50, 38, 43]",
-      "[50, 38, 44]"
+      "3"
     ],
     "correctIndex": 2,
     "explanationTh": "[Filter pattern] เฉลย: [50, 38, 43]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7379,15 +7379,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(2):\n    for j in range(3):\n        print(i, j)\n```",
     "options": [
-      "100",
+      "82",
       "0 0,0 1,0 2,1 0,1 1,1 2",
       "9",
-      "Dede"
+      "100"
     ],
     "correctIndex": 1,
     "explanationTh": "[Nested loop พื้นฐาน] เฉลย: 0 0,0 1,0 2,1 0,1 1,1 2",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7401,14 +7401,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [8, 12, 14, 10, 3, 4]\nresult = []\nfor n in nums:\n    if n > 9:\n        continue\n    result.append(n)\nprint(result)\n```",
     "options": [
       "[8, 3, 4]",
-      "[4, 3, 8]",
       "(8, 3, 4)",
-      "[8, 3, 5]"
+      "3",
+      "[4, 3, 8]"
     ],
     "correctIndex": 0,
     "explanationTh": "[for loop + continue] เฉลย: [8, 3, 4]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7424,12 +7424,12 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
       "[40, 28, 11]",
       "[11, 28, 40]",
       "(11, 28, 40)",
-      "[11, 28, 41]"
+      "3"
     ],
     "correctIndex": 1,
     "explanationTh": "[for loop + break] เฉลย: [11, 28, 40]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7442,15 +7442,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `idx` มีค่าเท่าใด\n\n```python\nnums = [49, 8, 56, 24, 12, 45]\ntarget = 12\nidx = -1\nfor i in range(len(nums)):\n    if nums[i] == target:\n        idx = i\n        break\nprint(idx)\n```",
     "options": [
-      "5",
-      "6",
+      "3",
+      "2",
       "4",
-      "3"
+      "5"
     ],
     "correctIndex": 2,
     "explanationTh": "[Search index pattern (แรกที่เจอ)] เฉลย: 4",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7464,14 +7464,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `rows` มีค่าเท่าใด\n\n```python\nrows = []\nfor i in range(1, 3 + 1):\n    row_sum = 0\n    for j in range(1, i + 1):\n        row_sum += j\n    rows.append(row_sum)\nprint(rows)\n```",
     "options": [
       "[1, 3, 6]",
-      "(1, 3, 6)",
-      "[6, 3, 1]",
-      "[1, 3, 7]"
+      "3",
+      "[1, 3, 7]",
+      "(1, 3, 6)"
     ],
     "correctIndex": 0,
     "explanationTh": "[Nested loop จำนวนรอบไม่คงที่] เฉลย: [1, 3, 6]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7485,14 +7485,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\nmatrix = [[5, 5, 2], [8, 9, 9], [8, 1, 3]]\ntotal = 0\nfor row in matrix:\n    for val in row:\n        total += val\nprint(total)\n```",
     "options": [
       "48",
-      "51",
+      "49",
       "50",
-      "52"
+      "51"
     ],
     "correctIndex": 2,
     "explanationTh": "[Nested loop กับ list ซ้อน list] เฉลย: 50",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7505,15 +7505,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `found` มีค่าเท่าใด\n\n```python\nnums = [23, 24, 1, 13, 21, 42, 25]\ntarget = 24\nfound = False\nfor n in nums:\n    if n == target:\n        found = True\nprint(found)\n```",
     "options": [
-      "Error",
       "None",
+      "False",
       "True",
-      "False"
+      "Error"
     ],
     "correctIndex": 2,
     "explanationTh": "[Search/Flag pattern] เฉลย: True",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7526,15 +7526,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [16, 17, 6, 18, 5, 50]\nresult = []\nfor n in nums:\n    if n > 21:\n        result.append(n)\nprint(result)\n```",
     "options": [
-      "[51]",
+      "[]",
       "(50,)",
       "[50]",
-      "[]"
+      "[51]"
     ],
     "correctIndex": 2,
     "explanationTh": "[Filter pattern] เฉลย: [50]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7548,14 +7548,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(2):\n    for j in range(2):\n        print(i, j)\n```",
     "options": [
       "9",
-      "Dede",
       "100",
+      "82",
       "0 0,0 1,1 0,1 1"
     ],
     "correctIndex": 3,
     "explanationTh": "[Nested loop พื้นฐาน] เฉลย: 0 0,0 1,1 0,1 1",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7569,14 +7569,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\ntotal = 0\nfor i in range(1, 3 + 1):\n    for j in range(1, 3 + 1):\n        total += i * j\nprint(total)\n```",
     "options": [
       "36",
-      "37",
       "35",
+      "72",
       "38"
     ],
     "correctIndex": 0,
     "explanationTh": "[Nested loop + accumulator] เฉลย: 36",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7590,14 +7590,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [3, 11, 15, 15, 16, 16]\nresult = []\nfor n in nums:\n    if n > 10:\n        continue\n    result.append(n)\nprint(result)\n```",
     "options": [
       "(3,)",
-      "[4]",
+      "[]",
       "[3]",
-      "[]"
+      "[4]"
     ],
     "correctIndex": 2,
     "explanationTh": "[for loop + continue] เฉลย: [3]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7613,12 +7613,12 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
       "[1, 2, 41]",
       "[1, 2, 42]",
       "[1, 2]",
-      "[41, 2, 1]"
+      "3"
     ],
     "correctIndex": 0,
     "explanationTh": "[for loop + break] เฉลย: [1, 2, 41]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7631,15 +7631,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `idx` มีค่าเท่าใด\n\n```python\nnums = [45, 2, 24, 14, 25]\ntarget = 25\nidx = -1\nfor i in range(len(nums)):\n    if nums[i] == target:\n        idx = i\n        break\nprint(idx)\n```",
     "options": [
-      "6",
-      "4",
       "2",
+      "4",
+      "6",
       "8"
     ],
     "correctIndex": 1,
     "explanationTh": "[Search index pattern (แรกที่เจอ)] เฉลย: 4",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7652,15 +7652,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\nmatrix = [[7, 2, 9], [8, 8, 9], [2, 7, 1]]\ntotal = 0\nfor row in matrix:\n    for val in row:\n        total += val\nprint(total)\n```",
     "options": [
-      "106",
+      "52",
       "55",
-      "54",
+      "51",
       "53"
     ],
     "correctIndex": 3,
     "explanationTh": "[Nested loop กับ list ซ้อน list] เฉลย: 53",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7673,15 +7673,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `found` มีค่าเท่าใด\n\n```python\nnums = [45, 1, 7, 34, 35, 37]\ntarget = 37\nfound = False\nfor n in nums:\n    if n == target:\n        found = True\nprint(found)\n```",
     "options": [
-      "False",
+      "Error",
       "True",
-      "None",
-      "Error"
+      "False",
+      "None"
     ],
     "correctIndex": 1,
     "explanationTh": "[Search/Flag pattern] เฉลย: True",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7696,13 +7696,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "[31, 32, 28, 33]",
       "4",
-      "(31, 32, 28, 33)",
+      "[31, 32, 28]",
       "[33, 28, 32, 31]"
     ],
     "correctIndex": 0,
     "explanationTh": "[Filter pattern] เฉลย: [31, 32, 28, 33]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7715,15 +7715,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(4):\n    for j in range(3):\n        print(i, j)\n```",
     "options": [
-      "100",
+      "82",
       "9",
-      "Dede",
+      "100",
       "0 0,0 1,0 2,1 0,1 1,1 2,2 0,2 1,2 2,3 0,3 1,3 2"
     ],
     "correctIndex": 3,
     "explanationTh": "[Nested loop พื้นฐาน] เฉลย: 0 0,0 1,0 2,1 0,1 1,1 2,2 0,2 1,2 2,3 0,3 1,3 2",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7736,15 +7736,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [16, 17, 6, 18, 9]\nresult = []\nfor n in nums:\n    if n > 11:\n        continue\n    result.append(n)\nprint(result)\n```",
     "options": [
-      "(6, 9)",
+      "[9, 6]",
       "[6, 9]",
-      "[6, 10]",
-      "[9, 6]"
+      "[6]",
+      "2"
     ],
     "correctIndex": 1,
     "explanationTh": "[for loop + continue] เฉลย: [6, 9]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7758,14 +7758,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [23, 19, 22, 2, 22, 14, 31, 17, 38]\nresult = []\nfor n in nums:\n    if n == 31:\n        break\n    result.append(n)\nprint(result)\n```",
     "options": [
       "[23, 19, 22, 2, 22, 14]",
+      "(23, 19, 22, 2, 22, 14)",
       "[23, 19, 22, 2, 22, 15]",
-      "[14, 22, 2, 22, 19, 23]",
-      "(23, 19, 22, 2, 22, 14)"
+      "6"
     ],
     "correctIndex": 0,
     "explanationTh": "[for loop + break] เฉลย: [23, 19, 22, 2, 22, 14]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7778,15 +7778,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `idx` มีค่าเท่าใด\n\n```python\nnums = [30, 54, 27, 34, 21, 55, 5, 40]\ntarget = 30\nidx = -1\nfor i in range(len(nums)):\n    if nums[i] == target:\n        idx = i\n        break\nprint(idx)\n```",
     "options": [
-      "1",
-      "-1",
       "3",
+      "2",
+      "1",
       "0"
     ],
     "correctIndex": 3,
     "explanationTh": "[Search index pattern (แรกที่เจอ)] เฉลย: 0",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7800,14 +7800,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\nmatrix = [[2, 5, 7], [7, 8, 8], [5, 7, 6]]\ntotal = 0\nfor row in matrix:\n    for val in row:\n        total += val\nprint(total)\n```",
     "options": [
       "55",
-      "56",
-      "53",
-      "110"
+      "57",
+      "110",
+      "56"
     ],
     "correctIndex": 0,
     "explanationTh": "[Nested loop กับ list ซ้อน list] เฉลย: 55",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7821,14 +7821,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `found` มีค่าเท่าใด\n\n```python\nnums = [9, 52, 57, 29, 12, 18, 21, 28]\ntarget = 52\nfound = False\nfor n in nums:\n    if n == target:\n        found = True\nprint(found)\n```",
     "options": [
       "True",
+      "Error",
       "False",
-      "None",
-      "Error"
+      "None"
     ],
     "correctIndex": 0,
     "explanationTh": "[Search/Flag pattern] เฉลย: True",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7849,7 +7849,7 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "correctIndex": 1,
     "explanationTh": "[Filter pattern] เฉลย: [18, 26, 46, 39, 37]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7863,14 +7863,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(4):\n    for j in range(2):\n        print(i, j)\n```",
     "options": [
       "9",
-      "Dede",
       "100",
+      "82",
       "0 0,0 1,1 0,1 1,2 0,2 1,3 0,3 1"
     ],
     "correctIndex": 3,
     "explanationTh": "[Nested loop พื้นฐาน] เฉลย: 0 0,0 1,1 0,1 1,2 0,2 1,3 0,3 1",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7883,15 +7883,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [4, 2, 15, 2, 2, 11]\nresult = []\nfor n in nums:\n    if n > 15:\n        continue\n    result.append(n)\nprint(result)\n```",
     "options": [
-      "(4, 2, 15, 2, 2, 11)",
-      "6",
+      "[11, 2, 2, 15, 2, 4]",
+      "[4, 2, 15, 2, 2, 12]",
       "[4, 2, 15, 2, 2]",
       "[4, 2, 15, 2, 2, 11]"
     ],
     "correctIndex": 3,
     "explanationTh": "[for loop + continue] เฉลย: [4, 2, 15, 2, 2, 11]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7904,15 +7904,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [4, 20, 12, 22, 12, 12, 47, 49, 1]\nresult = []\nfor n in nums:\n    if n == 1:\n        break\n    result.append(n)\nprint(result)\n```",
     "options": [
-      "[4, 20, 12, 22, 12, 12, 47]",
-      "[4, 20, 12, 22, 12, 12, 47, 50]",
       "8",
+      "[4, 20, 12, 22, 12, 12, 47, 50]",
+      "[4, 20, 12, 22, 12, 12, 47]",
       "[4, 20, 12, 22, 12, 12, 47, 49]"
     ],
     "correctIndex": 3,
     "explanationTh": "[for loop + break] เฉลย: [4, 20, 12, 22, 12, 12, 47, 49]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7925,15 +7925,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `idx` มีค่าเท่าใด\n\n```python\nnums = [46, 29, 19, 14, 42, 21, 35, 37]\ntarget = 42\nidx = -1\nfor i in range(len(nums)):\n    if nums[i] == target:\n        idx = i\n        break\nprint(idx)\n```",
     "options": [
-      "2",
-      "5",
+      "6",
+      "3",
       "8",
       "4"
     ],
     "correctIndex": 3,
     "explanationTh": "[Search index pattern (แรกที่เจอ)] เฉลย: 4",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7946,15 +7946,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\nmatrix = [[8, 3, 7], [7, 8, 6], [6, 4, 6]]\ntotal = 0\nfor row in matrix:\n    for val in row:\n        total += val\nprint(total)\n```",
     "options": [
-      "54",
-      "56",
+      "53",
+      "57",
       "55",
-      "57"
+      "54"
     ],
     "correctIndex": 2,
     "explanationTh": "[Nested loop กับ list ซ้อน list] เฉลย: 55",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7968,14 +7968,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `found` มีค่าเท่าใด\n\n```python\nnums = [52, 9, 22, 58, 26, 21]\ntarget = 52\nfound = False\nfor n in nums:\n    if n == target:\n        found = True\nprint(found)\n```",
     "options": [
       "True",
+      "None",
       "Error",
-      "False",
-      "None"
+      "False"
     ],
     "correctIndex": 0,
     "explanationTh": "[Search/Flag pattern] เฉลย: True",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -7988,15 +7988,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [12, 36, 25, 26, 19, 27, 13, 45]\nresult = []\nfor n in nums:\n    if n > 34:\n        result.append(n)\nprint(result)\n```",
     "options": [
-      "2",
-      "[36, 46]",
+      "[45, 36]",
+      "[36]",
       "[36, 45]",
-      "[45, 36]"
+      "[36, 46]"
     ],
     "correctIndex": 2,
     "explanationTh": "[Filter pattern] เฉลย: [36, 45]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8009,15 +8009,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [7, 4, 19, 17, 3, 10, 12]\nresult = []\nfor n in nums:\n    if n > 9:\n        continue\n    result.append(n)\nprint(result)\n```",
     "options": [
+      "3",
       "[7, 4]",
       "[7, 4, 4]",
-      "[3, 4, 7]",
       "[7, 4, 3]"
     ],
     "correctIndex": 3,
     "explanationTh": "[for loop + continue] เฉลย: [7, 4, 3]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8031,14 +8031,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [6, 21, 40, 39, 3, 38]\nresult = []\nfor n in nums:\n    if n == 21:\n        break\n    result.append(n)\nprint(result)\n```",
     "options": [
       "[6]",
-      "[]",
       "(6,)",
+      "[]",
       "[7]"
     ],
     "correctIndex": 0,
     "explanationTh": "[for loop + break] เฉลย: [6]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8051,15 +8051,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `idx` มีค่าเท่าใด\n\n```python\nnums = [32, 13, 7, 41, 11, 33]\ntarget = 41\nidx = -1\nfor i in range(len(nums)):\n    if nums[i] == target:\n        idx = i\n        break\nprint(idx)\n```",
     "options": [
-      "2",
-      "3",
       "1",
-      "5"
+      "3",
+      "6",
+      "2"
     ],
     "correctIndex": 1,
     "explanationTh": "[Search index pattern (แรกที่เจอ)] เฉลย: 3",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8073,14 +8073,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\nmatrix = [[7, 9, 3], [3, 9, 9], [5, 2, 9]]\ntotal = 0\nfor row in matrix:\n    for val in row:\n        total += val\nprint(total)\n```",
     "options": [
       "56",
-      "54",
-      "57",
-      "112"
+      "55",
+      "112",
+      "58"
     ],
     "correctIndex": 0,
     "explanationTh": "[Nested loop กับ list ซ้อน list] เฉลย: 56",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8093,15 +8093,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `found` มีค่าเท่าใด\n\n```python\nnums = [30, 14, 28, 54, 16, 13, 22, 40]\ntarget = 22\nfound = False\nfor n in nums:\n    if n == target:\n        found = True\nprint(found)\n```",
     "options": [
+      "False",
       "None",
-      "Error",
       "True",
-      "False"
+      "Error"
     ],
     "correctIndex": 2,
     "explanationTh": "[Search/Flag pattern] เฉลย: True",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8116,13 +8116,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "[35, 41, 33, 47]",
       "[35, 41, 33, 46]",
-      "4",
-      "[46, 33, 41, 35]"
+      "[35, 41, 33]",
+      "(35, 41, 33, 46)"
     ],
     "correctIndex": 1,
     "explanationTh": "[Filter pattern] เฉลย: [35, 41, 33, 46]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8135,15 +8135,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [18, 4, 17, 12, 1]\nresult = []\nfor n in nums:\n    if n > 9:\n        continue\n    result.append(n)\nprint(result)\n```",
     "options": [
-      "[4]",
-      "2",
+      "(4, 1)",
+      "[4, 2]",
       "[4, 1]",
-      "(4, 1)"
+      "[1, 4]"
     ],
     "correctIndex": 2,
     "explanationTh": "[for loop + continue] เฉลย: [4, 1]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8156,15 +8156,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [44, 22, 10, 10, 33, 20, 44, 45, 44]\nresult = []\nfor n in nums:\n    if n == 45:\n        break\n    result.append(n)\nprint(result)\n```",
     "options": [
-      "[44, 20, 33, 10, 10, 22, 44]",
       "(44, 22, 10, 10, 33, 20, 44)",
+      "7",
       "[44, 22, 10, 10, 33, 20, 44]",
-      "7"
+      "[44, 22, 10, 10, 33, 20]"
     ],
     "correctIndex": 2,
     "explanationTh": "[for loop + break] เฉลย: [44, 22, 10, 10, 33, 20, 44]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8177,15 +8177,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `idx` มีค่าเท่าใด\n\n```python\nnums = [11, 20, 15, 48, 40, 14]\ntarget = 14\nidx = -1\nfor i in range(len(nums)):\n    if nums[i] == target:\n        idx = i\n        break\nprint(idx)\n```",
     "options": [
-      "4",
+      "3",
       "5",
-      "6",
-      "10"
+      "10",
+      "6"
     ],
     "correctIndex": 1,
     "explanationTh": "[Search index pattern (แรกที่เจอ)] เฉลย: 5",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8199,14 +8199,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\nmatrix = [[9, 5, 3], [6, 8, 3], [4, 7, 7]]\ntotal = 0\nfor row in matrix:\n    for val in row:\n        total += val\nprint(total)\n```",
     "options": [
       "52",
-      "53",
-      "54",
-      "51"
+      "51",
+      "50",
+      "54"
     ],
     "correctIndex": 0,
     "explanationTh": "[Nested loop กับ list ซ้อน list] เฉลย: 52",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8220,14 +8220,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `found` มีค่าเท่าใด\n\n```python\nnums = [24, 33, 1, 35, 15]\ntarget = 35\nfound = False\nfor n in nums:\n    if n == target:\n        found = True\nprint(found)\n```",
     "options": [
       "True",
+      "False",
       "None",
-      "Error",
-      "False"
+      "Error"
     ],
     "correctIndex": 0,
     "explanationTh": "[Search/Flag pattern] เฉลย: True",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8241,14 +8241,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [15, 2, 26, 16, 8, 9]\nresult = []\nfor n in nums:\n    if n > 25:\n        result.append(n)\nprint(result)\n```",
     "options": [
       "[26]",
-      "[27]",
       "[]",
-      "(26,)"
+      "(26,)",
+      "1"
     ],
     "correctIndex": 0,
     "explanationTh": "[Filter pattern] เฉลย: [26]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8262,14 +8262,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [3, 9, 18, 7, 18, 19, 6]\nresult = []\nfor n in nums:\n    if n > 11:\n        continue\n    result.append(n)\nprint(result)\n```",
     "options": [
       "[3, 9, 7, 6]",
-      "[3, 9, 7, 7]",
       "[3, 9, 7]",
-      "4"
+      "(3, 9, 7, 6)",
+      "[6, 7, 9, 3]"
     ],
     "correctIndex": 0,
     "explanationTh": "[for loop + continue] เฉลย: [3, 9, 7, 6]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8282,15 +8282,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [50, 38, 46, 37, 42, 17, 15]\nresult = []\nfor n in nums:\n    if n == 17:\n        break\n    result.append(n)\nprint(result)\n```",
     "options": [
-      "5",
       "[50, 38, 46, 37, 43]",
-      "(50, 38, 46, 37, 42)",
+      "[50, 38, 46, 37]",
+      "[42, 37, 46, 38, 50]",
       "[50, 38, 46, 37, 42]"
     ],
     "correctIndex": 3,
     "explanationTh": "[for loop + break] เฉลย: [50, 38, 46, 37, 42]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8303,15 +8303,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `idx` มีค่าเท่าใด\n\n```python\nnums = [27, 42, 15, 14, 50]\ntarget = 14\nidx = -1\nfor i in range(len(nums)):\n    if nums[i] == target:\n        idx = i\n        break\nprint(idx)\n```",
     "options": [
-      "5",
-      "3",
       "2",
-      "1"
+      "3",
+      "1",
+      "6"
     ],
     "correctIndex": 1,
     "explanationTh": "[Search index pattern (แรกที่เจอ)] เฉลย: 3",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8326,13 +8326,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "90",
       "47",
-      "43",
+      "44",
       "45"
     ],
     "correctIndex": 3,
     "explanationTh": "[Nested loop กับ list ซ้อน list] เฉลย: 45",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8346,14 +8346,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `found` มีค่าเท่าใด\n\n```python\nnums = [39, 44, 56, 19, 15, 35, 30, 22]\ntarget = 35\nfound = False\nfor n in nums:\n    if n == target:\n        found = True\nprint(found)\n```",
     "options": [
       "True",
+      "Error",
       "False",
-      "None",
-      "Error"
+      "None"
     ],
     "correctIndex": 0,
     "explanationTh": "[Search/Flag pattern] เฉลย: True",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8367,14 +8367,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [19, 17, 36, 23, 10, 13]\nresult = []\nfor n in nums:\n    if n > 30:\n        result.append(n)\nprint(result)\n```",
     "options": [
       "[36]",
+      "[37]",
       "[]",
-      "(36,)",
-      "[37]"
+      "(36,)"
     ],
     "correctIndex": 0,
     "explanationTh": "[Filter pattern] เฉลย: [36]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8387,15 +8387,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [9, 6, 9, 13, 13, 5]\nresult = []\nfor n in nums:\n    if n > 10:\n        continue\n    result.append(n)\nprint(result)\n```",
     "options": [
-      "4",
+      "[9, 6, 9]",
       "[9, 6, 9, 5]",
-      "(9, 6, 9, 5)",
-      "[9, 6, 9]"
+      "[9, 6, 9, 6]",
+      "(9, 6, 9, 5)"
     ],
     "correctIndex": 1,
     "explanationTh": "[for loop + continue] เฉลย: [9, 6, 9, 5]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8409,14 +8409,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [19, 4, 36, 16, 23, 22, 50, 6, 8]\nresult = []\nfor n in nums:\n    if n == 23:\n        break\n    result.append(n)\nprint(result)\n```",
     "options": [
       "[19, 4, 36]",
-      "(19, 4, 36, 16)",
+      "[16, 36, 4, 19]",
       "[19, 4, 36, 17]",
       "[19, 4, 36, 16]"
     ],
     "correctIndex": 3,
     "explanationTh": "[for loop + break] เฉลย: [19, 4, 36, 16]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8429,15 +8429,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `idx` มีค่าเท่าใด\n\n```python\nnums = [46, 25, 12, 44, 5]\ntarget = 5\nidx = -1\nfor i in range(len(nums)):\n    if nums[i] == target:\n        idx = i\n        break\nprint(idx)\n```",
     "options": [
-      "3",
-      "6",
+      "5",
       "2",
+      "6",
       "4"
     ],
     "correctIndex": 3,
     "explanationTh": "[Search index pattern (แรกที่เจอ)] เฉลย: 4",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8450,15 +8450,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\nmatrix = [[3, 3, 7], [7, 8, 6], [3, 4, 6]]\ntotal = 0\nfor row in matrix:\n    for val in row:\n        total += val\nprint(total)\n```",
     "options": [
-      "49",
       "46",
-      "48",
+      "45",
+      "94",
       "47"
     ],
     "correctIndex": 3,
     "explanationTh": "[Nested loop กับ list ซ้อน list] เฉลย: 47",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8472,14 +8472,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `found` มีค่าเท่าใด\n\n```python\nnums = [56, 51, 22, 48, 42, 12, 17]\ntarget = 48\nfound = False\nfor n in nums:\n    if n == target:\n        found = True\nprint(found)\n```",
     "options": [
       "True",
-      "Error",
       "None",
-      "False"
+      "False",
+      "Error"
     ],
     "correctIndex": 0,
     "explanationTh": "[Search/Flag pattern] เฉลย: True",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8492,15 +8492,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [9, 11, 29, 27, 27, 45, 10]\nresult = []\nfor n in nums:\n    if n > 27:\n        result.append(n)\nprint(result)\n```",
     "options": [
-      "[29, 46]",
+      "(29, 45)",
       "[29, 45]",
-      "2",
+      "[29, 46]",
       "[45, 29]"
     ],
     "correctIndex": 1,
     "explanationTh": "[Filter pattern] เฉลย: [29, 45]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8513,15 +8513,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [17, 6, 14, 15, 17, 12]\nresult = []\nfor n in nums:\n    if n > 12:\n        continue\n    result.append(n)\nprint(result)\n```",
     "options": [
-      "(6, 12)",
-      "[12, 6]",
+      "[6, 13]",
+      "2",
       "[6, 12]",
-      "[6, 13]"
+      "(6, 12)"
     ],
     "correctIndex": 2,
     "explanationTh": "[for loop + continue] เฉลย: [6, 12]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8536,13 +8536,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "4",
       "[26, 13, 26, 3]",
-      "[26, 13, 26]",
+      "[2, 26, 13, 26]",
       "[26, 13, 26, 2]"
     ],
     "correctIndex": 3,
     "explanationTh": "[for loop + break] เฉลย: [26, 13, 26, 2]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8555,15 +8555,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `idx` มีค่าเท่าใด\n\n```python\nnums = [52, 49, 47, 7, 53, 28]\ntarget = 53\nidx = -1\nfor i in range(len(nums)):\n    if nums[i] == target:\n        idx = i\n        break\nprint(idx)\n```",
     "options": [
-      "6",
+      "2",
       "8",
       "4",
-      "2"
+      "6"
     ],
     "correctIndex": 2,
     "explanationTh": "[Search index pattern (แรกที่เจอ)] เฉลย: 4",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8576,15 +8576,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\nmatrix = [[4, 5, 3], [1, 5, 5], [8, 5, 2]]\ntotal = 0\nfor row in matrix:\n    for val in row:\n        total += val\nprint(total)\n```",
     "options": [
-      "40",
+      "76",
       "38",
-      "37",
-      "36"
+      "40",
+      "39"
     ],
     "correctIndex": 1,
     "explanationTh": "[Nested loop กับ list ซ้อน list] เฉลย: 38",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8597,15 +8597,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `found` มีค่าเท่าใด\n\n```python\nnums = [8, 1, 10, 36, 22, 38, 33]\ntarget = 80\nfound = False\nfor n in nums:\n    if n == target:\n        found = True\nprint(found)\n```",
     "options": [
+      "Error",
       "True",
       "None",
-      "Error",
       "False"
     ],
     "correctIndex": 3,
     "explanationTh": "[Search/Flag pattern] เฉลย: False",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8618,15 +8618,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [50, 23, 13, 33, 37]\nresult = []\nfor n in nums:\n    if n > 16:\n        result.append(n)\nprint(result)\n```",
     "options": [
-      "4",
-      "(50, 23, 33, 37)",
+      "[50, 23, 33, 38]",
+      "[50, 23, 33]",
       "[37, 33, 23, 50]",
       "[50, 23, 33, 37]"
     ],
     "correctIndex": 3,
     "explanationTh": "[Filter pattern] เฉลย: [50, 23, 33, 37]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8639,15 +8639,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [11, 4, 18, 6, 9, 19]\nresult = []\nfor n in nums:\n    if n > 11:\n        continue\n    result.append(n)\nprint(result)\n```",
     "options": [
+      "[11, 4, 6, 10]",
+      "[9, 6, 4, 11]",
       "(11, 4, 6, 9)",
-      "[11, 4, 6]",
-      "4",
       "[11, 4, 6, 9]"
     ],
     "correctIndex": 3,
     "explanationTh": "[for loop + continue] เฉลย: [11, 4, 6, 9]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8660,15 +8660,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [3, 48, 39, 31, 32, 24, 20]\nresult = []\nfor n in nums:\n    if n == 39:\n        break\n    result.append(n)\nprint(result)\n```",
     "options": [
-      "(3, 48)",
-      "[48, 3]",
+      "2",
       "[3, 49]",
+      "[3]",
       "[3, 48]"
     ],
     "correctIndex": 3,
     "explanationTh": "[for loop + break] เฉลย: [3, 48]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8682,14 +8682,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `idx` มีค่าเท่าใด\n\n```python\nnums = [29, 49, 6, 5, 9, 11]\ntarget = 11\nidx = -1\nfor i in range(len(nums)):\n    if nums[i] == target:\n        idx = i\n        break\nprint(idx)\n```",
     "options": [
       "5",
-      "3",
+      "4",
       "7",
-      "4"
+      "3"
     ],
     "correctIndex": 0,
     "explanationTh": "[Search index pattern (แรกที่เจอ)] เฉลย: 5",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8702,15 +8702,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\nmatrix = [[1, 2, 7], [4, 5, 4], [6, 3, 7]]\ntotal = 0\nfor row in matrix:\n    for val in row:\n        total += val\nprint(total)\n```",
     "options": [
-      "38",
-      "78",
       "40",
+      "41",
+      "78",
       "39"
     ],
     "correctIndex": 3,
     "explanationTh": "[Nested loop กับ list ซ้อน list] เฉลย: 39",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8723,15 +8723,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `found` มีค่าเท่าใด\n\n```python\nnums = [41, 56, 22, 25, 31, 11, 10, 3]\ntarget = 62\nfound = False\nfor n in nums:\n    if n == target:\n        found = True\nprint(found)\n```",
     "options": [
-      "True",
+      "Error",
       "False",
-      "None",
-      "Error"
+      "True",
+      "None"
     ],
     "correctIndex": 1,
     "explanationTh": "[Search/Flag pattern] เฉลย: False",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8745,14 +8745,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [2, 50, 28, 19, 50, 6, 5, 32]\nresult = []\nfor n in nums:\n    if n > 21:\n        result.append(n)\nprint(result)\n```",
     "options": [
       "[50, 28, 50, 32]",
-      "(50, 28, 50, 32)",
       "[50, 28, 50, 33]",
-      "[32, 50, 28, 50]"
+      "[50, 28, 50]",
+      "(50, 28, 50, 32)"
     ],
     "correctIndex": 0,
     "explanationTh": "[Filter pattern] เฉลย: [50, 28, 50, 32]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8765,15 +8765,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [14, 2, 6, 7, 16, 4, 4]\nresult = []\nfor n in nums:\n    if n > 8:\n        continue\n    result.append(n)\nprint(result)\n```",
     "options": [
-      "[2, 6, 7, 4]",
       "[4, 4, 7, 6, 2]",
+      "(2, 6, 7, 4, 4)",
       "[2, 6, 7, 4, 4]",
-      "5"
+      "[2, 6, 7, 4, 5]"
     ],
     "correctIndex": 2,
     "explanationTh": "[for loop + continue] เฉลย: [2, 6, 7, 4, 4]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8789,12 +8789,12 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
       "[38, 24, 22, 47, 14]",
       "[38, 24, 22, 47, 15]",
       "[38, 24, 22, 47]",
-      "5"
+      "(38, 24, 22, 47, 14)"
     ],
     "correctIndex": 0,
     "explanationTh": "[for loop + break] เฉลย: [38, 24, 22, 47, 14]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8808,14 +8808,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `idx` มีค่าเท่าใด\n\n```python\nnums = [6, 15, 35, 16, 17]\ntarget = 15\nidx = -1\nfor i in range(len(nums)):\n    if nums[i] == target:\n        idx = i\n        break\nprint(idx)\n```",
     "options": [
       "1",
+      "3",
       "0",
-      "4",
-      "2"
+      "5"
     ],
     "correctIndex": 0,
     "explanationTh": "[Search index pattern (แรกที่เจอ)] เฉลย: 1",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8828,15 +8828,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\nmatrix = [[8, 5, 7], [5, 7, 7], [7, 8, 4]]\ntotal = 0\nfor row in matrix:\n    for val in row:\n        total += val\nprint(total)\n```",
     "options": [
-      "56",
+      "116",
       "58",
-      "60",
+      "59",
       "57"
     ],
     "correctIndex": 1,
     "explanationTh": "[Nested loop กับ list ซ้อน list] เฉลย: 58",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8849,15 +8849,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `found` มีค่าเท่าใด\n\n```python\nnums = [32, 50, 26, 9, 8, 34]\ntarget = 32\nfound = False\nfor n in nums:\n    if n == target:\n        found = True\nprint(found)\n```",
     "options": [
-      "False",
       "Error",
+      "None",
       "True",
-      "None"
+      "False"
     ],
     "correctIndex": 2,
     "explanationTh": "[Search/Flag pattern] เฉลย: True",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8871,14 +8871,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [24, 17, 6, 20, 31, 41]\nresult = []\nfor n in nums:\n    if n > 25:\n        result.append(n)\nprint(result)\n```",
     "options": [
       "[31, 41]",
-      "[41, 31]",
-      "(31, 41)",
-      "[31, 42]"
+      "[31, 42]",
+      "[31]",
+      "(31, 41)"
     ],
     "correctIndex": 0,
     "explanationTh": "[Filter pattern] เฉลย: [31, 41]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8891,15 +8891,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "โค้ดด้านล่างพิมพ์ค่าอะไรออกมาบ้างตามลำดับ (พิมพ์ทีละค่า คั่นด้วยเครื่องหมายจุลภาค , เช่น 1,2,3)\n\n```python\nfor i in range(3):\n    for j in range(3):\n        print(i, j)\n```",
     "options": [
-      "Dede",
+      "100",
       "0 0,0 1,0 2,1 0,1 1,1 2,2 0,2 1,2 2",
       "9",
-      "100"
+      "82"
     ],
     "correctIndex": 1,
     "explanationTh": "[Nested loop พื้นฐาน] เฉลย: 0 0,0 1,0 2,1 0,1 1,1 2,2 0,2 1,2 2",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8913,14 +8913,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [15, 3, 17, 15, 10]\nresult = []\nfor n in nums:\n    if n > 12:\n        continue\n    result.append(n)\nprint(result)\n```",
     "options": [
       "[3, 10]",
-      "(3, 10)",
+      "[3, 11]",
       "[10, 3]",
-      "[3, 11]"
+      "(3, 10)"
     ],
     "correctIndex": 0,
     "explanationTh": "[for loop + continue] เฉลย: [3, 10]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8933,15 +8933,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [26, 13, 15, 17, 8, 10, 30, 22, 30]\nresult = []\nfor n in nums:\n    if n == 22:\n        break\n    result.append(n)\nprint(result)\n```",
     "options": [
-      "(26, 13, 15, 17, 8, 10, 30)",
       "[26, 13, 15, 17, 8, 10]",
-      "[26, 13, 15, 17, 8, 10, 31]",
+      "7",
+      "[30, 10, 8, 17, 15, 13, 26]",
       "[26, 13, 15, 17, 8, 10, 30]"
     ],
     "correctIndex": 3,
     "explanationTh": "[for loop + break] เฉลย: [26, 13, 15, 17, 8, 10, 30]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8954,15 +8954,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `idx` มีค่าเท่าใด\n\n```python\nnums = [31, 57, 4, 2, 15, 23, 1, 54]\ntarget = 4\nidx = -1\nfor i in range(len(nums)):\n    if nums[i] == target:\n        idx = i\n        break\nprint(idx)\n```",
     "options": [
-      "3",
       "1",
       "0",
+      "3",
       "2"
     ],
     "correctIndex": 3,
     "explanationTh": "[Search index pattern (แรกที่เจอ)] เฉลย: 2",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8975,15 +8975,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\nmatrix = [[8, 5, 9], [9, 2, 7], [7, 2, 7]]\ntotal = 0\nfor row in matrix:\n    for val in row:\n        total += val\nprint(total)\n```",
     "options": [
-      "112",
-      "54",
+      "58",
       "55",
+      "57",
       "56"
     ],
     "correctIndex": 3,
     "explanationTh": "[Nested loop กับ list ซ้อน list] เฉลย: 56",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -8996,15 +8996,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `found` มีค่าเท่าใด\n\n```python\nnums = [48, 41, 6, 25, 19, 55, 15]\ntarget = 6\nfound = False\nfor n in nums:\n    if n == target:\n        found = True\nprint(found)\n```",
     "options": [
-      "None",
-      "True",
       "False",
-      "Error"
+      "True",
+      "Error",
+      "None"
     ],
     "correctIndex": 1,
     "explanationTh": "[Search/Flag pattern] เฉลย: True",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -9018,14 +9018,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [23, 9, 5, 32, 13]\nresult = []\nfor n in nums:\n    if n > 27:\n        result.append(n)\nprint(result)\n```",
     "options": [
       "[32]",
-      "(32,)",
       "[33]",
+      "(32,)",
       "[]"
     ],
     "correctIndex": 0,
     "explanationTh": "[Filter pattern] เฉลย: [32]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -9039,14 +9039,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [15, 3, 7, 1, 15]\nresult = []\nfor n in nums:\n    if n > 9:\n        continue\n    result.append(n)\nprint(result)\n```",
     "options": [
       "[3, 7, 1]",
-      "[3, 7]",
-      "(3, 7, 1)",
-      "[1, 7, 3]"
+      "3",
+      "[1, 7, 3]",
+      "(3, 7, 1)"
     ],
     "correctIndex": 0,
     "explanationTh": "[for loop + continue] เฉลย: [3, 7, 1]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -9059,15 +9059,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [25, 3, 45, 5, 26, 16]\nresult = []\nfor n in nums:\n    if n == 26:\n        break\n    result.append(n)\nprint(result)\n```",
     "options": [
-      "4",
       "[25, 3, 45, 6]",
-      "[25, 3, 45]",
+      "[5, 45, 3, 25]",
+      "(25, 3, 45, 5)",
       "[25, 3, 45, 5]"
     ],
     "correctIndex": 3,
     "explanationTh": "[for loop + break] เฉลย: [25, 3, 45, 5]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -9080,15 +9080,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `idx` มีค่าเท่าใด\n\n```python\nnums = [14, 41, 31, 7, 25, 3]\ntarget = 14\nidx = -1\nfor i in range(len(nums)):\n    if nums[i] == target:\n        idx = i\n        break\nprint(idx)\n```",
     "options": [
-      "3",
       "1",
-      "-1",
+      "3",
+      "2",
       "0"
     ],
     "correctIndex": 3,
     "explanationTh": "[Search index pattern (แรกที่เจอ)] เฉลย: 0",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -9101,15 +9101,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\nmatrix = [[7, 2, 6], [2, 6, 9], [2, 8, 7]]\ntotal = 0\nfor row in matrix:\n    for val in row:\n        total += val\nprint(total)\n```",
     "options": [
-      "51",
-      "50",
+      "47",
+      "48",
       "49",
       "98"
     ],
     "correctIndex": 2,
     "explanationTh": "[Nested loop กับ list ซ้อน list] เฉลย: 49",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -9122,15 +9122,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `found` มีค่าเท่าใด\n\n```python\nnums = [48, 39, 18, 35, 41, 6, 23, 31]\ntarget = 23\nfound = False\nfor n in nums:\n    if n == target:\n        found = True\nprint(found)\n```",
     "options": [
-      "Error",
       "None",
+      "False",
       "True",
-      "False"
+      "Error"
     ],
     "correctIndex": 2,
     "explanationTh": "[Search/Flag pattern] เฉลย: True",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -9145,13 +9145,13 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "options": [
       "[31, 37]",
       "[37, 31]",
-      "[31, 38]",
-      "[31]"
+      "[31]",
+      "2"
     ],
     "correctIndex": 0,
     "explanationTh": "[Filter pattern] เฉลย: [31, 37]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -9165,14 +9165,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `result` มีค่าเท่าใด\n\n```python\nnums = [17, 10, 13, 10, 19, 14, 2]\nresult = []\nfor n in nums:\n    if n > 15:\n        continue\n    result.append(n)\nprint(result)\n```",
     "options": [
       "[10, 13, 10, 14]",
-      "5",
+      "[2, 14, 10, 13, 10]",
       "[10, 13, 10, 14, 2]",
       "(10, 13, 10, 14, 2)"
     ],
     "correctIndex": 2,
     "explanationTh": "[for loop + continue] เฉลย: [10, 13, 10, 14, 2]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -9188,12 +9188,12 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
       "[28, 37]",
       "[37, 28]",
       "[28, 38]",
-      "(28, 37)"
+      "[28]"
     ],
     "correctIndex": 0,
     "explanationTh": "[for loop + break] เฉลย: [28, 37]",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -9207,14 +9207,14 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `idx` มีค่าเท่าใด\n\n```python\nnums = [20, 24, 39, 1, 54, 31]\ntarget = 20\nidx = -1\nfor i in range(len(nums)):\n    if nums[i] == target:\n        idx = i\n        break\nprint(idx)\n```",
     "options": [
       "0",
+      "2",
       "-1",
-      "4",
-      "2"
+      "4"
     ],
     "correctIndex": 0,
     "explanationTh": "[Search index pattern (แรกที่เจอ)] เฉลย: 0",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",
@@ -9227,15 +9227,15 @@ export const PYTHON_QUESTIONS: QuizQuestion[] = [
     "subjectCode": "CS101",
     "questionTh": "จากโค้ดด้านล่าง หลังรันจบ ตัวแปร `total` มีค่าเท่าใด\n\n```python\nmatrix = [[2, 3, 7], [9, 5, 9], [1, 4, 8]]\ntotal = 0\nfor row in matrix:\n    for val in row:\n        total += val\nprint(total)\n```",
     "options": [
-      "47",
+      "50",
       "46",
       "48",
-      "50"
+      "47"
     ],
     "correctIndex": 2,
     "explanationTh": "[Nested loop กับ list ซ้อน list] เฉลย: 48",
     "difficulty": "HARD",
-    "timeLimitSeconds": 7,
+    "timeLimitSeconds": 14,
     "rewardAmmo": 5,
     "bonusPoints": 150,
     "source": "LOCAL",

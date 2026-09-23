@@ -105,7 +105,7 @@ export const TeacherPortalView: React.FC<TeacherPortalViewProps> = ({ onBackToGa
   const [formOptions, setFormOptions] = useState<string[]>(['', '', '', '']);
   const [formCorrectIndex, setFormCorrectIndex] = useState<number>(0);
   const [formExplanationTh, setFormExplanationTh] = useState<string>('');
-  const [formTimeLimit, setFormTimeLimit] = useState<number>(12);
+  const [formTimeLimit, setFormTimeLimit] = useState<number>(9);
   const [formRewardAmmo, setFormRewardAmmo] = useState<number>(3);
   const [formDifficulty, setFormDifficulty] = useState<'EASY' | 'MEDIUM' | 'HARD'>('MEDIUM');
 
