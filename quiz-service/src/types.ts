@@ -9,7 +9,7 @@ export interface QuizQuestion {
   options: string[];            // ตัวเลือกคำตอบ 4 ตัวเลือก
   correctIndex: number;         // ดัชนีคำตอบที่ถูกต้อง (0-3)
   explanationTh?: string;       // คำอธิบายเฉลย
-  timeLimitSeconds?: number;    // เวลาจำกัด (EASY=5s, MEDIUM=9s, HARD=14s)
+  timeLimitSeconds?: number;    // เวลาจำกัด (EASY=10s, MEDIUM=20s, HARD=30s)
   rewardAmmo?: number;          // จำนวนกระสุนที่ได้รับเมื่อตอบถูก (3-5 นัด)
   bonusPoints?: number;         // คะแนนโบนัสทีม (100-150)
   difficulty?: DifficultyLevel; // ระดับความยาก

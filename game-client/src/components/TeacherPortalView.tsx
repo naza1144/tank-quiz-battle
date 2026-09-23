@@ -105,7 +105,7 @@ export const TeacherPortalView: React.FC<TeacherPortalViewProps> = ({ onBackToGa
   const [formOptions, setFormOptions] = useState<string[]>(['', '', '', '']);
   const [formCorrectIndex, setFormCorrectIndex] = useState<number>(0);
   const [formExplanationTh, setFormExplanationTh] = useState<string>('');
-  const [formTimeLimit, setFormTimeLimit] = useState<number>(9);
+  const [formTimeLimit, setFormTimeLimit] = useState<number>(20);
   const [formRewardAmmo, setFormRewardAmmo] = useState<number>(3);
   const [formDifficulty, setFormDifficulty] = useState<'EASY' | 'MEDIUM' | 'HARD'>('MEDIUM');
 
@@ -1050,7 +1050,7 @@ export const TeacherPortalView: React.FC<TeacherPortalViewProps> = ({ onBackToGa
                   <input
                     type="number"
                     min={5}
-                    max={30}
+                    max={60}
                     value={formTimeLimit}
                     onChange={(e) => setFormTimeLimit(Number(e.target.value))}
                     className="w-full px-3 py-2 bg-black border border-slate-700 text-xs focus:border-amber-400 focus:outline-none"

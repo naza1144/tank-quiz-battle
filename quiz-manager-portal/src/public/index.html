@@ -156,17 +156,17 @@
         <div class="bg-slate-900 border border-emerald-950 p-4 rounded-xl">
           <div class="text-emerald-400 text-xs font-medium">ระดับง่าย (EASY)</div>
           <div id="stat-easy" class="text-2xl font-bold text-white mt-1">0</div>
-          <div class="text-[11px] text-slate-500 mt-1">เวลาตอบ 2 วินาที</div>
+          <div class="text-[11px] text-slate-500 mt-1">เวลาตอบ 10 วินาที</div>
         </div>
         <div class="bg-slate-900 border border-amber-950 p-4 rounded-xl">
           <div class="text-amber-400 text-xs font-medium">ระดับปานกลาง (MED)</div>
           <div id="stat-med" class="text-2xl font-bold text-white mt-1">0</div>
-          <div class="text-[11px] text-slate-500 mt-1">เวลาตอบ 5 วินาที</div>
+          <div class="text-[11px] text-slate-500 mt-1">เวลาตอบ 20 วินาที</div>
         </div>
         <div class="bg-slate-900 border border-rose-950 p-4 rounded-xl">
           <div class="text-rose-400 text-xs font-medium">ระดับยาก (HARD)</div>
           <div id="stat-hard" class="text-2xl font-bold text-white mt-1">0</div>
-          <div class="text-[11px] text-slate-500 mt-1">เวลาตอบ 7 วินาที</div>
+          <div class="text-[11px] text-slate-500 mt-1">เวลาตอบ 30 วินาที</div>
         </div>
       </div>
 
@@ -181,9 +181,9 @@
           <!-- Filter Difficulty -->
           <select id="filter-difficulty" onchange="renderQuestionsTable()" class="bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-lg px-3 py-2 focus:ring-1 focus:ring-blue-500 focus:outline-none">
             <option value="ALL">ทุกระดับความยาก</option>
-            <option value="EASY">ง่าย (5 วินาที)</option>
-            <option value="MEDIUM">ปานกลาง (9 วินาที)</option>
-            <option value="HARD">ยาก (14 วินาที)</option>
+            <option value="EASY">ง่าย (10 วินาที)</option>
+            <option value="MEDIUM">ปานกลาง (20 วินาที)</option>
+            <option value="HARD">ยาก (30 วินาที)</option>
           </select>
 
           <!-- Search Input -->
@@ -257,9 +257,9 @@
           <div>
             <label class="block text-xs font-medium text-slate-300 mb-1">ระดับความยาก *</label>
             <select id="form-difficulty" class="w-full bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-lg p-2.5 focus:ring-1 focus:ring-blue-500 focus:outline-none">
-              <option value="EASY">ง่าย (เวลาตอบ 5 วินาที)</option>
-              <option value="MEDIUM" selected>ปานกลาง (เวลาตอบ 9 วินาที)</option>
-              <option value="HARD">ยาก (เวลาตอบ 14 วินาที)</option>
+              <option value="EASY">ง่าย (เวลาตอบ 10 วินาที)</option>
+              <option value="MEDIUM" selected>ปานกลาง (เวลาตอบ 20 วินาที)</option>
+              <option value="HARD">ยาก (เวลาตอบ 30 วินาที)</option>
             </select>
           </div>
         </div>
@@ -550,9 +550,9 @@
       }
 
       tbody.innerHTML = filtered.map(q => {
-        let diffBadge = `<span class="badge-med text-[10px] px-2 py-0.5 rounded font-medium">ปานกลาง (9s)</span>`;
-        if (q.difficulty === 'EASY') diffBadge = `<span class="badge-easy text-[10px] px-2 py-0.5 rounded font-medium">ง่าย (5s)</span>`;
-        if (q.difficulty === 'HARD') diffBadge = `<span class="badge-hard text-[10px] px-2 py-0.5 rounded font-medium">ยาก (14s)</span>`;
+        let diffBadge = `<span class="badge-med text-[10px] px-2 py-0.5 rounded font-medium">ปานกลาง (20s)</span>`;
+        if (q.difficulty === 'EASY') diffBadge = `<span class="badge-easy text-[10px] px-2 py-0.5 rounded font-medium">ง่าย (10s)</span>`;
+        if (q.difficulty === 'HARD') diffBadge = `<span class="badge-hard text-[10px] px-2 py-0.5 rounded font-medium">ยาก (30s)</span>`;
 
         const optionsHtml = (q.options || []).map((opt, idx) => {
           const isCorrect = idx === q.correctIndex;

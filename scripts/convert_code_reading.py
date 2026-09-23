@@ -165,11 +165,11 @@ def main():
 
     converted = []
     diff_map = {
-        1: ('EASY', 5, 3, 100),
-        2: ('MEDIUM', 9, 3, 100),
-        3: ('MEDIUM', 9, 4, 120),
-        4: ('HARD', 14, 4, 130),
-        5: ('HARD', 14, 5, 150)
+        1: ('EASY', 10, 3, 100),
+        2: ('MEDIUM', 20, 3, 100),
+        3: ('MEDIUM', 20, 4, 120),
+        4: ('HARD', 30, 4, 130),
+        5: ('HARD', 30, 5, 150)
     }
 
     for idx, q in enumerate(raw_questions):
@@ -178,7 +178,7 @@ def main():
         correct_ans = str(q['options'][0]['text']).strip()
         feedback = q.get('feedback', '')
         level = q.get('level', 1)
-        diff, time_limit, ammo, bonus = diff_map.get(level, ('MEDIUM', 9, 3, 100))
+        diff, time_limit, ammo, bonus = diff_map.get(level, ('MEDIUM', 20, 3, 100))
 
         distractors = generate_distractors(correct_ans, feedback, q_text, all_answers)
         
