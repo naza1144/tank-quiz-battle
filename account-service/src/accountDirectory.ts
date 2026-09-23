@@ -224,7 +224,7 @@ export class AccountDirectory {
       lastNameTh: 'นักรบรถถัง',
       firstNameEn: 'Thanakorn',
       lastNameEn: 'TankAce',
-      displayName: 'ธนกร [6501001]',
+      displayName: 'ธนกร',
       avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=TankAce1',
     };
     const std1Detail: StudentProfile = {
@@ -258,7 +258,7 @@ export class AccountDirectory {
       lastNameTh: 'ปัญญาไว',
       firstNameEn: 'Kamonwan',
       lastNameEn: 'Panyawai',
-      displayName: 'กมลวรรณ [6501002]',
+      displayName: 'กมลวรรณ',
       avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=TankAce2',
     };
     const std2Detail: StudentProfile = {
@@ -290,16 +290,6 @@ export class AccountDirectory {
       const isTeacherEmail = normalizedEmail.includes('teacher') || normalizedEmail.includes('prof') || normalizedEmail.includes('instructor');
       const roleId: UserRoleCode = isAdminEmail ? 'ADMIN' : (isTeacherEmail ? 'TEACHER' : 'STUDENT');
       const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-      
-      let studentId = req.studentId?.trim();
-      if (!studentId) {
-        const ubuMatch = normalizedEmail.match(/\.(\d{2})@ubu\.ac\.th/);
-        if (ubuMatch) {
-          studentId = `${ubuMatch[1]}145${randomSuffix}`;
-        } else {
-          studentId = `670${randomSuffix}`;
-        }
-      }
 
       account = {
         id: `usr-${Date.now()}-${randomSuffix}`,
@@ -323,7 +313,7 @@ export class AccountDirectory {
         lastNameTh: lastName,
         firstNameEn: firstName,
         lastNameEn: lastName,
-        displayName: `${firstName} ${roleId === 'ADMIN' ? '(Admin)' : (roleId === 'TEACHER' ? '(อาจารย์)' : `[${studentId}]`)}`,
+        displayName: `${req.name.trim()} ${roleId === 'ADMIN' ? '(Admin)' : (roleId === 'TEACHER' ? '(อาจารย์)' : '')}`.trim(),
         avatarUrl: req.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${normalizedEmail}`,
       };
 
@@ -333,14 +323,13 @@ export class AccountDirectory {
       this.profilesByAccountId.set(account.id, profile);
 
       if (roleId === 'STUDENT') {
-        const enrollYear = studentId.startsWith('67') ? 2567 : (studentId.startsWith('66') ? 2566 : (studentId.startsWith('65') ? 2565 : 2567));
         const student: StudentProfile = {
-          studentId,
+          studentId: `std-${randomSuffix}`,
           userProfileId: profile.id,
           facultyId: 'fac-eng',
           departmentId: 'dept-cpe',
           sectionId: 'sec-cpe-2026-1',
-          enrollmentYear: enrollYear,
+          enrollmentYear: 2567,
         };
         this.students.set(student.studentId, student);
       } else {
@@ -360,29 +349,10 @@ export class AccountDirectory {
       }
       account.googleSub = req.googleSub || account.googleSub;
       account.lastLoginAt = Date.now();
-
-      if (req.studentId && account.roleId === 'STUDENT') {
+      if (req.name) {
         const existingProfile = this.profilesByAccountId.get(account.id);
         if (existingProfile) {
-          const cleanStudentId = req.studentId.trim();
-          let student = Array.from(this.students.values()).find(s => s.userProfileId === existingProfile.id);
-          if (student) {
-            this.students.delete(student.studentId);
-            student.studentId = cleanStudentId;
-            this.students.set(cleanStudentId, student);
-          } else {
-            const enrollYear = cleanStudentId.startsWith('67') ? 2567 : (cleanStudentId.startsWith('66') ? 2566 : 2567);
-            this.students.set(cleanStudentId, {
-              studentId: cleanStudentId,
-              userProfileId: existingProfile.id,
-              facultyId: 'fac-eng',
-              departmentId: 'dept-cpe',
-              sectionId: 'sec-cpe-2026-1',
-              enrollmentYear: enrollYear,
-            });
-          }
-          const baseName = existingProfile.firstNameTh || 'Player';
-          existingProfile.displayName = `${baseName} [${cleanStudentId}]`;
+          existingProfile.displayName = req.name.trim();
         }
       }
     }
@@ -397,10 +367,10 @@ export class AccountDirectory {
   // Offline Classroom Student Login (OPA-granted permissions)
   // -------------------------------------------------------------
   async syncOfflineStudentLogin(req: OfflineStudentLoginRequest): Promise<{ token: string; userDetail: FullUserDetailResponse; isNew: boolean }> {
-    const rawStudentId = (req.studentId || '').trim();
-    const cleanStudentId = rawStudentId || `650${Math.floor(1000 + Math.random() * 9000)}`;
-    const studentEmail = `${cleanStudentId.toLowerCase()}@classroom.local`;
-    let account = this.accounts.get(studentEmail);
+    const cleanPlayerName = (req.name || '').trim() || `Tanker_${Math.floor(1000 + Math.random() * 9000)}`;
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+    const playerEmail = `${cleanPlayerName.toLowerCase().replace(/[^a-z0-9]/g, '') || 'player'}_${randomSuffix}@classroom.local`;
+    let account = this.accounts.get(playerEmail);
     let isNew = false;
 
     const facultyId = req.facultyId || 'fac-eng';
@@ -410,18 +380,17 @@ export class AccountDirectory {
     if (!account) {
       isNew = true;
       account = {
-        id: `usr-std-${cleanStudentId}`,
-        email: studentEmail,
+        id: `usr-player-${Date.now().toString(36)}-${randomSuffix}`,
+        email: playerEmail,
         roleId: 'STUDENT',
         status: 'ACTIVE',
         createdAt: Date.now(),
         lastLoginAt: Date.now(),
       };
 
-      const displayName = req.name ? `${req.name.trim()} [${cleanStudentId}]` : `นักศึกษา [${cleanStudentId}]`;
-      const nameParts = (req.name || cleanStudentId).trim().split(' ');
-      const firstName = nameParts[0] || 'Student';
-      const lastName = nameParts.slice(1).join(' ') || cleanStudentId;
+      const nameParts = cleanPlayerName.split(' ');
+      const firstName = nameParts[0] || cleanPlayerName;
+      const lastName = nameParts.slice(1).join(' ') || '';
 
       const profile: UserProfile = {
         id: `prof-${account.id}`,
@@ -431,20 +400,20 @@ export class AccountDirectory {
         lastNameTh: lastName,
         firstNameEn: firstName,
         lastNameEn: lastName,
-        displayName,
-        avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanStudentId}`,
+        displayName: cleanPlayerName,
+        avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanPlayerName}`,
       };
 
       const student: StudentProfile = {
-        studentId: cleanStudentId,
+        studentId: `std-${randomSuffix}`,
         userProfileId: profile.id,
         facultyId,
         departmentId,
         sectionId,
-        enrollmentYear: 2565,
+        enrollmentYear: 2567,
       };
 
-      this.accounts.set(studentEmail, account);
+      this.accounts.set(playerEmail, account);
       this.accountsById.set(account.id, account);
       this.profiles.set(profile.id, profile);
       this.profilesByAccountId.set(account.id, profile);
@@ -453,7 +422,7 @@ export class AccountDirectory {
       account.lastLoginAt = Date.now();
       const profile = this.profilesByAccountId.get(account.id);
       if (profile && req.name) {
-        profile.displayName = `${req.name.trim()} [${cleanStudentId}]`;
+        profile.displayName = cleanPlayerName;
       }
     }
 
@@ -551,7 +520,6 @@ export class AccountDirectory {
       email: detail.account.email,
       name: detail.profile.displayName,
       role: detail.account.roleId,
-      studentId: detail.student?.studentId,
       teacherId: detail.teacher?.teacherId,
       facultyCode: detail.student?.facultyName || detail.teacher?.facultyName,
       departmentCode: detail.student?.departmentName || detail.teacher?.departmentName,

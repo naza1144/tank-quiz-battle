@@ -10,7 +10,6 @@ interface AuthModalProps {
 export const AuthModal: React.FC<AuthModalProps> = ({ onLogin }) => {
   const [activeTab, setActiveTab] = useState<'student' | 'teacher'>('student');
   const [gamerTag, setGamerTag] = useState<string>('');
-  const [studentId, setStudentId] = useState<string>('');
   const [teacherUsername, setTeacherUsername] = useState<string>('');
   const [teacherPassword, setTeacherPassword] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -21,19 +20,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin }) => {
     soundFx.playStart();
     setErrorMsg('');
     const rawName = gamerTag.trim();
-    const rawId = studentId.trim();
-    const finalId = rawId || (rawName.match(/^\d+$/) ? rawName : `650${Math.floor(1000 + Math.random() * 9000)}`);
-    const finalName = rawName || `PLAYER_${finalId.slice(-4)}`;
+    const finalName = rawName || `PLAYER_${Math.floor(1000 + Math.random() * 9000)}`;
 
     setLoading(true);
 
     try {
-      // 1. Try Offline Classroom Login via account-service (OPA-evaluated)
+      // 1. Try Offline Login via account-service (OPA-evaluated)
       const res = await fetch('/api/account/offline-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          studentId: finalId,
           name: finalName,
           sectionId: 'sec-cpe-2026-1'
         })
@@ -42,7 +38,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin }) => {
       if (data.success && data.token) {
         localStorage.setItem('tank_auth_token', data.token);
         localStorage.setItem('tank_user_name', data.user?.profile?.displayName || finalName);
-        localStorage.setItem('tank_student_id', data.user?.student?.studentId || finalId);
+        localStorage.removeItem('tank_student_id');
         onLogin(data.token, data.user?.profile?.displayName || finalName);
         return;
       }
@@ -55,12 +51,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin }) => {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: finalName, studentId: finalId })
+        body: JSON.stringify({ name: finalName })
       });
       const data = await res.json();
       if (data.token) {
         localStorage.setItem('tank_auth_token', data.token);
         localStorage.setItem('tank_user_name', data.name);
+        localStorage.removeItem('tank_student_id');
         onLogin(data.token, data.name);
         return;
       }
@@ -72,6 +69,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin }) => {
     const fallbackToken = `std-${Date.now()}:${finalName}`;
     localStorage.setItem('tank_auth_token', fallbackToken);
     localStorage.setItem('tank_user_name', finalName);
+    localStorage.removeItem('tank_student_id');
     onLogin(fallbackToken, finalName);
     setLoading(false);
   };
@@ -143,7 +141,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin }) => {
           <PixelStar color="#22d3ee" size={12} />
         </div>
 
-        {/* Mode Selector Tabs (Student vs Teacher) */}
+        {/* Mode Selector Tabs (Player vs Teacher) */}
         <div className="grid grid-cols-2 gap-2 mb-5 font-arcade text-[11px]">
           <button
             type="button"
@@ -155,7 +153,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin }) => {
             }`}
           >
             <GraduationCap size={14} />
-            <span>นักเรียน (STUDENT)</span>
+            <span>เข้าเล่นเกม (PLAYER)</span>
           </button>
           <button
             type="button"
@@ -177,27 +175,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin }) => {
           </div>
         )}
 
-        {/* ---------------- STUDENT TAB ---------------- */}
+        {/* ---------------- PLAYER TAB ---------------- */}
         {activeTab === 'student' && (
           <div className="space-y-4 text-left">
             <form onSubmit={handleStudentLogin} className="space-y-3">
               <div>
                 <label className="block font-arcade text-[10px] text-amber-300 mb-1 uppercase tracking-wide">
-                  ▸ รหัสนักศึกษา (STUDENT ID):
-                </label>
-                <input
-                  type="text"
-                  placeholder="เช่น 6501001"
-                  value={studentId}
-                  onChange={(e) => setStudentId(e.target.value)}
-                  maxLength={15}
-                  className="w-full px-4 py-2.5 bg-black border-4 border-slate-700 focus:border-amber-400 text-amber-300 font-bold font-mono text-sm placeholder-slate-600 focus:outline-none transition-all shadow-[inset_2px_2px_4px_rgba(0,0,0,0.8)]"
-                />
-              </div>
-
-              <div>
-                <label className="block font-arcade text-[10px] text-amber-300 mb-1 uppercase tracking-wide">
-                  ▸ ชื่อเล่น / ฉายาในเกม (GAMER TAG):
+                  ▸ ชื่อผู้เล่น / ฉายาในเกม (GAMER TAG):
                 </label>
                 <input
                   type="text"

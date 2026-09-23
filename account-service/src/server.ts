@@ -66,18 +66,13 @@ app.get('/api/account/master-data', (_req: Request, res: Response) => {
 });
 
 // -------------------------------------------------------------
-// 3. Offline Student Login Endpoint (Classroom LAN / No Internet)
+// 3. Offline Player Login Endpoint (Classroom LAN / No Internet)
 // -------------------------------------------------------------
 app.post('/api/account/offline-login', async (req: Request, res: Response) => {
-  const { studentId, name, facultyId, departmentId, sectionId } = req.body as OfflineStudentLoginRequest;
-
-  if (!name && !studentId) {
-    return res.status(400).json({ success: false, error: 'Student ID or Player name is required' });
-  }
+  const { name, facultyId, departmentId, sectionId } = req.body as OfflineStudentLoginRequest;
 
   try {
     const result = await accountDirectory.syncOfflineStudentLogin({
-      studentId,
       name,
       facultyId,
       departmentId,

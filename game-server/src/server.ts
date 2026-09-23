@@ -80,14 +80,14 @@ app.get(['/api/auth/login', '/auth/login'], handleGoogleAuthLogin);
 app.get(['/api/auth/callback', '/auth/callback'], handleGoogleAuthCallback);
 app.post(['/api/auth/google', '/auth/google'], handleGoogleDirectLogin);
 
-// ── Standalone & Student Auth Endpoints ─────────────────────────────────
+// ── Standalone & Player Auth Endpoints ─────────────────────────────────
 app.post(['/api/auth/login', '/auth/login'], (req, res) => {
-  const { name, email, studentId } = req.body;
-  const displayName = name || studentId || 'TankPlayer';
+  const { name, email } = req.body;
+  const displayName = name || 'TankPlayer';
   const token = signUserToken({
-    id: `std-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`,
+    id: `usr-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`,
     name: displayName,
-    email: email || `${displayName.toLowerCase().replace(/\s+/g, '')}@ubu.ac.th`,
+    email: email || `${displayName.toLowerCase().replace(/\s+/g, '')}@player.local`,
     isGuest: false
   });
   res.json({ success: true, token, name: displayName });
