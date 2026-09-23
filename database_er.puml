@@ -22,7 +22,7 @@ skinparam package {
     BorderColor #7F8C8D
     FontColor #1A5276
     FontSize 12
-    FontStyle bold
+    FontStyle boldaccount-service
     BackgroundColor #F8F9FA
 }
 

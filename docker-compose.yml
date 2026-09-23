@@ -26,6 +26,7 @@ services:
     environment:
       - PORT=4005
       - JWT_SECRET=tank-battle-quiz-secret-2026
+      - OPA_URL=http://opa:8181
     networks:
       game-net:
         aliases:
@@ -87,7 +88,27 @@ services:
     environment:
       - PORT=5000
     networks:
-      - game-net
+      game-net:
+
+  # ── 7. Open Policy Agent (OPA Rego Authorization Engine) ────────────
+  opa:
+    image: openpolicyagent/opa:latest-static
+    container_name: tank-opa
+    restart: unless-stopped
+    command:
+      - "run"
+      - "--server"
+      - "--log-level=info"
+      - "--addr=0.0.0.0:8181"
+      - "/policies"
+    volumes:
+      - ./opa/policies:/policies:ro
+    ports:
+      - "8181:8181"
+    networks:
+      game-net:
+        aliases:
+          - opa
 
 networks:
   game-net:

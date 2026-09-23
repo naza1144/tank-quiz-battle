@@ -129,3 +129,17 @@ export interface FullUserDetailResponse {
   teacher?: TeacherProfile & { facultyName?: string; departmentName?: string };
   permissions: string[];
 }
+
+export interface OfflineStudentLoginRequest {
+  studentId: string;
+  name: string;
+  facultyId?: string;
+  departmentId?: string;
+  sectionId?: string;
+}
+
+export interface OfflineTeacherLoginRequest {
+  username: string;
+  password: string;
+}
+

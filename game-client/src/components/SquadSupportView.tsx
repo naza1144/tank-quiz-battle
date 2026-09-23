@@ -15,6 +15,8 @@ import {
   PixelTrophy, 
   PixelShield 
 } from './PixelIcons.js';
+import { FormattedQuestionText } from './FormattedQuestionText.js';
+
 
 interface SquadSupportViewProps {
   teamId?: string;
@@ -315,7 +317,7 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
           </div>
 
           <div className="text-sm sm:text-base font-bold text-white mb-3">
-            {ghostRevivalData.question.questionTh}
+            <FormattedQuestionText text={ghostRevivalData.question.questionTh} />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -373,7 +375,7 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
 
           {/* Question Title */}
           <div className="text-base sm:text-lg font-extrabold text-amber-300 mb-4 text-center leading-relaxed font-thai">
-            {currentQuestion.questionTh}
+            <FormattedQuestionText text={currentQuestion.questionTh} />
           </div>
 
           {/* Confidence Betting Toggle Switch (SPEC §5) */}

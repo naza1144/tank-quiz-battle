@@ -131,6 +131,7 @@ export interface QuizQuestion {
   bonusPoints: number;
   difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
   subjectCode?: string;
+  level?: number;
 }
 
 export interface TeamQuizVoteUpdate {

@@ -16,6 +16,7 @@ export interface QuizQuestion {
   subjectCode?: string;         // รหัสวิชา (เช่น CS101, MATH201)
   source?: 'LOCAL' | 'EXTERNAL';// แหล่งที่มาของข้อสอบ
   externalId?: string;          // ID อ้างอิงจากระบบภายนอก
+  level?: number;               // ระดับความยากของโจทย์ (เช่น 1-5)
 }
 
 export interface CategorySummary {

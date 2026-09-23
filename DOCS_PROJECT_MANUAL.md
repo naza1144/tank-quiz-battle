@@ -37,6 +37,9 @@
 |           │                                                                                   |
 |           ├──▶ Path: /api/account (Priority 248)==▶ [ account-service ] (3NF RBAC Port 4005)  |
 |           │                                         Namespace: identity                       |
+|           │                                              │                                    |
+|           │                                              ▼ Localhost Sidecar (:8181)          |
+|           │                                         [ opa-sidecar ] (Rego v1 Policy Engine)   |
 |           │                                                                                   |
 |           └──▶ Path: /quiz-portal (Priority 235)==▶ [ quiz-manager-portal ] (Teacher UI: 4008)|
 |                                                     Namespace: quiz                           |
@@ -272,18 +275,23 @@ erDiagram
 
 | Method | Endpoint | คำอธิบาย | พารามิเตอร์ / Body |
 | :--- | :--- | :--- | :--- |
+| `POST` | `/api/account/offline-login` | เข้าสู่ระบบนักศึกษาแบบ Offline ในห้องเรียน (ไม่ต้องใช้อินเทอร์เน็ต) | `{ studentId, name, facultyId, departmentId, sectionId }` |
+| `POST` | `/api/account/teacher-login` | เข้าสู่ระบบอาจารย์/ผู้ดูแลระบบแบบ Offline (User + PIN/Password) | `{ username, password }` |
+| `POST` | `/api/account/verify-permission` | ตรวจสอบสิทธิ์ผ่าน OPA Policy Engine (Rego v1) | `{ role, permission }` |
 | `POST` | `/api/account/login` | ยืนยันตัวตน Google OAuth Token และแปลงเป็น In-Game JWT | `{ credential: "<GOOGLE_ID_TOKEN>" }` |
+| `POST` | `/api/account/sync-google` | ซิงค์ข้อมูลโปรไฟล์ Google และออก Token | `{ email, name, googleSub, avatarUrl }` |
 | `POST` | `/api/account/hydrate` | ดึงประวัติการศึกษา/สิทธิ์แบบเต็ม (3NF Hydration) | `{ email: "..." }` |
 | `GET` | `/api/account/profile` | ดึงโปรไฟล์ผู้ใช้ปัจจุบันพร้อม Role & Permissions | Header: `Authorization: Bearer <JWT>` |
+| `GET` | `/api/account/students` | ดึงรายชื่อนักศึกษาทั้งหมด (เฉพาะ Teacher & Admin) | Header: `Bearer <JWT>`, `?sectionId=...&facultyId=...` |
 | `GET` | `/api/account/directory/faculties` | ดึงรายชื่อคณะทั้งหมดในสถาบัน | - |
 | `GET` | `/api/account/directory/departments` | ดึงรายชื่อสาขา/ภาควิชาตามสังกัด | `?facultyId=...` |
 | `GET` | `/api/account/health` | Health Check ของ Account Service | - |
 
 ---
 
-## 6. ระบบโครงสร้างข้อมูลสถานศึกษา 3NF และการควบคุมสิทธิ์ (Identity & RBAC)
+## 6. ระบบโครงสร้างข้อมูลสถานศึกษา 3NF และการควบคุมสิทธิ์ (Identity & RBAC with OPA)
 
-ระบบ `account-service` ปฏิบัติตามมาตรฐานการจัดระเบียบฐานข้อมูลระดับ **Third Normal Form (3NF)** ปราศจากข้อมูลซ้ำซ้อนและแยกบทบาทการเข้าถึงตามหลัก Principle of Least Privilege:
+ระบบ `account-service` ปฏิบัติตามมาตรฐานการจัดระเบียบฐานข้อมูลระดับ **Third Normal Form (3NF)** ปราศจากข้อมูลซ้ำซ้อน และใช้ **Open Policy Agent (OPA)** ในการตัดสินใจและแจกจ่ายสิทธิ์แบบ Dynamic:
 
 ### 6.1 โครงสร้างระดับ 3NF Academic Directory
 
@@ -297,17 +305,36 @@ FACULTY (คณะ)
 ```text
 TITLE (คำนำหน้าชื่อ / ยศทางวิชาการ: นาย, น.ส., ดร., ผศ.ดร.)
 ROLE (STUDENT, TEACHER, ADMIN, GUEST)
-  └── PERMISSION (game:play, quiz:write, portal:teacher, admin:all)
+  └── PERMISSION (ประเมินผลผ่าน Open Policy Agent Rego Policies)
 ```
 
-### 6.2 กลไก Token Hydration (Google SSO ➔ 3NF Context)
-1. เมื่อผู้ใช้ล็อกอินผ่าน **Google OAuth 2.0** ทาง Client จะส่ง Google ID Token มายัง `POST /api/account/login`
-2. `account-service` ตรวจสอบความถูกต้องของ Signature กับ Google Auth Server
-3. ทำการ **Hydrate** ข้อมูลจาก 3NF Directory:
-   - ตรวจสอบอีเมลกับตาราง `UserAccount`
-   - ตรวจจับสิทธิ์ `Role` (`TEACHER`, `ADMIN`, `STUDENT`)
-   - ผูกโยงข้อมูลการศึกษา/ตำแหน่งวิชาการ (`Faculty`, `Department`, `Section`, `PositionTitle`)
-4. ออก **RS256/HS256 Session JWT** ที่บรรจุ Claims ครบถ้วน เพื่อให้ `game-server` และ `quiz-manager-portal` ตรวจสอบสิทธิ์ได้แบบ Stateless
+### 6.2 ระบบการเล่นและยืนยันตัวตนในห้องเรียนแบบออฟไลน์ 100% (Offline Classroom Mode)
+กรณีที่นำระบบไปติดตั้งในโรงเรียนหรือพื้นที่ LAN ท้องถิ่นที่ไม่มีการเชื่อมต่ออินเทอร์เน็ตออกภายนอก:
+1. **นักศึกษา (Student Offline Login)**:
+   - ผู้เล่นกรอก **รหัสนักศึกษา (Student ID)** และ **ชื่อผู้เล่น / GamerTag** ผ่านหน้า `AuthModal.tsx`
+   - Client ยิง `POST /api/account/offline-login` เข้าสู่ Traefik Gateway
+   - `account-service` สร้างหรือค้นหาบัญชีนักศึกษาใน 3NF Directory อัตโนมัติ พร้อมสุ่ม Avatar แบบ Deterministic SVG
+   - เรียก OPA Sidecar เพื่อแจกสิทธิ์ของ Role `STUDENT` และประทับตรา JWT Token ส่งกลับให้ Client นำไปใช้เล่นเกมได้ทันที
+2. **อาจารย์ผู้สอน (Teacher Offline Login)**:
+   - อาจารย์กรอก Username (`teacher` หรือ `admin`) และรหัส PIN (`1990` หรือ `teacher`/`admin`)
+   - Client ยิง `POST /api/account/teacher-login`
+   - ตรวจสอบความถูกต้องและออก JWT Token ที่มีสิทธิ์ระดับ `TEACHER` หรือ `ADMIN` จาก OPA
+
+### 6.3 การควบคุมและแจกสิทธิ์ด้วย Open Policy Agent (OPA Sidecar & Rego v1 Policies)
+ระบบติดตั้ง `opa-sidecar` ประกบกับ `account-service` บน Pod เดียวกัน (สื่อสารผ่าน `127.0.0.1:8181` ด้วยความเร็วระดับ Microseconds):
+- **Rego Policy File (`opa/policies/authz.rego`)**:
+  - กำหนดด้วยมาตรฐาน **Rego v1 Syntax**
+  - **ADMIN**: ได้รับสิทธิ์ Wildcard `*` ครอบคลุมทุกการกระทำในระบบ
+  - **TEACHER**: ได้รับสิทธิ์ `game:play`, `game:join_squad`, `quiz:vote`, `portal:teacher`, `quiz:read_all`, `quiz:write`, `quiz:import`, `quiz:difficulty`, `room:control`, `stats:read_class`, `stats:read_own`, `lms:sync`
+  - **STUDENT**: ได้รับสิทธิ์ `game:play`, `game:join_squad`, `quiz:vote`, `stats:read_own`
+  - **GUEST**: ได้รับสิทธิ์ `game:play`, `game:join_squad`, `quiz:vote`
+- **Unit Testing**: มีชุดทดสอบ Rego (`opa/policies/authz_test.rego`) ทดสอบทั้ง 6 Scenario ผ่านคำสั่ง `opa test` ได้ผลลัพธ์ผ่าน 100%
+
+### 6.4 กลไก Token Hydration (Google SSO ➔ 3NF Context - Online Mode)
+สำหรับกรณีเชื่อมต่อ Online ภายนอก:
+1. ผู้ใช้ล็อกอินผ่าน Google Sign-In ในหน้าเกมหรือหน้า Portal
+2. Token ถูกส่งไป verify และจับคู่เข้ากับอีเมลในฐานข้อมูล 3NF
+3. OPA Sidecar ทำการประเมินสิทธิ์และผนวก Claims ลงใน JWT Token เพื่อให้ Microservices อื่นๆ ใช้งานต่อได้แบบ Stateless
 
 ---
 

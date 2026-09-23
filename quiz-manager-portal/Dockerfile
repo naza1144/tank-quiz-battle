@@ -1,7 +1,7 @@
 FROM node:20-alpine
 WORKDIR /app
 COPY package*.json tsconfig.json ./
-RUN npm install --no-audit --no-fund
+RUN npm install --include=dev --no-audit --no-fund
 COPY src ./src
 RUN npm run build
 RUN cp -r src/public dist/public || true

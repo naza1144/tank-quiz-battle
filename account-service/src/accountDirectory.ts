@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { opaClient } from './opaClient.js';
 import {
   Faculty,
   Department,
@@ -15,6 +16,8 @@ import {
   EnrichedTokenPayload,
   GoogleSyncRequest,
   FullUserDetailResponse,
+  OfflineStudentLoginRequest,
+  OfflineTeacherLoginRequest,
 } from './types.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'tank-battle-quiz-secret-2026';
@@ -23,6 +26,7 @@ export const ADMIN_EMAILS = new Set([
   'chanon.se.67@ubu.ac.th',
   'admin@dssi.ac.th',
 ]);
+
 
 export class AccountDirectory {
   // 1. Master Academic Tables
@@ -48,7 +52,23 @@ export class AccountDirectory {
   constructor() {
     this.seedMasterData();
     this.seedInitialUsers();
+    this.refreshPermissionsFromOpa().catch(() => {});
   }
+
+  async refreshPermissionsFromOpa(): Promise<void> {
+    const roles: UserRoleCode[] = ['ADMIN', 'TEACHER', 'STUDENT', 'GUEST'];
+    for (const r of roles) {
+      try {
+        const perms = await opaClient.getPermissionsForRole(r);
+        if (perms && perms.length > 0) {
+          this.rolePermissionMap.set(r, new Set(perms));
+        }
+      } catch (e) {
+        // Safe fallback
+      }
+    }
+  }
+
 
   private seedMasterData(): void {
     // 1. Seed Faculty
@@ -339,6 +359,154 @@ export class AccountDirectory {
   }
 
   // -------------------------------------------------------------
+  // Offline Classroom Student Login (OPA-granted permissions)
+  // -------------------------------------------------------------
+  async syncOfflineStudentLogin(req: OfflineStudentLoginRequest): Promise<{ token: string; userDetail: FullUserDetailResponse; isNew: boolean }> {
+    const rawStudentId = (req.studentId || '').trim();
+    const cleanStudentId = rawStudentId || `650${Math.floor(1000 + Math.random() * 9000)}`;
+    const studentEmail = `${cleanStudentId.toLowerCase()}@classroom.local`;
+    let account = this.accounts.get(studentEmail);
+    let isNew = false;
+
+    const facultyId = req.facultyId || 'fac-eng';
+    const departmentId = req.departmentId || 'dept-cpe';
+    const sectionId = req.sectionId || 'sec-cpe-2026-1';
+
+    if (!account) {
+      isNew = true;
+      account = {
+        id: `usr-std-${cleanStudentId}`,
+        email: studentEmail,
+        roleId: 'STUDENT',
+        status: 'ACTIVE',
+        createdAt: Date.now(),
+        lastLoginAt: Date.now(),
+      };
+
+      const displayName = req.name ? `${req.name.trim()} [${cleanStudentId}]` : `นักศึกษา [${cleanStudentId}]`;
+      const nameParts = (req.name || cleanStudentId).trim().split(' ');
+      const firstName = nameParts[0] || 'Student';
+      const lastName = nameParts.slice(1).join(' ') || cleanStudentId;
+
+      const profile: UserProfile = {
+        id: `prof-${account.id}`,
+        accountId: account.id,
+        titleId: 'tit-mr',
+        firstNameTh: firstName,
+        lastNameTh: lastName,
+        firstNameEn: firstName,
+        lastNameEn: lastName,
+        displayName,
+        avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanStudentId}`,
+      };
+
+      const student: StudentProfile = {
+        studentId: cleanStudentId,
+        userProfileId: profile.id,
+        facultyId,
+        departmentId,
+        sectionId,
+        enrollmentYear: 2565,
+      };
+
+      this.accounts.set(studentEmail, account);
+      this.accountsById.set(account.id, account);
+      this.profiles.set(profile.id, profile);
+      this.profilesByAccountId.set(account.id, profile);
+      this.students.set(student.studentId, student);
+    } else {
+      account.lastLoginAt = Date.now();
+      const profile = this.profilesByAccountId.get(account.id);
+      if (profile && req.name) {
+        profile.displayName = `${req.name.trim()} [${cleanStudentId}]`;
+      }
+    }
+
+    // Refresh OPA permissions dynamically for STUDENT
+    const perms = await opaClient.getPermissionsForRole('STUDENT');
+    this.rolePermissionMap.set('STUDENT', new Set(perms));
+
+    const userDetail = this.getFullUserDetail(account.id)!;
+    const token = this.generateToken(userDetail);
+
+    return { token, userDetail, isNew };
+  }
+
+  // -------------------------------------------------------------
+  // Offline Classroom Teacher Login (Username / PIN with OPA check)
+  // -------------------------------------------------------------
+  async syncOfflineTeacherLogin(req: OfflineTeacherLoginRequest): Promise<{ token: string; userDetail: FullUserDetailResponse } | null> {
+    const username = (req.username || '').trim().toLowerCase();
+    const password = (req.password || '').trim();
+
+    let targetAccount: UserAccount | undefined;
+
+    if (username === 'admin' || username === 'chanon' || username === 'chanon.se.67@ubu.ac.th') {
+      if (password === 'admin' || password === '1990') {
+        targetAccount = this.accounts.get('chanon.se.67@ubu.ac.th');
+      }
+    } else if (username === 'somchai' || username === 'teacher' || username === 'somchai.teacher@dssi.ac.th') {
+      if (password === 'teacher' || password === '1990') {
+        targetAccount = this.accounts.get('somchai.teacher@dssi.ac.th');
+      }
+    } else if (password === '1990') {
+      const teacherEmail = `${username}@dssi.ac.th`;
+      let acc = this.accounts.get(teacherEmail);
+      if (!acc) {
+        const teacherId = `T-${Math.floor(100 + Math.random() * 900)}`;
+        acc = {
+          id: `usr-teacher-${username}`,
+          email: teacherEmail,
+          roleId: 'TEACHER',
+          status: 'ACTIVE',
+          createdAt: Date.now(),
+          lastLoginAt: Date.now(),
+        };
+        const profile: UserProfile = {
+          id: `prof-${acc.id}`,
+          accountId: acc.id,
+          titleId: 'tit-asst-prof-dr',
+          firstNameTh: req.username,
+          lastNameTh: '(ผู้สอน)',
+          firstNameEn: req.username,
+          lastNameEn: 'Teacher',
+          displayName: `อ.${req.username} (ผู้สอน)`,
+          avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${username}`,
+        };
+        const teacher: TeacherProfile = {
+          teacherId,
+          userProfileId: profile.id,
+          facultyId: 'fac-eng',
+          departmentId: 'dept-cpe',
+          positionTitle: 'อาจารย์ผู้สอนประจำวิชา',
+        };
+        this.accounts.set(teacherEmail, acc);
+        this.accountsById.set(acc.id, acc);
+        this.profiles.set(profile.id, profile);
+        this.profilesByAccountId.set(acc.id, profile);
+        this.teachers.set(teacher.teacherId, teacher);
+      }
+      targetAccount = acc;
+    }
+
+    if (!targetAccount) {
+      return null;
+    }
+
+    targetAccount.lastLoginAt = Date.now();
+
+    // Query OPA for updated permissions for this role
+    const perms = await opaClient.getPermissionsForRole(targetAccount.roleId);
+    this.rolePermissionMap.set(targetAccount.roleId, new Set(perms));
+
+    const userDetail = this.getFullUserDetail(targetAccount.id)!;
+    const token = this.generateToken(userDetail);
+
+    return { token, userDetail };
+  }
+
+
+  // -------------------------------------------------------------
   // Token Generation & Verification
   // -------------------------------------------------------------
   generateToken(detail: FullUserDetailResponse): string {
@@ -396,6 +564,11 @@ export class AccountDirectory {
     if (perms.has('*')) return true;
     return perms.has(requiredPermission);
   }
+
+  async hasPermissionWithOpa(role: UserRoleCode, requiredPermission: string): Promise<boolean> {
+    return await opaClient.evaluatePermission(role, requiredPermission);
+  }
+
 
   // -------------------------------------------------------------
   // Hydrate Full User Detail (Join 3NF entities for API/Token)

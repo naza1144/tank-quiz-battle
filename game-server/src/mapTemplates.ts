@@ -299,7 +299,7 @@ export const CRATE_SPAWN_LOCATIONS = [
   { x: 5 * TILE_SIZE, y: 15 * TILE_SIZE, category: 'ENGLISH' },
   { x: 14 * TILE_SIZE, y: 15 * TILE_SIZE, category: 'LOGIC' },
   { x: 10 * TILE_SIZE, y: 7 * TILE_SIZE, category: 'GENERAL' },
-  { x: 10 * TILE_SIZE, y: 12 * TILE_SIZE, category: 'MATH' },
+  { x: 10 * TILE_SIZE, y: 12 * TILE_SIZE, category: 'PYTHON' },
   { x: 3 * TILE_SIZE, y: 10 * TILE_SIZE, category: 'SCIENCE' },
-  { x: 16 * TILE_SIZE, y: 10 * TILE_SIZE, category: 'LOGIC' }
+  { x: 16 * TILE_SIZE, y: 10 * TILE_SIZE, category: 'PYTHON' }
 ];

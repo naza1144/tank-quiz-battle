@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { QuizQuestion } from '../types.js';
 import { soundFx } from '../audio/soundFx.js';
 import { PixelClock, PixelCheck, PixelCross, PixelStar, PixelAmmo } from './PixelIcons.js';
+import { FormattedQuestionText } from './FormattedQuestionText.js';
 
 interface QuizModalProps {
   question: QuizQuestion;
@@ -128,7 +129,7 @@ export const QuizModal: React.FC<QuizModalProps> = ({
 
         {/* Question Text */}
         <div className="mb-3 text-base sm:text-lg font-bold text-center text-amber-300 leading-relaxed bg-black/70 p-4 border-2 border-slate-800">
-          {question.questionTh}
+          <FormattedQuestionText text={question.questionTh} />
         </div>
 
         {/* Confidence Betting Toggle Switch */}

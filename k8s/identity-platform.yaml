@@ -4,7 +4,69 @@ metadata:
   name: identity
 ---
 # ─────────────────────────────────────────────────────────────
-# 1. IDENTITY & RBAC SERVICE (Namespace: identity | Port 4005)
+# 0. OPA REGO POLICIES CONFIGMAP (Namespace: identity)
+# ─────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: opa-policies
+  namespace: identity
+data:
+  authz.rego: |
+    package tankquiz.authz
+
+    import rego.v1
+
+    default allow := false
+
+    role_permissions := {
+        "ADMIN": [
+            "*"
+        ],
+        "TEACHER": [
+            "game:play",
+            "game:join_squad",
+            "quiz:vote",
+            "portal:teacher",
+            "quiz:read_all",
+            "quiz:write",
+            "quiz:import",
+            "quiz:difficulty",
+            "room:control",
+            "stats:read_class",
+            "stats:read_own",
+            "lms:sync"
+        ],
+        "STUDENT": [
+            "game:play",
+            "game:join_squad",
+            "quiz:vote",
+            "stats:read_own"
+        ],
+        "GUEST": [
+            "game:play",
+            "game:join_squad",
+            "quiz:vote"
+        ]
+    }
+
+    user_permissions contains perm if {
+        role := input.role
+        some p in role_permissions[role]
+        perm := p
+    }
+
+    allow if {
+        "*" in user_permissions
+    }
+
+    allow if {
+        input.permission in user_permissions
+    }
+
+---
+# ─────────────────────────────────────────────────────────────
+# 1. IDENTITY & OPA RBAC SERVICE (Namespace: identity | Port 4005)
 # ─────────────────────────────────────────────────────────────
 apiVersion: apps/v1
 kind: Deployment
@@ -37,6 +99,8 @@ spec:
               value: "4005"
             - name: JWT_SECRET
               value: "tank-battle-quiz-secret-2026"
+            - name: OPA_URL
+              value: "http://127.0.0.1:8181"
           readinessProbe:
             httpGet:
               path: /api/account/health
@@ -60,6 +124,35 @@ spec:
             limits:
               cpu: 500m
               memory: 256Mi
+
+        # OPA Authorization Engine Sidecar
+        - name: opa-sidecar
+          image: docker.io/openpolicyagent/opa:latest-static
+          imagePullPolicy: IfNotPresent
+          args:
+            - "run"
+            - "--server"
+            - "--log-level=info"
+            - "--addr=127.0.0.1:8181"
+            - "/policies/authz.rego"
+          ports:
+            - containerPort: 8181
+              name: opa
+          volumeMounts:
+            - name: policy-vol
+              mountPath: /policies
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+
+      volumes:
+        - name: policy-vol
+          configMap:
+            name: opa-policies
 ---
 apiVersion: v1
 kind: Service

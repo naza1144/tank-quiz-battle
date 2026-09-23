@@ -288,6 +288,8 @@ export class GameEngine {
         return { kind: 'CRYO', nameTh: 'กระสุนแช่แข็ง (CRYO ❄️)' };
       case 'MATH':
       case 'LOGIC':
+      case 'PYTHON':
+      case 'CODE_READING':
         return { kind: 'AP', nameTh: 'กระสุนเจาะเกราะ (AP ⚡)' };
       case 'ENGLISH':
         return { kind: 'RAPID', nameTh: 'กระสุนรัว 3 ทิศทาง (RAPID 💥)' };

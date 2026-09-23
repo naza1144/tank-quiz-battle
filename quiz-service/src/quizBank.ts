@@ -1,4 +1,5 @@
 import { QuizQuestion, DifficultyLevel, CategorySummary } from './types.js';
+import { PYTHON_QUESTIONS } from './data/pythonQuestions.js';
 
 export function getTimeLimitForDifficulty(difficulty?: string, explicitSeconds?: number): number {
   if (difficulty === 'HARD') return 7;
@@ -227,7 +228,8 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     rewardAmmo: 3,
     bonusPoints: 100,
     source: 'LOCAL'
-  }
+  },
+  ...PYTHON_QUESTIONS
 ];
 
 export class QuizManager {
