@@ -7,6 +7,7 @@ export interface UserSession {
   name: string;
   email?: string;
   avatar?: string;
+  studentId?: string;
   roles?: string[];
   isGuest?: boolean;
 }
@@ -18,6 +19,7 @@ export function signUserToken(user: UserSession): string {
       name: user.name,
       email: user.email,
       avatar: user.avatar,
+      studentId: user.studentId,
       roles: user.roles || ['player'],
       isGuest: !!user.isGuest
     },
@@ -51,6 +53,7 @@ export function verifyToken(token: string): Promise<UserSession | null> {
           name: decoded.name || decoded.email || 'Player',
           email: decoded.email,
           avatar: decoded.avatar,
+          studentId: decoded.studentId || decoded.student_id,
           roles: isAdmin ? ['admin', 'player'] : (decoded.roles || ['player']),
           isGuest: !!decoded.isGuest
         });
@@ -66,6 +69,7 @@ export function verifyToken(token: string): Promise<UserSession | null> {
             name: rawDecoded.name || rawDecoded.preferred_username || rawDecoded.email || 'Player',
             email: rawDecoded.email,
             avatar: rawDecoded.picture || rawDecoded.avatar,
+            studentId: rawDecoded.studentId || rawDecoded.student_id,
             roles: isAdmin ? ['admin', 'player'] : (rawDecoded.roles || ['player']),
             isGuest: false
           });

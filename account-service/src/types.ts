@@ -104,6 +104,7 @@ export interface EnrichedTokenPayload {
   email: string;
   name: string;
   role: UserRoleCode;
+  studentId?: string;
   teacherId?: string;
   facultyCode?: string;
   departmentCode?: string;
@@ -118,6 +119,7 @@ export interface GoogleSyncRequest {
   name: string;
   googleSub?: string;
   avatarUrl?: string;
+  studentId?: string;
 }
 
 export interface FullUserDetailResponse {
@@ -130,6 +132,7 @@ export interface FullUserDetailResponse {
 }
 
 export interface OfflineStudentLoginRequest {
+  studentId?: string;
   name: string;
   facultyId?: string;
   departmentId?: string;

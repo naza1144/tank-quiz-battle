@@ -69,10 +69,11 @@ app.get('/api/account/master-data', (_req: Request, res: Response) => {
 // 3. Offline Player Login Endpoint (Classroom LAN / No Internet)
 // -------------------------------------------------------------
 app.post('/api/account/offline-login', async (req: Request, res: Response) => {
-  const { name, facultyId, departmentId, sectionId } = req.body as OfflineStudentLoginRequest;
+  const { studentId, name, facultyId, departmentId, sectionId } = req.body as OfflineStudentLoginRequest;
 
   try {
     const result = await accountDirectory.syncOfflineStudentLogin({
+      studentId,
       name,
       facultyId,
       departmentId,

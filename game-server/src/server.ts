@@ -82,15 +82,17 @@ app.post(['/api/auth/google', '/auth/google'], handleGoogleDirectLogin);
 
 // ── Standalone & Player Auth Endpoints ─────────────────────────────────
 app.post(['/api/auth/login', '/auth/login'], (req, res) => {
-  const { name, email } = req.body;
-  const displayName = name || 'TankPlayer';
+  const { name, email, studentId } = req.body;
+  const displayName = name || studentId || 'TankPlayer';
+  const effectiveStudentId = studentId || (name && /^\d+$/.test(name) ? name : undefined);
   const token = signUserToken({
     id: `usr-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`,
     name: displayName,
     email: email || `${displayName.toLowerCase().replace(/\s+/g, '')}@player.local`,
+    studentId: effectiveStudentId,
     isGuest: false
   });
-  res.json({ success: true, token, name: displayName });
+  res.json({ success: true, token, name: displayName, studentId: effectiveStudentId });
 });
 
 app.post(['/api/auth/guest', '/auth/guest'], (req, res) => {

@@ -19,8 +19,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin }) => {
     e.preventDefault();
     soundFx.playStart();
     setErrorMsg('');
-    const rawName = gamerTag.trim();
-    const finalName = rawName || `PLAYER_${Math.floor(1000 + Math.random() * 9000)}`;
+    const rawInput = gamerTag.trim();
+    const finalInput = rawInput || `PLAYER_${Math.floor(1000 + Math.random() * 9000)}`;
 
     setLoading(true);
 
@@ -30,16 +30,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin }) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: finalName,
+          studentId: finalInput,
+          name: finalInput,
           sectionId: 'sec-cpe-2026-1'
         })
       });
       const data = await res.json();
       if (data.success && data.token) {
         localStorage.setItem('tank_auth_token', data.token);
-        localStorage.setItem('tank_user_name', data.user?.profile?.displayName || finalName);
-        localStorage.removeItem('tank_student_id');
-        onLogin(data.token, data.user?.profile?.displayName || finalName);
+        localStorage.setItem('tank_user_name', data.user?.profile?.displayName || finalInput);
+        localStorage.setItem('tank_student_id', data.user?.student?.studentId || finalInput);
+        onLogin(data.token, data.user?.profile?.displayName || finalInput);
         return;
       }
     } catch (err) {
@@ -51,13 +52,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin }) => {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: finalName })
+        body: JSON.stringify({ studentId: finalInput, name: finalInput })
       });
       const data = await res.json();
       if (data.token) {
         localStorage.setItem('tank_auth_token', data.token);
         localStorage.setItem('tank_user_name', data.name);
-        localStorage.removeItem('tank_student_id');
+        localStorage.setItem('tank_student_id', finalInput);
         onLogin(data.token, data.name);
         return;
       }
@@ -66,11 +67,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin }) => {
     }
 
     // 3. Instant Standalone Local Token
-    const fallbackToken = `std-${Date.now()}:${finalName}`;
+    const fallbackToken = `std-${Date.now()}:${finalInput}`;
     localStorage.setItem('tank_auth_token', fallbackToken);
-    localStorage.setItem('tank_user_name', finalName);
-    localStorage.removeItem('tank_student_id');
-    onLogin(fallbackToken, finalName);
+    localStorage.setItem('tank_user_name', finalInput);
+    localStorage.setItem('tank_student_id', finalInput);
+    onLogin(fallbackToken, finalInput);
     setLoading(false);
   };
 
@@ -181,14 +182,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onLogin }) => {
             <form onSubmit={handleStudentLogin} className="space-y-3">
               <div>
                 <label className="block font-arcade text-[10px] text-amber-300 mb-1 uppercase tracking-wide">
-                  ▸ ชื่อผู้เล่น / ฉายาในเกม (GAMER TAG):
+                  ▸ รหัสนักศึกษา / บัญชีผู้เล่น (STUDENT ID / USER):
                 </label>
                 <input
                   type="text"
-                  placeholder="เช่น ธนกร หรือ TankAce"
+                  placeholder="เช่น 6501001 หรือ ธนกร"
                   value={gamerTag}
                   onChange={(e) => setGamerTag(e.target.value)}
-                  maxLength={20}
+                  maxLength={30}
                   autoFocus
                   className="w-full px-4 py-2.5 bg-black border-4 border-slate-700 focus:border-amber-400 text-amber-300 font-bold font-thai text-sm placeholder-slate-600 focus:outline-none transition-all shadow-[inset_2px_2px_4px_rgba(0,0,0,0.8)]"
                 />

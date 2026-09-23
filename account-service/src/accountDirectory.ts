@@ -291,6 +291,18 @@ export class AccountDirectory {
       const roleId: UserRoleCode = isAdminEmail ? 'ADMIN' : (isTeacherEmail ? 'TEACHER' : 'STUDENT');
       const randomSuffix = Math.floor(1000 + Math.random() * 9000);
 
+      let studentId = req.studentId?.trim();
+      if (!studentId && roleId === 'STUDENT') {
+        const ubuMatch = normalizedEmail.match(/\.(\d{2})@ubu\.ac\.th/);
+        if (ubuMatch) {
+          studentId = `${ubuMatch[1]}145${randomSuffix}`;
+        } else if (normalizedEmail.startsWith('s') && /^s\d+@/.test(normalizedEmail)) {
+          studentId = normalizedEmail.substring(1).split('@')[0];
+        } else {
+          studentId = `std-${randomSuffix}`;
+        }
+      }
+
       account = {
         id: `usr-${Date.now()}-${randomSuffix}`,
         email: normalizedEmail,
@@ -324,7 +336,7 @@ export class AccountDirectory {
 
       if (roleId === 'STUDENT') {
         const student: StudentProfile = {
-          studentId: `std-${randomSuffix}`,
+          studentId: studentId!,
           userProfileId: profile.id,
           facultyId: 'fac-eng',
           departmentId: 'dept-cpe',
@@ -367,9 +379,11 @@ export class AccountDirectory {
   // Offline Classroom Student Login (OPA-granted permissions)
   // -------------------------------------------------------------
   async syncOfflineStudentLogin(req: OfflineStudentLoginRequest): Promise<{ token: string; userDetail: FullUserDetailResponse; isNew: boolean }> {
-    const cleanPlayerName = (req.name || '').trim() || `Tanker_${Math.floor(1000 + Math.random() * 9000)}`;
+    const rawStudentId = (req.studentId || '').trim();
+    const cleanPlayerName = (req.name || '').trim() || rawStudentId || `Tanker_${Math.floor(1000 + Math.random() * 9000)}`;
+    const studentId = rawStudentId || (cleanPlayerName && /^\d+$/.test(cleanPlayerName) ? cleanPlayerName : `std-${Math.floor(1000 + Math.random() * 9000)}`);
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-    const playerEmail = `${cleanPlayerName.toLowerCase().replace(/[^a-z0-9]/g, '') || 'player'}_${randomSuffix}@classroom.local`;
+    const playerEmail = `${studentId.toLowerCase().replace(/[^a-z0-9]/g, '') || 'player'}_${randomSuffix}@classroom.local`;
     let account = this.accounts.get(playerEmail);
     let isNew = false;
 
@@ -380,7 +394,7 @@ export class AccountDirectory {
     if (!account) {
       isNew = true;
       account = {
-        id: `usr-player-${Date.now().toString(36)}-${randomSuffix}`,
+        id: `usr-player-${studentId}`,
         email: playerEmail,
         roleId: 'STUDENT',
         status: 'ACTIVE',
@@ -401,11 +415,11 @@ export class AccountDirectory {
         firstNameEn: firstName,
         lastNameEn: lastName,
         displayName: cleanPlayerName,
-        avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanPlayerName}`,
+        avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${studentId}`,
       };
 
       const student: StudentProfile = {
-        studentId: `std-${randomSuffix}`,
+        studentId,
         userProfileId: profile.id,
         facultyId,
         departmentId,
@@ -520,6 +534,7 @@ export class AccountDirectory {
       email: detail.account.email,
       name: detail.profile.displayName,
       role: detail.account.roleId,
+      studentId: detail.student?.studentId,
       teacherId: detail.teacher?.teacherId,
       facultyCode: detail.student?.facultyName || detail.teacher?.facultyName,
       departmentCode: detail.student?.departmentName || detail.teacher?.departmentName,

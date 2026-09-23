@@ -68,6 +68,7 @@ async function runTests() {
     googleSub: 'google-sub-std-01',
   });
   assert(studentSync.userDetail.account.roleId === 'STUDENT', 'Student 6501001 mapped as STUDENT');
+  assert(studentSync.userDetail.student?.studentId === '6501001', 'Student ID 6501001 preserved');
   assert(studentSync.userDetail.profile.displayName === 'Thanakorn TankAce', 'Display name is clean without student ID');
   assert(studentSync.userDetail.student?.sectionCode === 'Sec 1', 'Student belongs to Sec 1');
 
@@ -76,16 +77,19 @@ async function runTests() {
   // -------------------------------------------------------------
   console.log('\n▶️ [Test Group 4] Offline Classroom Student Login (OPA Hydration)');
   const offlineStudent = await accountDirectory.syncOfflineStudentLogin({
+    studentId: '6509999',
     name: 'สมคิด ออฟไลน์',
     sectionId: 'sec-cpe-2026-1'
   });
   assert(offlineStudent.isNew, 'Offline student created successfully');
   assert(offlineStudent.userDetail.account.roleId === 'STUDENT', 'Offline student role is STUDENT');
+  assert(offlineStudent.userDetail.student?.studentId === '6509999', 'Offline student ID mapped to 6509999');
   assert(offlineStudent.userDetail.profile.displayName === 'สมคิด ออฟไลน์', 'Offline player display name matches');
 
   const verifyOfflineStudent = accountDirectory.verifyToken(offlineStudent.token);
   assert(verifyOfflineStudent.valid === true, 'Offline student token is cryptographically valid');
   assert(verifyOfflineStudent.payload?.role === 'STUDENT', 'Offline token has role STUDENT');
+  assert(verifyOfflineStudent.payload?.studentId === '6509999', 'Offline token contains studentId 6509999');
   assert(verifyOfflineStudent.payload?.permissions.includes('game:play') === true, 'Offline token has game:play permission');
   assert(!verifyOfflineStudent.payload?.permissions.includes('portal:teacher'), 'Offline token DOES NOT have portal:teacher');
 
