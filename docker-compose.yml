@@ -13,6 +13,12 @@ services:
       - "8081:8080" # Traefik Dashboard
     volumes:
       - ./traefik-dynamic.yaml:/etc/traefik/dynamic.yaml:ro
+    depends_on:
+      - game-client
+      - game-server
+      - quiz-service
+      - account-service
+      - quiz-portal
     networks:
       - game-net
 
@@ -27,6 +33,14 @@ services:
       - PORT=4005
       - JWT_SECRET=tank-battle-quiz-secret-2026
       - OPA_URL=http://opa:8181
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:4005/api/account/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    depends_on:
+      - opa
     networks:
       game-net:
         aliases:
@@ -42,6 +56,12 @@ services:
     environment:
       - PORT=4001
       - QUIZ_SERVICE_API_KEY=tank-quiz-api-key-2026
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:4001/api/quiz/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
     networks:
       game-net:
         aliases:
@@ -59,6 +79,17 @@ services:
       - QUIZ_SERVICE_URL=http://quiz-service:4001
       - ACCOUNT_SERVICE_URL=http://account-service:4005
       - JWT_SECRET=tank-battle-quiz-secret-2026
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:4000/api/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    depends_on:
+      quiz-service:
+        condition: service_healthy
+      account-service:
+        condition: service_healthy
     networks:
       game-net:
         aliases:
@@ -71,6 +102,12 @@ services:
       dockerfile: Dockerfile
     container_name: tank-client
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:80/ || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
     networks:
       game-net:
         aliases:
@@ -83,12 +120,18 @@ services:
       dockerfile: Dockerfile
     container_name: tank-quiz-portal
     restart: unless-stopped
-    ports:
-      - "5000:5000"
     environment:
       - PORT=5000
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:5000/ || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
     networks:
       game-net:
+        aliases:
+          - quiz-portal
 
   # ── 7. Open Policy Agent (OPA Rego Authorization Engine) ────────────
   opa:

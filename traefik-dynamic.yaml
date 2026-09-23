@@ -21,6 +21,13 @@ http:
       entryPoints:
         - "web"
 
+    portal:
+      rule: "PathPrefix(`/portal`)"
+      service: "quiz-portal"
+      priority: 235
+      entryPoints:
+        - "web"
+
     frontend:
       rule: "PathPrefix(`/`)"
       service: "game-client"
@@ -29,6 +36,11 @@ http:
         - "web"
 
   services:
+    quiz-portal:
+      loadBalancer:
+        servers:
+          - url: "http://quiz-portal:5000"
+
     quiz-service:
       loadBalancer:
         servers:

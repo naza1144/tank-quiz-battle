@@ -187,10 +187,21 @@ npx tsx test-game.ts
 ./deploy-all.sh
 ```
 
-### 2. รันแบบ Local Development ผ่าน Docker Compose (Traefik Gateway :80)
+### 2. รันแบบคำสั่งเดียวด้วย Docker Compose (พร้อม Healthcheck & Smoke Test)
 ```bash
+# รันคำสั่งเดียว Build, Up, และ Smoke Test ทุก Microservices ผ่าน Traefik Gateway (:80) อัตโนมัติ
+./run-compose.sh
+
+# หรือสั่งการด้วย Docker Compose มาตรฐาน:
 docker compose up -d --build
 ```
+
+**Local Ports & URLs (เมื่อรันด้วย Docker Compose):**
+- **🎮 Game Client (หลัก)**: [http://localhost/](http://localhost/)
+- **🔒 Teacher Portal**: [http://localhost/#teacher](http://localhost/#teacher) *(PIN: `1990`)*
+- **📚 Quiz Manager Portal**: [http://localhost/portal](http://localhost/portal)
+- **🩺 Traefik Ingress Dashboard**: [http://localhost:8081](http://localhost:8081)
+- **🛡️ OPA Engine Policy**: [http://localhost:8181/v1/data/tankquiz/authz](http://localhost:8181/v1/data/tankquiz/authz)
 
 ---
 
