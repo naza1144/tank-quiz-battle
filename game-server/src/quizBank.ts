@@ -1,11 +1,11 @@
 import { QuizQuestion } from './types.js';
 
 export function getTimeLimitForDifficulty(difficulty?: string, explicitSeconds?: number): number {
-  if (difficulty === 'HARD') return 30;
-  if (difficulty === 'MEDIUM') return 20;
-  if (difficulty === 'EASY') return 10;
+  if (difficulty === 'HARD') return 180;
+  if (difficulty === 'MEDIUM') return 60;
+  if (difficulty === 'EASY') return 30;
   if (explicitSeconds && explicitSeconds > 0) return explicitSeconds;
-  return 20;
+  return 60;
 }
 
 export const DEFAULT_QUESTIONS: QuizQuestion[] = [
@@ -18,7 +18,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['6', '7', '8', '9'],
     correctIndex: 2,
     explanationTh: 'การคูณและการหารสัมพันธ์กัน: 56 ÷ 7 = 8',
-    timeLimitSeconds: 20,
+    timeLimitSeconds: 60,
     difficulty: 'MEDIUM',
     rewardAmmo: 3,
     bonusPoints: 100
@@ -31,7 +31,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['90 องศา', '180 องศา', '270 องศา', '360 องศา'],
     correctIndex: 1,
     explanationTh: 'ผลรวมมุมภายในรูปสามเหลี่ยมทุกรูปคือ 180 องศา',
-    timeLimitSeconds: 10,
+    timeLimitSeconds: 30,
     difficulty: 'EASY',
     rewardAmmo: 3,
     bonusPoints: 100
@@ -44,7 +44,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['9', '15', '17', '21'],
     correctIndex: 2,
     explanationTh: '17 มีตัวประกอบแค่ 1 และตัวมันเองเท่านั้น',
-    timeLimitSeconds: 30,
+    timeLimitSeconds: 180,
     difficulty: 'HARD',
     rewardAmmo: 4,
     bonusPoints: 120
@@ -57,7 +57,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['30 กม.', '60 กม.', '90 กม.', '120 กม.'],
     correctIndex: 1,
     explanationTh: '30 นาที = 0.5 ชม. -> ระยะทาง = 120 x 0.5 = 60 กม.',
-    timeLimitSeconds: 30,
+    timeLimitSeconds: 180,
     difficulty: 'HARD',
     rewardAmmo: 4,
     bonusPoints: 150
@@ -70,7 +70,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['10', '16', '32', '64'],
     correctIndex: 2,
     explanationTh: '2 x 2 x 2 x 2 x 2 = 32',
-    timeLimitSeconds: 20,
+    timeLimitSeconds: 60,
     difficulty: 'MEDIUM',
     rewardAmmo: 3,
     bonusPoints: 100
@@ -85,7 +85,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['ดาวศุกร์', 'ดาวพฤหัสบดี', 'ดาวอังคาร', 'ดาวเสาร์'],
     correctIndex: 2,
     explanationTh: 'ดาวอังคาร (Mars) มีผิวที่เต็มไปด้วยเหล็กออกไซด์ (สนิมเหล็ก) จึงเห็นเป็นสีแดง',
-    timeLimitSeconds: 10,
+    timeLimitSeconds: 30,
     difficulty: 'EASY',
     rewardAmmo: 3,
     bonusPoints: 100
@@ -98,7 +98,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['ออกซิเจน', 'คาร์บอนไดออกไซด์', 'ไนโตรเจน', 'ไฮโดรเจน'],
     correctIndex: 1,
     explanationTh: 'พืชดูดซับคาร์บอนไดออกไซด์และปล่อยออกซิเจนออกมา',
-    timeLimitSeconds: 20,
+    timeLimitSeconds: 60,
     difficulty: 'MEDIUM',
     rewardAmmo: 3,
     bonusPoints: 100
@@ -111,7 +111,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['CO₂', 'NaCl', 'H₂O', 'O₂'],
     correctIndex: 2,
     explanationTh: 'น้ำประกอบด้วย ไฮโดรเจน 2 อะตอม และออกซิเจน 1 อะตอม (H₂O)',
-    timeLimitSeconds: 10,
+    timeLimitSeconds: 30,
     difficulty: 'EASY',
     rewardAmmo: 3,
     bonusPoints: 100
@@ -124,7 +124,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['ปอด', 'หัวใจ', 'ตับ', 'ไต'],
     correctIndex: 1,
     explanationTh: 'หัวใจทำหน้าที่เป็นปั๊มสูบฉีดเลือดผ่านระบบไหลเวียนโลหิต',
-    timeLimitSeconds: 10,
+    timeLimitSeconds: 30,
     difficulty: 'EASY',
     rewardAmmo: 3,
     bonusPoints: 100
@@ -139,7 +139,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['DEFEAT', 'WIN', 'CHAMPION', 'SUCCESS'],
     correctIndex: 0,
     explanationTh: 'DEFEAT แปลว่า ความพ่ายแพ้',
-    timeLimitSeconds: 10,
+    timeLimitSeconds: 30,
     difficulty: 'EASY',
     rewardAmmo: 3,
     bonusPoints: 100
@@ -152,7 +152,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['drive', 'drives', 'drove', 'driving'],
     correctIndex: 2,
     explanationTh: 'Yesterday แสดงเหตุการณ์ในอดีต (Past Simple) ต้องใช้กริยาช่อง 2 คือ drove',
-    timeLimitSeconds: 20,
+    timeLimitSeconds: 60,
     difficulty: 'MEDIUM',
     rewardAmmo: 4,
     bonusPoints: 120
@@ -165,7 +165,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['Sword', 'Shield / Armor', 'Bullet', 'Engine'],
     correctIndex: 1,
     explanationTh: 'Shield หรือ Armor แปลว่า เกราะป้องกัน',
-    timeLimitSeconds: 10,
+    timeLimitSeconds: 30,
     difficulty: 'EASY',
     rewardAmmo: 3,
     bonusPoints: 100
@@ -180,7 +180,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['Loop (วนซ้ำ)', 'If-Else (เงื่อนไข)', 'Variable (ตัวแปร)', 'Function (ฟังก์ชัน)'],
     correctIndex: 1,
     explanationTh: 'การตัดสินใจด้วย "ถ้า...แล้ว..." คือเงื่อนไขแบบ If-Else',
-    timeLimitSeconds: 30,
+    timeLimitSeconds: 180,
     difficulty: 'HARD',
     rewardAmmo: 4,
     bonusPoints: 120
@@ -193,7 +193,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['24', '30', '32', '64'],
     correctIndex: 2,
     explanationTh: 'เพิ่มขึ้นทีละ 2 เท่า (คูณ 2 ต่อเนื่อง): 16 x 2 = 32',
-    timeLimitSeconds: 20,
+    timeLimitSeconds: 60,
     difficulty: 'MEDIUM',
     rewardAmmo: 3,
     bonusPoints: 100
@@ -208,7 +208,7 @@ export const DEFAULT_QUESTIONS: QuizQuestion[] = [
     options: ['ทิศตะวันออก', 'ทิศใต้', 'ทิศเหนือ', 'ทิศตะวันตก'],
     correctIndex: 2,
     explanationTh: 'เข็มทิศแม่เหล็กจะชี้ขั้วเหนือเข้าหาขั้วแม่เหล็กโลกทางทิศเหนือเสมอ',
-    timeLimitSeconds: 10,
+    timeLimitSeconds: 30,
     difficulty: 'EASY',
     rewardAmmo: 3,
     bonusPoints: 100

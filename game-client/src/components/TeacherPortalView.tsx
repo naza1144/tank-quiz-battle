@@ -105,7 +105,7 @@ export const TeacherPortalView: React.FC<TeacherPortalViewProps> = ({ onBackToGa
   const [formOptions, setFormOptions] = useState<string[]>(['', '', '', '']);
   const [formCorrectIndex, setFormCorrectIndex] = useState<number>(0);
   const [formExplanationTh, setFormExplanationTh] = useState<string>('');
-  const [formTimeLimit, setFormTimeLimit] = useState<number>(20);
+  const [formTimeLimit, setFormTimeLimit] = useState<number>(60);
   const [formRewardAmmo, setFormRewardAmmo] = useState<number>(3);
   const [formDifficulty, setFormDifficulty] = useState<'EASY' | 'MEDIUM' | 'HARD'>('MEDIUM');
 
@@ -965,12 +965,18 @@ export const TeacherPortalView: React.FC<TeacherPortalViewProps> = ({ onBackToGa
                   </label>
                   <select
                     value={formDifficulty}
-                    onChange={(e) => setFormDifficulty(e.target.value as any)}
+                    onChange={(e) => {
+                      const diff = e.target.value as any;
+                      setFormDifficulty(diff);
+                      if (diff === 'EASY') setFormTimeLimit(30);
+                      else if (diff === 'MEDIUM') setFormTimeLimit(60);
+                      else if (diff === 'HARD') setFormTimeLimit(180);
+                    }}
                     className="w-full px-3 py-2 bg-black border border-slate-700 text-xs focus:border-amber-400 focus:outline-none"
                   >
-                    <option value="EASY">EASY (ง่าย • 10 วินาที)</option>
-                    <option value="MEDIUM">MEDIUM (ปานกลาง • 12 วินาที)</option>
-                    <option value="HARD">HARD (ท้าทาย • 15 วินาที)</option>
+                    <option value="EASY">EASY (ง่าย • 30 วินาที)</option>
+                    <option value="MEDIUM">MEDIUM (ปานกลาง • 1 นาที)</option>
+                    <option value="HARD">HARD (ท้าทาย • 3 นาที)</option>
                   </select>
                 </div>
               </div>
@@ -1050,7 +1056,7 @@ export const TeacherPortalView: React.FC<TeacherPortalViewProps> = ({ onBackToGa
                   <input
                     type="number"
                     min={5}
-                    max={60}
+                    max={300}
                     value={formTimeLimit}
                     onChange={(e) => setFormTimeLimit(Number(e.target.value))}
                     className="w-full px-3 py-2 bg-black border border-slate-700 text-xs focus:border-amber-400 focus:outline-none"

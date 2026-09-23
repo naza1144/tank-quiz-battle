@@ -21,11 +21,11 @@ function assert(condition: boolean, testName: string) {
 
 // ── 1. Test Difficulty Time Limit Rules ──
 console.log('▶️ [Test Group 1] Difficulty Time Limit Rules');
-assert(getTimeLimitForDifficulty('EASY') === 10, 'EASY difficulty returns 10 seconds');
-assert(getTimeLimitForDifficulty('MEDIUM') === 20, 'MEDIUM difficulty returns 20 seconds');
-assert(getTimeLimitForDifficulty('HARD') === 30, 'HARD difficulty returns 30 seconds');
+assert(getTimeLimitForDifficulty('EASY') === 30, 'EASY difficulty returns 30 seconds');
+assert(getTimeLimitForDifficulty('MEDIUM') === 60, 'MEDIUM difficulty returns 60 seconds');
+assert(getTimeLimitForDifficulty('HARD') === 180, 'HARD difficulty returns 180 seconds');
 assert(getTimeLimitForDifficulty(undefined, 10) === 10, 'Explicit seconds override when provided');
-assert(getTimeLimitForDifficulty('UNKNOWN') === 20, 'Fallback is 20 seconds');
+assert(getTimeLimitForDifficulty('UNKNOWN') === 60, 'Fallback is 60 seconds');
 
 // ── 2. Test QuizManager CRUD & Filtering ──
 console.log('\n▶️ [Test Group 2] QuizManager CRUD & Query Operations');
@@ -54,7 +54,7 @@ const addedQ = manager.addQuestion({
   correctIndex: 1,
   difficulty: 'EASY'
 });
-assert(addedQ.id.length > 0 && addedQ.timeLimitSeconds === 10, 'Added new question with correct time limit 10s');
+assert(addedQ.id.length > 0 && addedQ.timeLimitSeconds === 30, 'Added new question with correct time limit 30s');
 
 const fetchedAdded = manager.getQuestionById(addedQ.id);
 assert(fetchedAdded !== undefined && fetchedAdded.questionTh === '1 + 1 เท่ากับเท่าใด?', 'Get question by ID works');
@@ -63,7 +63,7 @@ const updatedQ = manager.updateQuestion(addedQ.id, {
   questionTh: '1 + 1 = ? (แก้ไข)',
   difficulty: 'HARD'
 });
-assert(updatedQ !== null && updatedQ.difficulty === 'HARD' && updatedQ.timeLimitSeconds === 30, 'Update question & recalculate difficulty to 30s works');
+assert(updatedQ !== null && updatedQ.difficulty === 'HARD' && updatedQ.timeLimitSeconds === 180, 'Update question & recalculate difficulty to 180s works');
 
 const deleted = manager.deleteQuestion(addedQ.id);
 assert(deleted && manager.getQuestionById(addedQ.id) === undefined, 'Delete question works');

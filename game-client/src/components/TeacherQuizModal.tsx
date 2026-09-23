@@ -39,7 +39,7 @@ export const TeacherQuizModal: React.FC<TeacherQuizModalProps> = ({ onClose }) =
   const [formOptions, setFormOptions] = useState<string[]>(['', '', '', '']);
   const [formCorrectIndex, setFormCorrectIndex] = useState<number>(0);
   const [formExplanationTh, setFormExplanationTh] = useState<string>('');
-  const [formTimeLimit, setFormTimeLimit] = useState<number>(20);
+  const [formTimeLimit, setFormTimeLimit] = useState<number>(60);
   const [formRewardAmmo, setFormRewardAmmo] = useState<number>(3);
   const [formDifficulty, setFormDifficulty] = useState<'EASY' | 'MEDIUM' | 'HARD'>('MEDIUM');
 
@@ -429,12 +429,18 @@ export const TeacherQuizModal: React.FC<TeacherQuizModalProps> = ({ onClose }) =
                 </label>
                 <select
                   value={formDifficulty}
-                  onChange={(e) => setFormDifficulty(e.target.value as any)}
+                  onChange={(e) => {
+                    const diff = e.target.value as any;
+                    setFormDifficulty(diff);
+                    if (diff === 'EASY') setFormTimeLimit(30);
+                    else if (diff === 'MEDIUM') setFormTimeLimit(60);
+                    else if (diff === 'HARD') setFormTimeLimit(180);
+                  }}
                   className="w-full px-3 py-2 bg-black border border-slate-700 text-xs focus:border-amber-400 focus:outline-none"
                 >
-                  <option value="EASY">EASY (ง่าย • 3 วินาที)</option>
-                  <option value="MEDIUM">MEDIUM (ปานกลาง • 4 วินาที)</option>
-                  <option value="HARD">HARD (ท้าทาย • 5 วินาที)</option>
+                  <option value="EASY">EASY (ง่าย • 30 วินาที)</option>
+                  <option value="MEDIUM">MEDIUM (ปานกลาง • 1 นาที)</option>
+                  <option value="HARD">HARD (ท้าทาย • 3 นาที)</option>
                 </select>
               </div>
             </div>
@@ -514,7 +520,7 @@ export const TeacherQuizModal: React.FC<TeacherQuizModalProps> = ({ onClose }) =
                 <input
                   type="number"
                   min={3}
-                  max={60}
+                  max={300}
                   value={formTimeLimit}
                   onChange={(e) => setFormTimeLimit(Number(e.target.value))}
                   className="w-full px-3 py-2 bg-black border border-slate-700 text-xs focus:border-amber-400 focus:outline-none"
