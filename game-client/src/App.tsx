@@ -827,19 +827,6 @@ export const App: React.FC = () => {
                 </div>
               </div>
             )}
-
-            {/* Live Combat Event Ticker */}
-            <div className="fixed bottom-4 left-4 z-20 space-y-1 pointer-events-none max-w-xs hidden sm:block">
-              {gameEvents.map((evt, idx) => (
-                <div
-                  key={evt.timestamp + idx}
-                  className="px-2.5 py-1 pixel-box bg-black/90 text-[10px] font-arcade text-amber-300 shadow-md"
-                >
-                  {evt.message}
-                </div>
-              ))}
-            </div>
-
           </div>
 
           {/* Solo Quiz Modal Popup */}

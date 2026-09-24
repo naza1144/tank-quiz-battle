@@ -484,7 +484,7 @@ export const SquadSupportView: React.FC<SquadSupportViewProps> = ({
           {selectedChoice !== null && !finalResult && (
             <div className="p-2.5 mb-2 bg-cyan-950/70 border-2 border-cyan-500/70 text-cyan-300 font-arcade text-[8px] sm:text-[9px] text-center animate-pulse flex items-center justify-center gap-2">
               <PixelClock size={12} color="#38bdf8" />
-              <span>บันทึกการโหวตของคุณแล้ว! กำลังรอหมดเวลาเพื่อคำนวณฉันทามติ...</span>
+              <span>บันทึกการโหวตของคุณแล้ว! ระบบจะสรุปผลทันทีเมื่อคนในทีมตอบครบ...</span>
             </div>
           )}
 

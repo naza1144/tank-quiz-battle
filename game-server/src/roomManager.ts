@@ -887,6 +887,16 @@ export class RoomManager {
         confidentVotes
       });
     });
+
+    // หากคนในทีม (SUPPORT / GHOST) ตอบครบทุกคนแล้ว ให้สรุปผลและไปข้อต่อไปทันที ไม่ต้องรอเวลาหมด
+    const teamSupporters = teamMembers.filter(p => p.role === 'SUPPORT' || p.role === 'GHOST');
+    if (teamSupporters.length > 0 && session.votes.size >= teamSupporters.length) {
+      if (session.timer) {
+        clearTimeout(session.timer);
+        session.timer = undefined;
+      }
+      this.finalizeTeamQuiz(roomId, player.teamId);
+    }
   }
 
   public handleTacticalPing(socket: Socket, data: { x: number; y: number }) {
